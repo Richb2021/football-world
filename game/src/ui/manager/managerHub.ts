@@ -30,6 +30,7 @@ export interface ManagerHubNav {
   onPlay: () => void;
   onQuickSim: () => void;
   onStandings: () => void;
+  onCup: () => void;
   onSquad: () => void;
   onTraining: () => void;
   onTransfers: () => void;
@@ -95,6 +96,7 @@ export function managerHub(ui: UI, state: ManagerState, nav: ManagerHubNav): voi
         <button class="btn small" id="mh-headlines">HEADLINES${state.headlines.length ? ` <span class="badge">${state.headlines.length}</span>` : ''}</button>
       </div>
       <button class="btn small" id="mh-table">LEAGUE TABLE</button>
+      <button class="btn small" id="mh-cup">${state.cup ? `${esc(state.cup.name.toUpperCase())} BRACKET` : 'NO CUP'}</button>
       <button class="btn small" id="mh-squad">SQUAD</button>
       <button class="btn small" id="mh-training">TRAINING</button>
       <button class="btn small" id="mh-transfers">TRANSFER MARKET</button>
@@ -108,6 +110,7 @@ export function managerHub(ui: UI, state: ManagerState, nav: ManagerHubNav): voi
   bind('mh-press', nav.onPress);
   bind('mh-headlines', nav.onHeadlines);
   bind('mh-table', nav.onStandings);
+  bind('mh-cup', nav.onCup);
   bind('mh-squad', nav.onSquad);
   bind('mh-training', nav.onTraining);
   bind('mh-transfers', nav.onTransfers);
@@ -431,5 +434,40 @@ export function managerPress(
   ui.root.querySelectorAll<HTMLElement>('[data-ans]').forEach((b) => {
     b.addEventListener('click', () => onAnswer(b.dataset.ans!));
   });
+  bind('back', onBack);
+}
+
+export function managerCup(ui: UI, state: ManagerState, onBack: () => void): void {
+  const cup = state.cup;
+  if (!cup) {
+    uiScreen(ui, `
+      <h1 class="h-screen">NO <span class="accent">CUP</span></h1>
+      <div class="panel" style="text-align:center">This football world has no cup competition.</div>
+      <div class="menu-col" style="margin-top:10px"><button class="btn small" id="back">◀ BACK</button></div>`);
+    bind('back', onBack);
+    return;
+  }
+  const status = cup.winner
+    ? (cup.winner === state.userClubId ? 'WINNERS 🏆' : `Won by ${anyTeamById(cup.winner)?.name ?? cup.winner}`)
+    : cup.userEliminated ? 'Eliminated'
+      : `Alive · Round ${cup.currentRound + 1} of ${cup.rounds.length}`;
+  const cols = cup.rounds.map((ties, r) => {
+    const rows = ties.map((t) => {
+      const hn = t.homeClubId ? (anyTeamById(t.homeClubId)?.short ?? t.homeClubId) : 'bye';
+      const an = t.awayClubId ? (anyTeamById(t.awayClubId)?.short ?? t.awayClubId) : 'bye';
+      const sc = t.winner !== undefined ? ` ${t.homeGoals ?? 0}–${t.awayGoals ?? 0}` : '';
+      const hw = t.winner !== undefined && t.winner === t.homeClubId ? 'w' : '';
+      const aw = t.winner !== undefined && t.winner === t.awayClubId ? 'w' : '';
+      const you = (t.homeClubId === state.userClubId || t.awayClubId === state.userClubId) ? 'you' : '';
+      return `<div class="tie ${you}"><span class="${hw}">${esc(hn)}</span> v <span class="${aw}">${esc(an)}</span>${sc}</div>`;
+    }).join('');
+    const label = r === cup.rounds.length - 1 ? 'Final' : r === cup.rounds.length - 2 ? 'Semi-Finals' : `Round ${r + 1}`;
+    return `<div class="roundcol"><h4>${label}</h4>${rows}</div>`;
+  }).join('');
+  uiScreen(ui, `
+    <h1 class="h-screen">${esc(cup.name.toUpperCase())} <span class="accent">BRACKET</span></h1>
+    <div class="row spread" style="margin-bottom:8px"><span class="tag">YOUR RUN: ${esc(status)}</span></div>
+    <div class="panel"><div class="bracket" style="max-height:60vh;overflow:auto">${cols}</div></div>
+    <div class="menu-col" style="margin-top:10px;width:min(300px,80vw)"><button class="btn small" id="back">◀ BACK</button></div>`);
   bind('back', onBack);
 }

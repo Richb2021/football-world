@@ -8,7 +8,7 @@
  */
 import { Rng } from '../../sim/rng';
 import { roundRobin, computeTable, type TableRow } from '../fixtures';
-import { simulateFixture } from '../../sim/statSim';
+import { simulateFixture, simulateKnockout } from '../../sim/statSim';
 import { clubBudget } from '../transfers';
 import { nationById, tiersOf, type NationTier } from '../../data/nations';
 import { anyTeamById } from '../../data/teams';
@@ -20,6 +20,10 @@ import { cpuTransferMarket, youthIntake, tickScouting } from './market';
 import { applyTrainingTick, ageAndDevelopOffseason } from './training';
 import { seasonTargetFor, applyBoardEvaluation, evaluateTarget } from './targets';
 import { recordUserMatchNarrative, seedManagerInbox } from './meta';
+import {
+  buildSeasonCup, isCupMatchday, userStillInCup, userCupTieNow, simCupRoundCPUs,
+  advanceCupRound, recordCupUserTie,
+} from './cup';
 
 export { resolveLineup } from './utils';
 
@@ -92,6 +96,7 @@ export function createManagerCareer(opts: { nationId: string; clubId: string; ma
     results,
     matchday: 0,
     totalRounds,
+    cup: null,
     transferBudget: clubBudget(userStr),
     wageBudget: Math.max(50, Math.round(clubBudget(userStr) / 40)),
     windowPhase: 'summer',
@@ -117,6 +122,7 @@ export function createManagerCareer(opts: { nationId: string; clubId: string; ma
   };
 
   state.board.target = seasonTargetFor(state, opts.clubId, userTier);
+  state.cup = buildSeasonCup(state, rng);
   seedManagerInbox(state);
   state.pendingUserFixture = userFixtureThisMatchday(state);
   return ensureManagerSystems(state);
@@ -150,8 +156,11 @@ export function currentTierOf(state: ManagerState, clubId: string): number {
 
 // -------------------------------------------------------------- matchday
 
-/** The user's fixture for the current round, or null if none / already played. */
+/** The user's fixture for the current round, or null if none / already played.
+ *  A cup tie takes precedence on a cup matchday (the league game is simmed instead). */
 export function userFixtureThisMatchday(state: ManagerState): PendingFixture | null {
+  const cupFx = userCupTieNow(state);
+  if (cupFx) return cupFx;
   const leagueId = userLeagueId(state);
   const ids = state.leagueTeamIds[leagueId] ?? [];
   const round = state.matchday;
@@ -170,8 +179,10 @@ export function userFixtureThisMatchday(state: ManagerState): PendingFixture | n
   return null;
 }
 
-/** Simulate every CPU-vs-CPU fixture in the current round across all leagues. */
-export function simMatchdayCPUs(state: ManagerState, rng: Rng): void {
+/** Simulate every CPU-vs-CPU fixture in the current round across all leagues.
+ *  When `simUserLeague` is true the user is busy with a cup tie, so their league
+ *  game this round is simmed too (keeping the league table complete). */
+export function simMatchdayCPUs(state: ManagerState, rng: Rng, simUserLeague = false): void {
   for (const [leagueId, fx] of Object.entries(state.fixtures)) {
     const ids = state.leagueTeamIds[leagueId] ?? [];
     const round = state.matchday;
@@ -181,7 +192,8 @@ export function simMatchdayCPUs(state: ManagerState, rng: Rng): void {
     for (let i = 0; i < pairs.length; i++) {
       const [h, a] = pairs[i];
       const homeId = ids[h], awayId = ids[a];
-      if (homeId === state.userClubId || awayId === state.userClubId) continue; // user plays theirs
+      const involvesUser = homeId === state.userClubId || awayId === state.userClubId;
+      if (involvesUser && !simUserLeague) continue; // user plays their own league game
       if (state.results[leagueId][resultKey(round, i)]) continue;
       const homeStr = clubStrength(state.squads[homeId] ?? []);
       const awayStr = clubStrength(state.squads[awayId] ?? []);
@@ -190,10 +202,24 @@ export function simMatchdayCPUs(state: ManagerState, rng: Rng): void {
   }
 }
 
-/** Record the user's just-played result and ripple form/morale/board effects. */
-export function recordUserResult(state: ManagerState, score: [number, number], rng: Rng): void {
+/** Record the user's just-played result (league or cup) and ripple form/morale/board.
+ *  `winnerSide` (0=home,1=away) decides a cup tie after extra time/penalties. */
+export function recordUserResult(state: ManagerState, score: [number, number], rng: Rng, winnerSide: -1 | 0 | 1 = -1): void {
   const fx = state.pendingUserFixture;
   if (!fx) return;
+  const userIsHome = fx.homeClubId === state.userClubId;
+  const opponentClubId = userIsHome ? fx.awayClubId : fx.homeClubId;
+
+  if (fx.cupTie) {
+    const userWon = recordCupUserTie(state, fx, score, (winnerSide === -1 ? (score[0] > score[1] ? 0 : score[0] < score[1] ? 1 : 0) : winnerSide) as 0 | 1);
+    const s = state.sentiment;
+    if (userWon) { s.fans = clamp(s.fans + 7); s.squad = clamp(s.squad + 5); s.pressure = clamp(s.pressure - 4); state.board.confidence = clamp(state.board.confidence + 5); }
+    else { s.fans = clamp(s.fans - 6); s.pressure = clamp(s.pressure + 7); state.board.confidence = clamp(state.board.confidence - 5); }
+    recordUserMatchNarrative(state, score, opponentClubId, rng);
+    state.pendingUserFixture = null;
+    return;
+  }
+
   const ids = state.leagueTeamIds[fx.leagueId] ?? [];
   const pairs = state.fixtures[fx.leagueId]?.[fx.round] ?? [];
   const userIdx = ids.indexOf(state.userClubId);
@@ -204,8 +230,6 @@ export function recordUserResult(state: ManagerState, score: [number, number], r
     state.results[fx.leagueId][resultKey(fx.round, pairIndex)] = score;
   }
 
-  const userIsHome = fx.homeClubId === state.userClubId;
-  const opponentClubId = userIsHome ? fx.awayClubId : fx.homeClubId;
   const [hg, ag] = score;
   const userGoals = userIsHome ? hg : ag;
   const oppGoals = userIsHome ? ag : hg;
@@ -245,6 +269,12 @@ export function quickSimUserFixture(state: ManagerState, rng: Rng): [number, num
   const userIsHome = fx.homeClubId === state.userClubId;
   const homeStr = clubStrength(state.squads[fx.homeClubId] ?? []);
   const awayStr = clubStrength(state.squads[fx.awayClubId] ?? []);
+  if (fx.cupTie) {
+    // cup ties can't be drawn — decide via the knockout sim and credit the winner
+    const res = simulateKnockout(homeStr, awayStr, rng);
+    recordUserResult(state, res.score, rng, res.winner);
+    return userIsHome ? res.score : [res.score[1], res.score[0]];
+  }
   const score = simulateFixture(homeStr, awayStr, rng); // canonical [home, away]
   recordUserResult(state, score, rng);
   return userIsHome ? score : [score[1], score[0]];
@@ -263,8 +293,11 @@ function windowForMatchday(matchday: number, totalRounds: number): 'summer' | 'w
 export function advance(state: ManagerState, rng: Rng): { seasonEnded: boolean } {
   // safety: if the user still has a pending fixture, quick-sim it
   if (state.pendingUserFixture) quickSimUserFixture(state, rng);
-  // simulate the CPU-vs-CPU fixtures concurrent with the matchday just played
-  simMatchdayCPUs(state, rng);
+  // On a cup matchday the user plays their cup tie, so their league game is simmed;
+  // the cup round's CPU ties resolve and the bracket advances to the next round.
+  const cupDay = isCupMatchday(state);
+  simMatchdayCPUs(state, rng, cupDay && userStillInCup(state));
+  if (cupDay) { simCupRoundCPUs(state, rng); advanceCupRound(state); }
 
   state.matchday += 1;
   applyTrainingTick(state, rng);
@@ -283,7 +316,7 @@ export function advance(state: ManagerState, rng: Rng): { seasonEnded: boolean }
   state.pendingUserFixture = userFixtureThisMatchday(state);
   if (!state.pendingUserFixture) {
     // odd-team rotation bye (rare) — resolve CPUs and step again
-    simMatchdayCPUs(state, rng);
+    simMatchdayCPUs(state, rng, false);
     return advance(state, rng);
   }
   return { seasonEnded: false };
@@ -323,6 +356,11 @@ export function endSeason(state: ManagerState, rng: Rng): void {
   const lines: string[] = [];
   lines.push(`<b>CHAMPIONS:</b> ${champions ? clubNameOf(state, champions.clubId) : '—'}`);
   lines.push(`You finished <b>${userFinish ? ordinal(userFinish) : '—'}</b> — target ${ev.met ? 'MET' : 'MISSED'} (${state.board.target.description}).`);
+  if (state.cup?.winner) {
+    const cupName = state.cup.name;
+    if (state.cup.winner === state.userClubId) lines.push(`<b style="color:#39d98a">${cupName.toUpperCase()} WINNERS!</b> A trophy for the cabinet.`);
+    else lines.push(`${cupName} winners: <b>${clubNameOf(state, state.cup.winner)}</b>`);
+  }
   lines.push(`Board confidence <b>${Math.round(state.board.confidence)}%</b> · Reputation <b>${Math.round(state.reputation)}</b>`);
   if (evalResult.sacked) lines.push(`<b style="color:#e0644a">THE BOARD HAVE SACKED YOU. Find a new club to continue.</b>`);
   else if (userFinish === 1) lines.push(`<b style="color:#39d98a">CHAMPIONS! The fans will never forget this season.</b>`);
@@ -370,6 +408,7 @@ export function startNextSeason(state: ManagerState, rng: Rng): void {
     state.results[lid] = {};
   }
   state.totalRounds = Math.max(0, ...Object.values(state.fixtures).map((f) => f.length));
+  state.cup = buildSeasonCup(state, rng);
 
   const userStr = clubStrength(state.squads[state.userClubId] ?? []);
   state.transferBudget = clubBudget(userStr) + Math.round(state.transferBudget * 0.25);
@@ -396,14 +435,10 @@ export function takeJob(state: ManagerState, clubId: string): void {
   }
   state.userClubId = clubId;
   const tier = state.clubTier[clubId] ?? 1;
-  const userStr = clubStrength(state.squads[clubId] ?? []);
-  state.transferBudget = clubBudget(userStr);
-  state.wageBudget = Math.max(50, Math.round(clubBudget(userStr) / 40));
-  state.board.target = seasonTargetFor(state, clubId, tier);
   state.board.confidence = 60;
   state.board.warnings = 0;
   state.sentiment = { fans: 55, media: 55, squad: 60, pressure: 30 };
   state.jobHistory.push({ clubId, clubName: anyTeamById(clubId)?.name ?? clubId, tier, seasonFrom: state.season, seasonTo: null, outcome: 'current' });
-  state.phase = 'in-season';
-  state.pendingUserFixture = userFixtureThisMatchday(state);
+  // start a fresh season at the new club (rebuilds fixtures, cup, budget, target)
+  startNextSeason(state, new Rng((state.seed ^ (state.season * 2654435761)) >>> 0));
 }

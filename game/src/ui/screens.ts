@@ -404,8 +404,8 @@ export class UI {
   loading(): (msg: string, frac: number) => void {
     this.screen(`
       <div class="title-logo" style="margin-top:24vh">
-        <div class="super" style="letter-spacing:0.15em; font-size:clamp(12px, 2vw, 20px);">INTERNATIONAL CUP</div>
-        <div class="league" style="font-size:clamp(32px, 7vw, 80px);">FOOT<em>BALL</em> 2026</div>
+        <div class="super" style="letter-spacing:0.15em; font-size:clamp(12px, 2vw, 20px);">FOOTBALL WORLD</div>
+        <div class="league" style="font-size:clamp(32px, 7vw, 80px);">FOOT<em>BALL</em> WORLD</div>
       </div>
       <div class="notice" id="load-msg">Loading…</div>
       <div class="loading-bar"><div id="load-bar"></div></div>`);
@@ -420,9 +420,9 @@ export class UI {
   title(onStart: () => void) {
     const s = this.screen(`
       <div class="title-logo">
-        <div class="super" style="letter-spacing:0.15em; font-size:clamp(14px, 2.2vw, 24px);">INTERNATIONAL CUP</div>
-        <div class="league" style="font-size:clamp(40px, 8vw, 110px);">FOOT<em>BALL</em> 2026</div>
-        <div class="season-tag">CLASSIC ARCADE FOOTBALL</div>
+        <div class="super" style="letter-spacing:0.15em; font-size:clamp(14px, 2.2vw, 24px);">FOOTBALL WORLD</div>
+        <div class="league" style="font-size:clamp(40px, 8vw, 110px);">FOOT<em>BALL</em> WORLD</div>
+        <div class="season-tag">MANAGER · CAREER · CUSTOMISE</div>
       </div>
       <div class="press-start">TAP TO PLAY</div>
       <div class="studio-credit">
@@ -453,7 +453,6 @@ export class UI {
     hasSave: boolean;
     saveLabel: string;
     onExhibition: () => void;
-    onCup: () => void;
     onManager: () => void;
     onPlayer: () => void;
     onCustomise: () => void;
@@ -474,7 +473,6 @@ export class UI {
         <button class="btn" id="m-player">PLAYER CAREER <span class="arrow">▶</span></button>
         <button class="btn" id="m-customise">CUSTOMISE <span class="arrow">▶</span></button>
         <button class="btn" id="m-exhibition">EXHIBITION <span class="arrow">▶</span></button>
-        <button class="btn" id="m-cup">INTERNATIONAL CUP <span class="arrow">▶</span></button>
         <button class="btn" id="m-challenge">CHALLENGE MODE <span class="arrow">▶</span></button>
         <button class="btn" id="m-stars">ALL STAR CLUB <span class="arrow">▶</span></button>
         <button class="btn" id="m-online">ONLINE <span class="arrow">▶</span></button>
@@ -491,7 +489,6 @@ export class UI {
     bind('m-manager', opts.onManager);
     bind('m-player', opts.onPlayer);
     bind('m-customise', opts.onCustomise);
-    bind('m-cup', opts.onCup);
     bind('m-challenge', opts.onChallenge);
     bind('m-stars', opts.onStars);
     bind('m-online', opts.onOnline);

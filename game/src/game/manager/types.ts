@@ -106,6 +106,25 @@ export interface PendingFixture {
   cupTie: boolean;
 }
 
+export interface CupTie {
+  homeClubId: string | null;
+  awayClubId: string | null;
+  homeGoals?: number;
+  awayGoals?: number;
+  winner?: string | null;
+}
+
+export interface ManagerCup {
+  name: string;
+  /** rounds[0] = first round (with byes as null sides); each resolved round pushes the next */
+  rounds: CupTie[][];
+  /** the league matchday index on which each round is played */
+  roundMatchdays: number[];
+  currentRound: number;
+  userEliminated: boolean;
+  winner: string | null;
+}
+
 export interface ManagerState {
   version: 1;
   managerName: string;
@@ -134,6 +153,8 @@ export interface ManagerState {
 
   matchday: number; // current round index (0-based), shared across leagues
   totalRounds: number;
+  /** the in-season knockout cup (null if the nation has no cup) */
+  cup: ManagerCup | null;
 
   // ---- transfer market ----
   transferBudget: number; // £k available to the user club

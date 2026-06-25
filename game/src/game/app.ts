@@ -53,7 +53,7 @@ import { buildJourneyMatchConfig } from '../journey/matches';
 // Football World — Manager Mode
 import {
   managerHub, managerStandings, managerSquad, managerTraining, managerTransfers,
-  managerScout, managerPhone, managerHeadlines, managerBoard, managerPress,
+  managerScout, managerPhone, managerHeadlines, managerBoard, managerPress, managerCup,
   seasonEndSummary, jobOffersScreen,
 } from '../ui/manager/managerHub';
 import {
@@ -240,7 +240,6 @@ export class App {
       onManager: () => this.managerSlotsFlow(),
       onPlayer: () => this.playerSlotsFlow(),
       onCustomise: () => this.customiseFlow(),
-      onCup: () => this.careerSlotsFlow(),
       onChallenge: () => this.challengeFlow(),
       onStars: () => this.starsFlow(),
       onJourney: () => this.journeyFlow(),
@@ -679,6 +678,7 @@ export class App {
       onPlay: () => this.playManagerMatch(),
       onQuickSim: () => this.managerQuickSim(),
       onStandings: () => managerStandings(this.ui, state, () => this.managerHub()),
+      onCup: () => managerCup(this.ui, state, () => this.managerHub()),
       onSquad: () => managerSquad(this.ui, state, () => this.managerHub()),
       onTraining: () => {
         const onFocus = (f: ManagerState['trainingFocus']) => {
@@ -725,11 +725,13 @@ export class App {
         const userSide = (userIsHome ? 0 : 1) as 0 | 1;
         this.playMatchWithPrematch(cfg, userSide, (outcome) => {
           const rng = new Rng((state.seed ^ (state.matchday * 40503)) >>> 0);
-          recordUserResult(state, outcome.score, rng);
+          recordUserResult(state, outcome.score, rng, outcome.winner);
           saveManager(state);
+          const pens = fx.cupTie && outcome.score[0] === outcome.score[1];
+          const note = pens ? (outcome.winner === userSide ? 'Through on penalties!' : 'Out on penalties.') : undefined;
           this.ui.result({
             teamA: anyTeamById(homeClubId)!, teamB: anyTeamById(awayClubId)!,
-            score: outcome.score,
+            score: outcome.score, note,
             continueLabel: 'BACK TO THE DUGOUT',
             onContinue: () => this.managerAdvanceAndShow(),
           });
@@ -959,7 +961,7 @@ export class App {
     const awayClubId = fx.awayClubId;
     this.playMatchWithPrematch(cfg, userSide, (outcome) => {
       const rng = new Rng((pcs.seed ^ (pcs.world.matchday * 40503)) >>> 0);
-      recordPlayerMatch(pcs, outcome.score, rng);
+      recordPlayerMatch(pcs, outcome.score, rng, outcome.scorers, outcome.winner);
       savePlayerCareer(pcs);
       this.ui.result({
         teamA: anyTeamById(homeClubId)!, teamB: anyTeamById(awayClubId)!,
@@ -2014,7 +2016,7 @@ export class App {
   private async playMatch(
     cfg: MatchConfig,
     localTeam: 0 | 1,
-    onEnd: (outcome: { score: [number, number]; winner: -1 | 0 | 1; momentum?: [number, number]; reason?: string }) => void,
+    onEnd: (outcome: { score: [number, number]; winner: -1 | 0 | 1; momentum?: [number, number]; reason?: string; scorers?: { team: 0 | 1; player: string; minute: number; ownGoal?: boolean }[] }) => void,
     net?: { session: NetTransport; role: 'host' | 'guest' },
     skipIntro = false,
   ) {
@@ -2069,7 +2071,7 @@ export class App {
   private playMatchWithPrematch(
     cfg: MatchConfig,
     localTeam: 0 | 1,
-    onEnd: (outcome: { score: [number, number]; winner: -1 | 0 | 1; momentum?: [number, number]; reason?: string }) => void,
+    onEnd: (outcome: { score: [number, number]; winner: -1 | 0 | 1; momentum?: [number, number]; reason?: string; scorers?: { team: 0 | 1; player: string; minute: number; ownGoal?: boolean }[] }) => void,
     net?: { session: NetTransport; role: 'host' | 'guest' },
   ) {
     const bgUrl = this.assets.uiUrls.prematchStadium ?? this.assets.uiUrls.teamSelect;

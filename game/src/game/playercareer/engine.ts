@@ -85,16 +85,25 @@ export function avatarOf(pcs: PlayerCareerState): ManagerPlayer | undefined {
 // -------------------------------------------------------------- match performance
 
 interface PlayerLine { goals: number; assists: number; rating: number; result: 'win' | 'draw' | 'loss'; }
+type ScorerEntry = { team: 0 | 1; player: string; minute: number; ownGoal?: boolean };
 
-function derivePlayerLine(pcs: PlayerCareerState, score: [number, number], userIsHome: boolean, rng: Rng): PlayerLine {
+function derivePlayerLine(pcs: PlayerCareerState, score: [number, number], userIsHome: boolean, rng: Rng, scorers?: ScorerEntry[]): PlayerLine {
   const av = avatarOf(pcs);
   const teamGoals = userIsHome ? score[0] : score[1];
   const oppGoals = userIsHome ? score[1] : score[0];
   const result: PlayerLine['result'] = teamGoals > oppGoals ? 'win' : teamGoals < oppGoals ? 'loss' : 'draw';
-  const shoot = av?.shoot ?? 50;
-  const goalChance = pcs.pos === 'FW' ? 0.30 + shoot / 380 : pcs.pos === 'MF' ? 0.14 + shoot / 620 : pcs.pos === 'DF' ? 0.05 : 0;
-  let goals = 0;
-  for (let g = 0; g < teamGoals; g++) if (rng.next() < goalChance) goals++;
+  // Real goals come from the match's goal log when available (a played Be-A-Pro
+  // match); otherwise they're estimated from the scoreline and the avatar's shooting.
+  let goals: number;
+  if (scorers) {
+    const userSide: 0 | 1 = userIsHome ? 0 : 1;
+    goals = Math.min(teamGoals, scorers.filter((s) => s.team === userSide && s.player === pcs.playerName && !s.ownGoal).length);
+  } else {
+    const shoot = av?.shoot ?? 50;
+    const goalChance = pcs.pos === 'FW' ? 0.30 + shoot / 380 : pcs.pos === 'MF' ? 0.14 + shoot / 620 : pcs.pos === 'DF' ? 0.05 : 0;
+    goals = 0;
+    for (let g = 0; g < teamGoals; g++) if (rng.next() < goalChance) goals++;
+  }
   const astChance = pcs.pos === 'FW' || pcs.pos === 'MF' ? 0.18 : pcs.pos === 'DF' ? 0.08 : 0;
   let assists = 0;
   for (let g = 0; g < teamGoals - goals; g++) if (rng.next() < astChance) assists++;
@@ -129,14 +138,15 @@ function pushHeadline(pcs: PlayerCareerState, title: string, tone: 'positive' | 
   if (pcs.headlines.length > 50) pcs.headlines.shift();
 }
 
-/** Record a PLAYED match (Be-A-Pro): apply the world result then derive the avatar's line. */
-export function recordPlayerMatch(pcs: PlayerCareerState, score: [number, number], rng: Rng): void {
+/** Record a PLAYED match (Be-A-Pro): apply the world result then derive the avatar's
+ *  line — using the real goal log (`scorers`) when the match was actually played. */
+export function recordPlayerMatch(pcs: PlayerCareerState, score: [number, number], rng: Rng, scorers?: ScorerEntry[], winnerSide: -1 | 0 | 1 = -1): void {
   const fx = pcs.world.pendingUserFixture;
   if (!fx) return;
   const userIsHome = fx.homeClubId === pcs.world.userClubId;
   const opp = userIsHome ? fx.awayClubId : fx.homeClubId;
-  recordUserResult(pcs.world, score, rng);
-  applyLine(pcs, derivePlayerLine(pcs, score, userIsHome, rng), opp, rng);
+  recordUserResult(pcs.world, score, rng, winnerSide);
+  applyLine(pcs, derivePlayerLine(pcs, score, userIsHome, rng, scorers), opp, rng);
 }
 
 /** Quick-sim the avatar's fixture (skipping the 3D match) and derive their line. */

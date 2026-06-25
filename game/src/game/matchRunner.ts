@@ -37,6 +37,9 @@ export interface MatchOutcome {
   momentum?: [number, number];
   /** set when the match ended by forfeit, for the result-screen note */
   reason?: string;
+  /** the goal log, so career modes can credit a Be-A-Pro avatar for goals they
+   *  actually scored (player = scorer name; ownGoal flags own goals). */
+  scorers?: { team: 0 | 1; player: string; minute: number; ownGoal?: boolean }[];
 }
 
 interface RunnerOpts {
@@ -409,7 +412,7 @@ export class MatchRunner {
       if (sim.events.length && this.startExitPresentation(sim.events)) break;
       if (sim.events.some((e) => e.type === 'hydrationBreak') && this.startHydrationBreak()) break;
       if (sim.state.phase === 'finished' && !this.ended && !this.exitPresentation) {
-        this.finish({ score: [sim.state.score[0], sim.state.score[1]], winner: sim.state.winner, momentum: [sim.state.momentum[0], sim.state.momentum[1]] });
+        this.finish({ score: [sim.state.score[0], sim.state.score[1]], winner: sim.state.winner, momentum: [sim.state.momentum[0], sim.state.momentum[1]], scorers: sim.state.goals });
         return;
       }
     }
@@ -537,7 +540,7 @@ export class MatchRunner {
 
     this.exitPresentation = null;
     if (scene.kind === 'fullTime') {
-      this.finish({ score: [state.score[0], state.score[1]], winner: state.winner, momentum: [state.momentum[0], state.momentum[1]] });
+      this.finish({ score: [state.score[0], state.score[1]], winner: state.winner, momentum: [state.momentum[0], state.momentum[1]], scorers: state.goals });
       return true;
     }
 
