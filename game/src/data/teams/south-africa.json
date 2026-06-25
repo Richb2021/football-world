@@ -1,0 +1,479 @@
+{
+  "id": "south-africa",
+  "name": "South Africa",
+  "short": "RSA",
+  "stadium": "FNB Stadium",
+  "strength": 75,
+  "colors": {
+    "home": {
+      "shirt": "#FFD100",
+      "shorts": "#007A33",
+      "socks": "#FFD100"
+    },
+    "away": {
+      "shirt": "#FFFFFF",
+      "shorts": "#FFFFFF",
+      "socks": "#FFFFFF"
+    }
+  },
+  "players": [
+    {
+      "name": "Ronwen Williamso",
+      "pos": "GK",
+      "age": 34,
+      "pace": 50,
+      "pass": 56,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 83,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Tholo Matuludie",
+      "pos": "DF",
+      "age": 27,
+      "pace": 54,
+      "pass": 49,
+      "shoot": 32,
+      "tackle": 65,
+      "keeping": 8,
+      "shirtNumber": 2,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Khulumani Ndamaney",
+      "pos": "DF",
+      "age": 22,
+      "pace": 58,
+      "pass": 51,
+      "shoot": 34,
+      "tackle": 59,
+      "keeping": 8,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Teboho Mokoenae",
+      "pos": "MF",
+      "age": 29,
+      "pace": 68,
+      "pass": 86,
+      "shoot": 68,
+      "tackle": 73,
+      "keeping": 7,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Thalente Mbathae",
+      "pos": "MF",
+      "age": 26,
+      "pace": 55,
+      "pass": 71,
+      "shoot": 58,
+      "tackle": 57,
+      "keeping": 7,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Aubrey Modibae",
+      "pos": "DF",
+      "age": 30,
+      "pace": 74,
+      "pass": 70,
+      "shoot": 36,
+      "tackle": 76,
+      "keeping": 8,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Oswin Appolliso",
+      "pos": "FW",
+      "age": 24,
+      "pace": 66,
+      "pass": 62,
+      "shoot": 77,
+      "tackle": 42,
+      "keeping": 8,
+      "shirtNumber": 7,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Tshepang Moremie",
+      "pos": "FW",
+      "age": 25,
+      "pace": 62,
+      "pass": 51,
+      "shoot": 68,
+      "tackle": 39,
+      "keeping": 8,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Lyle Fostere",
+      "pos": "FW",
+      "age": 25,
+      "pace": 69,
+      "pass": 62,
+      "shoot": 81,
+      "tackle": 37,
+      "keeping": 8,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Relebohile Mofokenge",
+      "pos": "FW",
+      "age": 21,
+      "pace": 63,
+      "pass": 54,
+      "shoot": 70,
+      "tackle": 40,
+      "keeping": 8,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Themba Zwaney",
+      "pos": "MF",
+      "age": 36,
+      "pace": 66,
+      "pass": 79,
+      "shoot": 66,
+      "tackle": 67,
+      "keeping": 7,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "moustache"
+      }
+    },
+    {
+      "name": "Thapelo Masekoe",
+      "pos": "FW",
+      "age": 22,
+      "pace": 64,
+      "pass": 52,
+      "shoot": 69,
+      "tackle": 38,
+      "keeping": 8,
+      "shirtNumber": 12,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Sphephelo Sitholey",
+      "pos": "MF",
+      "age": 27,
+      "pace": 65,
+      "pass": 75,
+      "shoot": 65,
+      "tackle": 59,
+      "keeping": 7,
+      "shirtNumber": 13,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Mbekezeli Mbokazie",
+      "pos": "DF",
+      "age": 20,
+      "pace": 58,
+      "pass": 55,
+      "shoot": 31,
+      "tackle": 69,
+      "keeping": 8,
+      "shirtNumber": 14,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Iqraam Raynerso",
+      "pos": "FW",
+      "age": 30,
+      "pace": 73,
+      "pass": 64,
+      "shoot": 77,
+      "tackle": 35,
+      "keeping": 8,
+      "shirtNumber": 15,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Sipho Chainey",
+      "pos": "GK",
+      "age": 29,
+      "pace": 45,
+      "pass": 46,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 64,
+      "shirtNumber": 16,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Sekotori Makgpae",
+      "pos": "FW",
+      "age": 26,
+      "pace": 73,
+      "pass": 63,
+      "shoot": 72,
+      "tackle": 36,
+      "keeping": 8,
+      "shirtNumber": 17,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Samukele Kabinie",
+      "pos": "DF",
+      "age": 22,
+      "pace": 60,
+      "pass": 53,
+      "shoot": 35,
+      "tackle": 60,
+      "keeping": 8,
+      "shirtNumber": 18,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Nkosinathi Sibisie",
+      "pos": "DF",
+      "age": 30,
+      "pace": 65,
+      "pass": 59,
+      "shoot": 36,
+      "tackle": 73,
+      "keeping": 8,
+      "shirtNumber": 19,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Khuliso Mudaue",
+      "pos": "DF",
+      "age": 31,
+      "pace": 72,
+      "pass": 59,
+      "shoot": 35,
+      "tackle": 73,
+      "keeping": 8,
+      "shirtNumber": 20,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Ime Okone",
+      "pos": "DF",
+      "age": 22,
+      "pace": 59,
+      "pass": 53,
+      "shoot": 35,
+      "tackle": 70,
+      "keeping": 8,
+      "shirtNumber": 21,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Stuart Gosso",
+      "pos": "GK",
+      "age": 32,
+      "pace": 46,
+      "pass": 49,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 66,
+      "shirtNumber": 22,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jayden Adamso",
+      "pos": "MF",
+      "age": 25,
+      "pace": 61,
+      "pass": 73,
+      "shoot": 60,
+      "tackle": 61,
+      "keeping": 7,
+      "shirtNumber": 23,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Olwethu Makhanyae",
+      "pos": "DF",
+      "age": 22,
+      "pace": 51,
+      "pass": 47,
+      "shoot": 35,
+      "tackle": 61,
+      "keeping": 8,
+      "shirtNumber": 24,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Kamogelo Sebelebeley",
+      "pos": "FW",
+      "age": 23,
+      "pace": 65,
+      "pass": 50,
+      "shoot": 65,
+      "tackle": 34,
+      "keeping": 8,
+      "shirtNumber": 25,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Bradley Crosso",
+      "pos": "DF",
+      "age": 25,
+      "pace": 54,
+      "pass": 47,
+      "shoot": 35,
+      "tackle": 59,
+      "keeping": 8,
+      "shirtNumber": 26,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    }
+  ],
+  "defaultLineup": {
+    "formation": "5-3-2",
+    "starters": [
+      0,
+      19,
+      5,
+      13,
+      20,
+      18,
+      3,
+      12,
+      8,
+      14,
+      22
+    ]
+  }
+}

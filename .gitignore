@@ -1,0 +1,26 @@
+.DS_Store
+node_modules/
+dist/
+*.log
+.env
+.env.local
+.env.*.local
+fal-agent/outputs/
+
+# Local agent/browser scratch output
+.playwright-mcp/
+.superpowers/
+docs/superpowers/
+output/
+/*.png
+game/.claude/
+game/.tmp/
+game/archive/
+game/docs/superpowers/
+
+# Secrets / keys — never commit
+*.pem
+*.key
+id_rsa*
+*.p8
+*.p12

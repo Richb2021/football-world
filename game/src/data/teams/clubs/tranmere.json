@@ -1,0 +1,461 @@
+{
+  "id": "tranmere",
+  "name": "Tranmere",
+  "short": "TRA",
+  "stadium": "Tranmere Arena",
+  "strength": 56,
+  "colors": {
+    "home": {
+      "shirt": "#FFFFFF",
+      "shorts": "#002980",
+      "socks": "#FFFFFF",
+      "style": {
+        "pattern": "hoops",
+        "secondary": "#0033A0",
+        "trim": "#0033A0"
+      }
+    },
+    "away": {
+      "shirt": "#14213d",
+      "shorts": "#1a1a1a",
+      "socks": "#14213d",
+      "style": {
+        "pattern": "solid",
+        "secondary": "#888",
+        "trim": "#888"
+      }
+    }
+  },
+  "players": [
+    {
+      "name": "Milo Thomas",
+      "pos": "GK",
+      "age": 32,
+      "pace": 35,
+      "pass": 41,
+      "shoot": 28,
+      "tackle": 28,
+      "keeping": 69,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#3a2a1a",
+        "hairStyle": "curly",
+        "facialHair": "none",
+        "bootColor": "#ff5a3c"
+      }
+    },
+    {
+      "name": "Marek Wilson",
+      "pos": "GK",
+      "age": 35,
+      "pace": 36,
+      "pass": 46,
+      "shoot": 28,
+      "tackle": 28,
+      "keeping": 59,
+      "shirtNumber": 13,
+      "appearance": {
+        "skinTone": "#5c3320",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "stubble",
+        "bootColor": "#111111"
+      }
+    },
+    {
+      "name": "Matt Winter",
+      "pos": "GK",
+      "age": 32,
+      "pace": 39,
+      "pass": 35,
+      "shoot": 28,
+      "tackle": 28,
+      "keeping": 67,
+      "shirtNumber": 12,
+      "appearance": {
+        "skinTone": "#f3c9a8",
+        "hairColor": "#3a2a1a",
+        "hairStyle": "bald",
+        "facialHair": "stubble",
+        "bootColor": "#111111"
+      }
+    },
+    {
+      "name": "Tyler Jackson",
+      "pos": "DF",
+      "age": 32,
+      "pace": 60,
+      "pass": 53,
+      "shoot": 40,
+      "tackle": 56,
+      "keeping": 8,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#3f2417",
+        "hairColor": "#a04020",
+        "hairStyle": "crop",
+        "facialHair": "beard",
+        "bootColor": "#111111"
+      }
+    },
+    {
+      "name": "Leo Hughes",
+      "pos": "DF",
+      "age": 29,
+      "pace": 55,
+      "pass": 57,
+      "shoot": 36,
+      "tackle": 66,
+      "keeping": 8,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#8a3a1a",
+        "hairStyle": "curly",
+        "facialHair": "stubble",
+        "bootColor": "#ff5a3c"
+      }
+    },
+    {
+      "name": "Dragan Marsden",
+      "pos": "DF",
+      "age": 31,
+      "pace": 59,
+      "pass": 55,
+      "shoot": 33,
+      "tackle": 60,
+      "keeping": 8,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#8a3a1a",
+        "hairStyle": "crop",
+        "facialHair": "none",
+        "bootColor": "#3aa0ff"
+      }
+    },
+    {
+      "name": "Bobby Williams",
+      "pos": "DF",
+      "age": 23,
+      "pace": 55,
+      "pass": 60,
+      "shoot": 42,
+      "tackle": 61,
+      "keeping": 8,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#5a4632",
+        "hairStyle": "long",
+        "facialHair": "none",
+        "bootColor": "#111111"
+      }
+    },
+    {
+      "name": "Rory Hopper",
+      "pos": "DF",
+      "age": 25,
+      "pace": 50,
+      "pass": 46,
+      "shoot": 35,
+      "tackle": 64,
+      "keeping": 8,
+      "shirtNumber": 7,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none",
+        "bootColor": "#3aa0ff"
+      }
+    },
+    {
+      "name": "Jack Fenton",
+      "pos": "DF",
+      "age": 23,
+      "pace": 55,
+      "pass": 55,
+      "shoot": 39,
+      "tackle": 68,
+      "keeping": 8,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#3f2417",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none",
+        "bootColor": "#ff5a3c"
+      }
+    },
+    {
+      "name": "Kristof Smith",
+      "pos": "DF",
+      "age": 28,
+      "pace": 52,
+      "pass": 52,
+      "shoot": 32,
+      "tackle": 58,
+      "keeping": 8,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#e6b187",
+        "hairColor": "#a07a3a",
+        "hairStyle": "curly",
+        "facialHair": "moustache",
+        "bootColor": "#3aa0ff"
+      }
+    },
+    {
+      "name": "Aiden Wright",
+      "pos": "DF",
+      "age": 19,
+      "pace": 60,
+      "pass": 59,
+      "shoot": 32,
+      "tackle": 59,
+      "keeping": 8,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#d09a6c",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none",
+        "bootColor": "#111111"
+      }
+    },
+    {
+      "name": "Kristof Whitfield",
+      "pos": "MF",
+      "age": 32,
+      "pace": 51,
+      "pass": 64,
+      "shoot": 53,
+      "tackle": 53,
+      "keeping": 7,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#b58a3a",
+        "hairStyle": "long",
+        "facialHair": "moustache",
+        "bootColor": "#111111"
+      }
+    },
+    {
+      "name": "Cole Cooper",
+      "pos": "MF",
+      "age": 35,
+      "pace": 50,
+      "pass": 57,
+      "shoot": 58,
+      "tackle": 53,
+      "keeping": 7,
+      "shirtNumber": 14,
+      "appearance": {
+        "skinTone": "#f3c9a8",
+        "hairColor": "#7a5230",
+        "hairStyle": "short",
+        "facialHair": "none",
+        "bootColor": "#ff5a3c"
+      }
+    },
+    {
+      "name": "Theo Frost",
+      "pos": "MF",
+      "age": 19,
+      "pace": 50,
+      "pass": 62,
+      "shoot": 55,
+      "tackle": 63,
+      "keeping": 7,
+      "shirtNumber": 15,
+      "appearance": {
+        "skinTone": "#5c3320",
+        "hairColor": "#b5502a",
+        "hairStyle": "crop",
+        "facialHair": "none",
+        "bootColor": "#111111"
+      }
+    },
+    {
+      "name": "Soren Reed",
+      "pos": "MF",
+      "age": 25,
+      "pace": 56,
+      "pass": 55,
+      "shoot": 44,
+      "tackle": 55,
+      "keeping": 7,
+      "shirtNumber": 16,
+      "appearance": {
+        "skinTone": "#3f2417",
+        "hairColor": "#3a2a1a",
+        "hairStyle": "curly",
+        "facialHair": "none",
+        "bootColor": "#ff5a3c"
+      }
+    },
+    {
+      "name": "Vince Mercer",
+      "pos": "MF",
+      "age": 36,
+      "pace": 63,
+      "pass": 67,
+      "shoot": 57,
+      "tackle": 54,
+      "keeping": 7,
+      "shirtNumber": 17,
+      "appearance": {
+        "skinTone": "#5c3320",
+        "hairColor": "#5a4632",
+        "hairStyle": "crop",
+        "facialHair": "none",
+        "bootColor": "#3aa0ff"
+      }
+    },
+    {
+      "name": "Bobby Darnell",
+      "pos": "MF",
+      "age": 35,
+      "pace": 60,
+      "pass": 59,
+      "shoot": 49,
+      "tackle": 63,
+      "keeping": 7,
+      "shirtNumber": 18,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#3a2a1a",
+        "hairStyle": "crop",
+        "facialHair": "none",
+        "bootColor": "#111111"
+      }
+    },
+    {
+      "name": "Diego Fenton",
+      "pos": "MF",
+      "age": 36,
+      "pace": 62,
+      "pass": 65,
+      "shoot": 49,
+      "tackle": 57,
+      "keeping": 7,
+      "shirtNumber": 19,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#3a2a1a",
+        "hairStyle": "short",
+        "facialHair": "none",
+        "bootColor": "#111111"
+      }
+    },
+    {
+      "name": "Sonny Watson",
+      "pos": "FW",
+      "age": 17,
+      "pace": 54,
+      "pass": 59,
+      "shoot": 60,
+      "tackle": 33,
+      "keeping": 8,
+      "shirtNumber": 20,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "stubble",
+        "bootColor": "#111111"
+      }
+    },
+    {
+      "name": "Hugo Morgan",
+      "pos": "FW",
+      "age": 27,
+      "pace": 61,
+      "pass": 56,
+      "shoot": 68,
+      "tackle": 30,
+      "keeping": 8,
+      "shirtNumber": 21,
+      "appearance": {
+        "skinTone": "#e6b187",
+        "hairColor": "#5a4632",
+        "hairStyle": "curly",
+        "facialHair": "beard",
+        "bootColor": "#111111"
+      }
+    },
+    {
+      "name": "Mateo Pollard",
+      "pos": "FW",
+      "age": 31,
+      "pace": 67,
+      "pass": 50,
+      "shoot": 68,
+      "tackle": 38,
+      "keeping": 8,
+      "shirtNumber": 22,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#3a2a1a",
+        "hairStyle": "short",
+        "facialHair": "none",
+        "bootColor": "#111111"
+      }
+    },
+    {
+      "name": "Ethan Richardson",
+      "pos": "FW",
+      "age": 32,
+      "pace": 61,
+      "pass": 55,
+      "shoot": 59,
+      "tackle": 28,
+      "keeping": 8,
+      "shirtNumber": 23,
+      "appearance": {
+        "skinTone": "#f3c9a8",
+        "hairColor": "#5a4632",
+        "hairStyle": "short",
+        "facialHair": "none",
+        "bootColor": "#111111"
+      }
+    },
+    {
+      "name": "Andreas Okafor",
+      "pos": "FW",
+      "age": 28,
+      "pace": 60,
+      "pass": 53,
+      "shoot": 62,
+      "tackle": 38,
+      "keeping": 8,
+      "shirtNumber": 24,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none",
+        "bootColor": "#111111"
+      }
+    }
+  ],
+  "defaultLineup": {
+    "formation": "4-2-3-1",
+    "starters": [
+      0,
+      8,
+      4,
+      6,
+      10,
+      15,
+      17,
+      13,
+      16,
+      11,
+      20
+    ]
+  }
+}

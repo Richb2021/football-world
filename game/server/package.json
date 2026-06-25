@@ -1,0 +1,11 @@
+{
+  "name": "grayson-api",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "Grayson Games shared backend (basketball + soccer)",
+  "dependencies": {
+    "fastify": "^5.2.0",
+    "ws": "^8.18.0"
+  }
+}

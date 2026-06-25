@@ -1,0 +1,33 @@
+{
+  "_comment": "English-flavoured fictional player name pool for Football World club squads. Random combinations only — never maps to a specific real player. Used by scripts/generate-clubs.mjs (baked into team JSON) and at runtime for youth intake / regens. Separate from namePool.json so existing manager/NPC seeds stay stable.",
+  "first": [
+    "Jack", "Tom", "James", "Harry", "George", "Oliver", "Charlie", "Jacob", "Alfie", "Tyler",
+    "Daniel", "Liam", "Ethan", "Lewis", "Sam", "Josh", "Callum", "Connor", "Brad", "Ryan",
+    "Mason", "Reece", "Joe", "Ben", "Adam", "Luke", "Matt", "Chris", "Alex", "Jordan",
+    "Nathan", "Curtis", "Dylan", "Kyle", "Lee", "Ash", "Rob", "Mike", "Andy", "Danny",
+    "Billy", "Bobby", "Ted", "Frank", "Pat", "Mick", "Reg", "Vince", "Sonny", "Reggie",
+    "Marcus", "Tyrone", "Kieran", "Declan", "Leroy", "Andre", "Marlon", "Dwight", "Wes", "Curtis",
+    "Tyrese", "Reiss", "Sasha", "Nico", "Mateo", "Luca", "Andreas", "Diego", "Marco", "Tomas",
+    "Rafa", "Pablo", "Emil", "Soren", "Nikolaj", "Kristof", "Pawel", "Marek", "Dragan", "Stefan",
+    "Yusuf", "Amir", "Karim", "Bilal", "Omar", "Idris", "Malik", "Younes", "Sami", "Rashid",
+    "Chidi", "Emeka", "Kwame", "Seko", "Yves", "Pape", "Moussa", "Ibrahima", "Sory", "Buba",
+    "Aiden", "Finn", "Noah", "Leo", "Theo", "Hugo", "Max", "Oscar", "Archie", "Freddie",
+    "Jude", "Cole", "Ezra", "Milo", "Rory", "Harvey", "Eddie", "Stan", "Bertie", "Ronnie"
+  ],
+  "last": [
+    "Smith", "Jones", "Williams", "Taylor", "Davies", "Wilson", "Evans", "Thomas", "Roberts", "Walker",
+    "Wright", "Robinson", "Thompson", "White", "Watson", "Jackson", "Harris", "Clarke", "Patel", "Khan",
+    "Mitchell", "Turner", "Hill", "Green", "Harrison", "Bennett", "Carter", "Phillips", "Bailey", "Cooper",
+    "Reed", "Bell", "Ward", "Watson", "Cox", "Richardson", "Morgan", "Hughes", "Murray", "Stewart",
+    "Kelly", "Cook", "Carter", "Webb", "Marshall", "Owen", "Knight", "Butler", "Barker", "Fisher",
+    "Stokes", "Doyle", "Walsh", "Brennan", "Fenton", "Marsden", "Carrick", "Bramall", "Calder", "Holt",
+    "Brooks", "Perry", "Powell", "Long", "Patterson", "Burgess", "Shaw", "Hart", "West", "Day",
+    "Ford", "Hunt", "Spencer", "Lane", "Fox", "Webb", "Dixon", "Fletcher", "Parker", "Gibson",
+    "Winter", "Frost", "Baxter", "Sutton", "Nash", "Drake", "Bishop", "Foster", "Hale", "Mercer",
+    "Okafor", "Adeyemi", "Nwosu", "Diallo", "Toure", "Camara", "Konate", "Mensah", "Owusu", "Abara",
+    "Ba", "Diop", "Sane", "Cisse", "Kane", "Mendy", "Coulter", "Gallagher", "O'Donnell", "McCarthy",
+    "Murphy", "O'Brien", "Reilly", "Lynch", "Quinn", "Kennedy", "Doyle", "Ellis", "Bryant", "Coleman",
+    "Ingram", "Pratt", "Whitfield", "Tucker", "Hopper", "Norton", "Sloane", "Vance", "Pollard", "Marsh",
+    "Petts", "Barlow", "Knox", "Selby", "Havers", "Cray", "Darnell", "Osei", "Benth", "Varma"
+  ]
+}

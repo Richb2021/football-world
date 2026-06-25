@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      (function() {
+        var path = window.location.pathname;
+        if (!path.endsWith('/') && !path.split('/').pop().includes('.')) {
+          window.location.replace(path + '/' + window.location.search + window.location.hash);
+        }
+        document.documentElement.style.setProperty(
+          '--splash-bg-image',
+          "url('%BASE_URL%assets/ui/prematch_stadium.webp')"
+        );
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1f12" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="icon" href="./icons/icon-192.png?v=4" />
+    <link rel="apple-touch-icon" href="./icons/icon-192.png?v=4" />
+    <title>Football World</title>
+    <style>
+      #splash {
+        position: fixed; inset: 0; z-index: 9999;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 0;
+        font-family: 'Avenir Next Condensed', 'Arial Narrow', 'Helvetica Neue', system-ui, sans-serif;
+        color: #f2f6f3;
+        /* bg colour shows instantly; image paints over it as it downloads */
+        background-color: #0b1f12;
+        background-image: var(--splash-bg-image, none);
+        background-position: center 40%;
+        background-size: cover;
+        background-repeat: no-repeat;
+        transition: opacity 0.6s ease;
+        overflow: hidden;
+      }
+      #splash.fade-out { opacity: 0; pointer-events: none; }
+
+      /* Dark gradient scrim so text is always readable */
+      #sp-scrim {
+        position: absolute; inset: 0;
+        background: linear-gradient(
+          to bottom,
+          rgba(11,31,18,0.35) 0%,
+          rgba(11,31,18,0.55) 40%,
+          rgba(11,31,18,0.85) 70%,
+          rgba(11,31,18,0.97) 100%
+        );
+      }
+
+      /* All content sits above the scrim */
+      #sp-content {
+        position: relative; z-index: 1;
+        display: flex; flex-direction: column; align-items: center;
+        gap: 16px; padding: 32px 24px 48px; box-sizing: border-box;
+        width: 100%; max-width: 440px; text-align: center;
+        transform: scale(var(--scale, 1));
+        transform-origin: center center;
+      }
+
+      #sp-icon {
+        width: 160px;
+        height: 160px;
+        border-radius: 24px;
+        border: 2px solid rgba(255, 212, 0, 0.4);
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+        object-fit: cover;
+        margin-bottom: 8px;
+      }
+
+      .sp-title {
+        font-size: clamp(36px, 10vw, 60px);
+        font-weight: 900; letter-spacing: 0.08em;
+        margin: 4px 0 0; line-height: 1;
+        text-shadow: 0 2px 12px rgba(0,0,0,0.7);
+      }
+      .sp-sub {
+        font-size: 13px; letter-spacing: 0.22em;
+        opacity: 0.55; margin: 0;
+        text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+      }
+
+      /* Mobile data warning */
+      #sp-warn {
+        display: none; width: 100%; box-sizing: border-box;
+        border: 1px solid rgba(255,212,0,0.4);
+        background: rgba(255,212,0,0.08);
+        border-radius: 10px; padding: 12px 16px;
+        margin-top: 4px;
+      }
+      #sp-warn p { margin: 0; font-size: 13px; line-height: 1.5; }
+      #sp-warn .sp-wt { font-weight: 800; color: #ffd400; letter-spacing: 0.06em; margin-bottom: 2px; }
+
+      /* Play button — always visible */
+      #btn-play {
+        margin-top: 8px;
+        padding: 18px 56px; border: none; border-radius: 10px;
+        background: #ffd400; color: #081018;
+        font-size: 20px; font-weight: 900; letter-spacing: 0.14em;
+        font-family: inherit; cursor: pointer; text-transform: uppercase;
+        -webkit-tap-highlight-color: transparent;
+        box-shadow: 0 4px 24px rgba(255,212,0,0.4);
+        transition: transform 0.1s, opacity 0.1s;
+      }
+      #btn-play:active { transform: scale(0.97); opacity: 0.9; }
+
+      /* SW install progress — secondary, below the button */
+      #sp-progress {
+        display: flex; flex-direction: column; align-items: center;
+        gap: 8px; width: 100%; margin-top: 4px;
+      }
+      .sp-bar {
+        width: min(260px, 70vw); height: 2px;
+        background: rgba(255,255,255,0.12); border-radius: 2px; overflow: hidden;
+      }
+      .sp-fill {
+        height: 100%; background: #ffd400; border-radius: 2px;
+        width: 0%; transition: width 0.7s ease;
+      }
+      .sp-fill.pulse {
+        width: 30% !important; transition: none;
+        animation: sp-pulse 1.8s ease-in-out infinite;
+      }
+      @keyframes sp-pulse {
+        0%   { transform: translateX(-200%); }
+        100% { transform: translateX(550%); }
+      }
+      #sp-status {
+        font-size: 11px; letter-spacing: 0.1em;
+        opacity: 0.4; margin: 0;
+      }
+
+      /* WiFi close message */
+      #btn-wifi {
+        display: none; background: transparent;
+        border: 1px solid rgba(242,246,243,0.2);
+        color: #f2f6f3; opacity: 0.5;
+        border-radius: 8px; padding: 10px 20px;
+        font-size: 12px; font-family: inherit;
+        letter-spacing: 0.06em; cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+      #sp-wifi-msg {
+        display: none; font-size: 14px;
+        line-height: 1.8; opacity: 0.75;
+        max-width: 300px;
+      }
+
+      /* Portrait blocker — this is a landscape-only game. Shows on any handheld
+         or small portrait viewport: touch devices in portrait, and ANY portrait
+         screen up to 820px wide (covers phones/small tablets even when a device
+         misreports its pointer type). Wide desktop windows are unaffected. */
+      #rotate {
+        display: none;
+        position: fixed; inset: 0; z-index: 99999;
+        background:
+          radial-gradient(125% 90% at 50% 26%, rgba(102,16,242,0.20), transparent 55%),
+          radial-gradient(120% 80% at 50% 100%, rgba(230,29,37,0.16), transparent 52%),
+          #08060f;
+        flex-direction: column; align-items: center; justify-content: center;
+        gap: 22px; padding: 32px; text-align: center;
+        font-family: 'Avenir Next Condensed', 'Arial Narrow', system-ui, sans-serif;
+        color: #f6f7fb;
+      }
+      #rotate svg { width: 84px; height: 84px; animation: rotate-hint 2.4s ease-in-out infinite; }
+      @keyframes rotate-hint {
+        0%, 100% { transform: rotate(0deg); }
+        45%, 65% { transform: rotate(-90deg); }
+      }
+      #rotate .rot-title { font-size: 26px; font-weight: 900; font-style: italic; letter-spacing: 0.12em; margin: 0; text-transform: uppercase; }
+      #rotate .rot-sub { font-size: 13px; font-weight: 700; letter-spacing: 0.2em; opacity: 0.55; margin: 0; text-transform: uppercase; }
+      @media (orientation: portrait) and (pointer: coarse) { #rotate { display: flex; } }
+      @media (orientation: portrait) and (max-width: 820px) { #rotate { display: flex; } }
+
+      /* Studio / publisher intro: black screen, two logos fade in and out in turn */
+      #intro {
+        position: fixed; inset: 0; z-index: 10000;
+        background: #000;
+        display: flex; align-items: center; justify-content: center;
+        transition: opacity 0.6s ease;
+      }
+      #intro.fade-out { opacity: 0; pointer-events: none; }
+      #intro img {
+        position: absolute;
+        /* cap by viewport HEIGHT too so the splash isn't oversized on short
+           landscape phones (desktop is unchanged — vh is large there) */
+        width: min(58vw, 58vh, 460px); height: auto;
+        opacity: 0;
+        transition: opacity 0.7s ease;
+        filter: drop-shadow(0 6px 30px rgba(0,0,0,0.6));
+        will-change: opacity;
+      }
+      #intro img.show { opacity: 1; }
+      #intro-skip {
+        position: absolute; bottom: 22px; right: 24px;
+        color: rgba(255,255,255,0.5); font-size: 12px; letter-spacing: 0.14em;
+        font-weight: 700; text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="intro">
+      <img id="intro-logo1" src="./assets/ui/grayson_games.webp" alt="Grayson Games" />
+      <img id="intro-logo2" src="./assets/ui/grayson_sports.webp" alt="Grayson Sports" />
+      <div id="intro-skip">tap to skip</div>
+    </div>
+    <script>
+    (function () {
+      var intro = document.getElementById('intro');
+      if (!intro) return;
+      var l1 = document.getElementById('intro-logo1');
+      var l2 = document.getElementById('intro-logo2');
+      var timers = [];
+      var done = false;
+      // crowd cheer for the Grayson Sports logo (best-effort: browsers may block
+      // audio before the first interaction, in which case the visual still plays)
+      var cheer = new Audio('./assets/audio/cheer_big.mp3');
+      cheer.preload = 'auto'; cheer.volume = 0.85;
+      function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+      function finish() {
+        if (done) return; done = true;
+        timers.forEach(clearTimeout);
+        try { cheer.pause(); } catch (e) {}
+        intro.classList.add('fade-out');
+        setTimeout(function () { if (intro.parentNode) intro.parentNode.removeChild(intro); }, 650);
+      }
+      // sequence
+      at(300,  function () { l1.classList.add('show'); });            // Grayson Games fades in
+      at(2000, function () { l1.classList.remove('show'); });          // ...fades out
+      at(2800, function () {                                           // Grayson Sports fades in + cheer
+        l2.classList.add('show');
+        cheer.play().catch(function () {});
+      });
+      at(4700, function () { l2.classList.remove('show'); });          // ...fades out
+      at(5500, finish);                                               // reveal the loading screen
+      // tap / key to skip the whole intro
+      intro.addEventListener('pointerdown', finish);
+      window.addEventListener('keydown', finish, { once: true });
+    })();
+    </script>
+    <div id="splash">
+      <div id="sp-scrim"></div>
+      <div id="sp-content">
+        <img id="sp-icon" src="./assets/ui/icon.webp" alt="Football World Logo" />
+
+        <div>
+          <p class="sp-title">FOOTBALL WORLD</p>
+          <p class="sp-sub">MANAGER &middot; CAREER &middot; CUSTOMISE</p>
+        </div>
+
+        <button id="btn-play" style="display: none;">TAP TO PLAY</button>
+
+        <div id="sp-progress">
+          <div class="sp-bar"><div class="sp-fill pulse" id="sp-fill"></div></div>
+          <p id="sp-status">LOADING GAME ASSETS…</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Portrait blocker — landscape-only game (see #rotate media queries) -->
+    <div id="rotate">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="18" y="8" width="28" height="48" rx="4" stroke="#5fffd0" stroke-width="3"/>
+        <path d="M44 20 L56 32 L44 44" stroke="#eaff3a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8 32 H56" stroke="#5fffd0" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+      </svg>
+      <p class="rot-title">Rotate to play</p>
+      <p class="rot-sub">This game is played in landscape</p>
+    </div>
+
+    <div id="app">
+      <canvas id="gl"></canvas>
+      <div id="hud"></div>
+      <div id="ui"></div>
+      <div id="touch"></div>
+    </div>
+
+    <script>
+    (function () {
+      var splash  = document.getElementById('splash');
+      var fill    = document.getElementById('sp-fill');
+      var status  = document.getElementById('sp-status');
+      var prog    = document.getElementById('sp-progress');
+      var btnPlay = document.getElementById('btn-play');
+
+      var gone = false;
+      var appReady = false;
+      var isReadyToPlay = false;
+
+      // Dynamic mobile scaling for splash content only. Menus size themselves
+      // through responsive CSS; scaling #ui makes landscape phone targets tiny.
+      function updateScale() {
+        var height = window.innerHeight;
+        var isMobileOrSmall = (580 > height) || (window.matchMedia('(pointer: coarse)').matches && 640 > height);
+        
+        var scale = 1;
+        if (isMobileOrSmall) {
+          scale = height / 580;
+          if (0.5 > scale) scale = 0.5;
+        }
+        
+        document.documentElement.style.setProperty('--scale', scale.toString());
+        
+        var ui = document.getElementById('ui');
+        if (ui) {
+          ui.style.width = '';
+          ui.style.height = '';
+          ui.style.position = '';
+          ui.style.left = '';
+          ui.style.top = '';
+          ui.style.transform = '';
+          ui.style.transformOrigin = '';
+        }
+      }
+      window.addEventListener('resize', updateScale);
+      window.addEventListener('orientationchange', updateScale);
+      updateScale();
+
+      function dismiss() {
+        if (gone) return; gone = true;
+        splash.classList.add('fade-out');
+        setTimeout(function () { splash.style.display = 'none'; }, 650);
+      }
+
+      function maybeAutoDismiss() {
+        if (!appReady || !isReadyToPlay) return;
+        dismiss();
+      }
+
+      // main.ts calls this when app.boot() resolves; once media is ready too,
+      // reveal the in-game title prompt rather than making players tap twice.
+      window.__splashAppReady = function () { appReady = true; maybeAutoDismiss(); };
+
+      // Register service worker automatically on load so PWA is installable immediately
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.register('./sw.js')
+          .then(function (reg) {
+            console.log('SW registered on load', reg);
+            reg.update().catch(function(e) { console.warn('SW update check failed', e); });
+          })
+          .catch(function (err) {
+            console.error('SW registration failed on load', err);
+          });
+
+        var refreshing = false;
+        // Only reload when an UPDATE replaces a service worker that was ALREADY
+        // controlling this page. On a fresh load the page starts uncontrolled and the
+        // first SW to activate fires controllerchange too — reloading there bounced
+        // players straight back to the splash "at the start of the game". Guard it.
+        var hadController = !!navigator.serviceWorker.controller;
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          if (refreshing || !hadController) return;
+          refreshing = true;
+          console.log('Service Worker updated. Reloading page...');
+          window.location.reload();
+        });
+      }
+
+      function downloadAllAssets(urls, cacheName, onProgress, onComplete) {
+        var activeRequests = 0;
+        var completed = 0;
+        var index = 0;
+        var CONCURRENCY = 15;
+        var failed = 0;
+
+        caches.open(cacheName).then(function (cache) {
+          function next() {
+            if (gone) return;
+            if (index >= urls.length) {
+              if (activeRequests === 0) {
+                onComplete(failed);
+              }
+              return;
+            }
+
+            var url = urls[index++];
+            activeRequests++;
+
+            fetch(url)
+              .then(function (response) {
+                if (response.ok) {
+                  return cache.put(url, response);
+                } else {
+                  throw new Error('Failed to fetch');
+                }
+              })
+              .then(function () {
+                completed++;
+                activeRequests--;
+                onProgress(Math.round(completed / urls.length * 100));
+                next();
+              })
+              .catch(function (err) {
+                console.warn('Failed to download', url, err);
+                failed++;
+                activeRequests--;
+                completed++;
+                onProgress(Math.round(completed / urls.length * 100));
+                next();
+              });
+          }
+
+          for (var i = 0; Math.min(CONCURRENCY, urls.length) > i; i++) {
+            next();
+          }
+        });
+      }
+
+      function setProgress(pct, label) {
+        fill.classList.remove('pulse');
+        fill.style.width = Math.min(100, pct) + '%';
+        status.textContent = label;
+      }
+
+      // Auto start download
+      if (localStorage.getItem('game_audio_downloaded') === 'true') {
+        isReadyToPlay = true;
+        prog.style.display = 'flex';
+        fill.classList.remove('pulse');
+        fill.style.width = '100%';
+        status.textContent = 'READYING GAME…';
+        btnPlay.style.display = 'none';
+        maybeAutoDismiss();
+      } else {
+        isReadyToPlay = false;
+        btnPlay.style.display = 'none';
+        prog.style.display = 'flex';
+        fill.classList.add('pulse');
+        status.textContent = 'LOADING GAME ASSETS…';
+
+        fetch('./assets/manifest.json')
+          .then(function (res) { return res.json(); })
+          .then(function (manifest) {
+            var urls = [];
+            for (var key in manifest) {
+              if (manifest.hasOwnProperty(key) && typeof manifest[key] === 'string') {
+                urls.push(decodeURIComponent(manifest[key]));
+              }
+            }
+            urls.push('assets/ui/icon.webp');
+            urls.push('assets/ui/menu_hero.webp');
+            urls.push('assets/ui/team_select_bg.webp');
+            urls.push('assets/ui/prematch_stadium.webp');
+
+            // the live International Cup Story uses the contemporary "_intl"
+            // backdrops (WebP); preload those, not the retired 1992-era stills
+            var storyBgs = [
+              'assets/journey/backgrounds/bedroom_intl.webp',
+              'assets/journey/backgrounds/kitchen_intl.webp',
+              'assets/journey/backgrounds/training_intl.webp',
+              'assets/journey/backgrounds/manager_office_intl.webp',
+              'assets/journey/backgrounds/locker_room_intl.webp',
+              'assets/journey/backgrounds/pub_intl.webp',
+              'assets/journey/backgrounds/pitch_intl.webp',
+              'assets/journey/backgrounds/hospital_intl.webp',
+              'assets/journey/backgrounds/press_room_intl.webp',
+              'assets/journey/backgrounds/car_interior_night.webp',
+              'assets/journey/backgrounds/physio_room_intl.webp'
+            ];
+            storyBgs.forEach(function (bg) { urls.push(bg); });
+
+            var storyChars = [
+              'assets/journey/characters/young_teammate_red_kit.webp',
+              'assets/journey/characters/manager_overcoat.webp',
+              'assets/journey/characters/assistant_clipboard.webp',
+              'assets/journey/characters/physio_bag.webp',
+              'assets/journey/characters/captain_red_kit.webp',
+              'assets/journey/characters/rival_training_top.webp',
+              'assets/journey/characters/dad_casual.webp',
+              'assets/journey/characters/reporter_notepad.webp',
+              'assets/journey/characters/pub_landlord.webp',
+              'assets/journey/characters/england_youth_coach.webp',
+              'assets/journey/characters/germany_defender.webp',
+              'assets/journey/characters/agent_phone.webp'
+            ];
+            storyChars.forEach(function (ch) { urls.push(ch); });
+
+            status.textContent = 'LOADING GAME ASSETS (0/' + urls.length + ')...';
+
+            downloadAllAssets(urls, 'media-assets', function (pct) {
+              setProgress(pct, 'LOADING GAME ASSETS… ' + pct + '%');
+            }, function (failedCount) {
+              localStorage.setItem('game_audio_downloaded', 'true');
+              fill.style.width = '100%';
+              fill.classList.remove('pulse');
+              status.textContent = 'ASSETS INSTALLED';
+              
+              setTimeout(function() {
+                prog.style.display = 'none';
+                btnPlay.style.display = 'none';
+                isReadyToPlay = true;
+                maybeAutoDismiss();
+              }, 400);
+            });
+          })
+          .catch(function (err) {
+            console.error('Failed to load assets manifest', err);
+            status.textContent = 'FAILED TO LOAD ASSET LIST: ' + err.message;
+          });
+      }
+      btnPlay.addEventListener('click', function () {
+        if (isReadyToPlay && appReady) {
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(function () {});
+          }
+          dismiss();
+        }
+      });
+    })();
+    </script>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

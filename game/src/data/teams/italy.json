@@ -1,0 +1,389 @@
+{
+  "id": "italy",
+  "name": "Italy",
+  "short": "ITA",
+  "stadium": "Stadio Olimpico",
+  "strength": 88,
+  "colors": {
+    "home": {
+      "shirt": "#003893",
+      "shorts": "#FFFFFF",
+      "socks": "#003893"
+    },
+    "away": {
+      "shirt": "#FFFFFF",
+      "shorts": "#003893",
+      "socks": "#FFFFFF"
+    }
+  },
+  "players": [
+    {
+      "name": "Gianluigi Donnarummae",
+      "pos": "GK",
+      "age": 22,
+      "pace": 51,
+      "pass": 53,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 75,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Alex Merete",
+      "pos": "GK",
+      "age": 29,
+      "pace": 44,
+      "pass": 53,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 75,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Alessandro Bastonie",
+      "pos": "DF",
+      "age": 23,
+      "pace": 71,
+      "pass": 74,
+      "shoot": 45,
+      "tackle": 89,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Riccardo Calafiorie",
+      "pos": "DF",
+      "age": 33,
+      "pace": 79,
+      "pass": 74,
+      "shoot": 41,
+      "tackle": 89,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "long",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Giovanni Di Lorenzoe",
+      "pos": "DF",
+      "age": 26,
+      "pace": 76,
+      "pass": 73,
+      "shoot": 45,
+      "tackle": 77,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Federico Dimarcoe",
+      "pos": "DF",
+      "age": 30,
+      "pace": 74,
+      "pass": 67,
+      "shoot": 44,
+      "tackle": 80,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Gianluca Mancinie",
+      "pos": "DF",
+      "age": 23,
+      "pace": 80,
+      "pass": 69,
+      "shoot": 55,
+      "tackle": 90,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Matteo Darmiane",
+      "pos": "DF",
+      "age": 24,
+      "pace": 79,
+      "pass": 75,
+      "shoot": 42,
+      "tackle": 78,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Nicolo Barela",
+      "pos": "MF",
+      "age": 34,
+      "pace": 88,
+      "pass": 82,
+      "shoot": 70,
+      "tackle": 72,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Davide Fratesi",
+      "pos": "MF",
+      "age": 20,
+      "pace": 79,
+      "pass": 90,
+      "shoot": 75,
+      "tackle": 61,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jorginhoo",
+      "pos": "MF",
+      "age": 29,
+      "pace": 84,
+      "pass": 92,
+      "shoot": 78,
+      "tackle": 65,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Lorenzo Pelegrini",
+      "pos": "MF",
+      "age": 21,
+      "pace": 79,
+      "pass": 92,
+      "shoot": 79,
+      "tackle": 59,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Bryan Cristantes",
+      "pos": "MF",
+      "age": 33,
+      "pace": 90,
+      "pass": 85,
+      "shoot": 70,
+      "tackle": 69,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Michael Folorunshoe",
+      "pos": "MF",
+      "age": 30,
+      "pace": 78,
+      "pass": 82,
+      "shoot": 66,
+      "tackle": 64,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Gianluca Scamaccae",
+      "pos": "FW",
+      "age": 29,
+      "pace": 90,
+      "pass": 71,
+      "shoot": 94,
+      "tackle": 35,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Federico Chiesae",
+      "pos": "FW",
+      "age": 31,
+      "pace": 93,
+      "pass": 74,
+      "shoot": 91,
+      "tackle": 44,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Mattia Zaccagnie",
+      "pos": "FW",
+      "age": 26,
+      "pace": 91,
+      "pass": 81,
+      "shoot": 88,
+      "tackle": 46,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Giacomo Raspadorie",
+      "pos": "FW",
+      "age": 28,
+      "pace": 88,
+      "pass": 77,
+      "shoot": 95,
+      "tackle": 50,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Finn Rivas",
+      "pos": "GK",
+      "age": 33,
+      "pace": 43,
+      "pass": 49,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 71,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Andre Camara",
+      "pos": "DF",
+      "age": 22,
+      "pace": 73,
+      "pass": 63,
+      "shoot": 37,
+      "tackle": 79,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Aleks Toure",
+      "pos": "DF",
+      "age": 21,
+      "pace": 70,
+      "pass": 62,
+      "shoot": 41,
+      "tackle": 74,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Iker Tanak",
+      "pos": "MF",
+      "age": 19,
+      "pace": 80,
+      "pass": 79,
+      "shoot": 64,
+      "tackle": 60,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Andre Montero",
+      "pos": "FW",
+      "age": 31,
+      "pace": 81,
+      "pass": 71,
+      "shoot": 86,
+      "tackle": 36,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "stubble"
+      }
+    }
+  ]
+}

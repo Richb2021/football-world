@@ -1,0 +1,479 @@
+{
+  "id": "south-korea",
+  "name": "South Korea",
+  "short": "KOR",
+  "stadium": "Seoul World Cup Stadium",
+  "strength": 81,
+  "colors": {
+    "home": {
+      "shirt": "#FF3B30",
+      "shorts": "#000000",
+      "socks": "#FF3B30"
+    },
+    "away": {
+      "shirt": "#FFFFFF",
+      "shorts": "#FFFFFF",
+      "socks": "#FFFFFF"
+    }
+  },
+  "players": [
+    {
+      "name": "Seunggyu Kimio",
+      "pos": "GK",
+      "age": 35,
+      "pace": 53,
+      "pass": 58,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 88,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Hanbeom Leeio",
+      "pos": "DF",
+      "age": 23,
+      "pace": 62,
+      "pass": 59,
+      "shoot": 37,
+      "tackle": 74,
+      "keeping": 8,
+      "shirtNumber": 2,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Gihyuk Leeio",
+      "pos": "MF",
+      "age": 25,
+      "pace": 59,
+      "pass": 77,
+      "shoot": 59,
+      "tackle": 59,
+      "keeping": 7,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Minjae Kimio",
+      "pos": "DF",
+      "age": 29,
+      "pace": 81,
+      "pass": 77,
+      "shoot": 31,
+      "tackle": 89,
+      "keeping": 8,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Taehyeon Kimio",
+      "pos": "DF",
+      "age": 25,
+      "pace": 56,
+      "pass": 58,
+      "shoot": 37,
+      "tackle": 67,
+      "keeping": 8,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Inbeom Hwange",
+      "pos": "MF",
+      "age": 29,
+      "pace": 77,
+      "pass": 88,
+      "shoot": 73,
+      "tackle": 78,
+      "keeping": 7,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "long",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Heung Heungmine",
+      "pos": "FW",
+      "age": 33,
+      "pace": 92,
+      "pass": 86,
+      "shoot": 97,
+      "tackle": 48,
+      "keeping": 8,
+      "shirtNumber": 7,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Seungho Paike",
+      "pos": "MF",
+      "age": 29,
+      "pace": 69,
+      "pass": 81,
+      "shoot": 65,
+      "tackle": 64,
+      "keeping": 7,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Guesung Choio",
+      "pos": "FW",
+      "age": 28,
+      "pace": 74,
+      "pass": 68,
+      "shoot": 87,
+      "tackle": 46,
+      "keeping": 8,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "long",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jae Jaesunge",
+      "pos": "MF",
+      "age": 33,
+      "pace": 84,
+      "pass": 96,
+      "shoot": 83,
+      "tackle": 84,
+      "keeping": 7,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Hee Heechane",
+      "pos": "MF",
+      "age": 30,
+      "pace": 80,
+      "pass": 85,
+      "shoot": 83,
+      "tackle": 74,
+      "keeping": 7,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "long",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Bumkeun Songe",
+      "pos": "GK",
+      "age": 28,
+      "pace": 47,
+      "pass": 48,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 71,
+      "shirtNumber": 12,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Taeseok Leeio",
+      "pos": "DF",
+      "age": 23,
+      "pace": 63,
+      "pass": 60,
+      "shoot": 35,
+      "tackle": 75,
+      "keeping": 8,
+      "shirtNumber": 13,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Wije Choio",
+      "pos": "DF",
+      "age": 24,
+      "pace": 56,
+      "pass": 55,
+      "shoot": 31,
+      "tackle": 68,
+      "keeping": 8,
+      "shirtNumber": 14,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "long",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Moonhwan Kimio",
+      "pos": "DF",
+      "age": 30,
+      "pace": 66,
+      "pass": 66,
+      "shoot": 33,
+      "tackle": 74,
+      "keeping": 8,
+      "shirtNumber": 15,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jinseob Parke",
+      "pos": "DF",
+      "age": 30,
+      "pace": 61,
+      "pass": 60,
+      "shoot": 38,
+      "tackle": 71,
+      "keeping": 8,
+      "shirtNumber": 16,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Junho Baeio",
+      "pos": "MF",
+      "age": 22,
+      "pace": 61,
+      "pass": 72,
+      "shoot": 60,
+      "tackle": 60,
+      "keeping": 7,
+      "shirtNumber": 17,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Hyeongyu Ohio",
+      "pos": "FW",
+      "age": 25,
+      "pace": 75,
+      "pass": 62,
+      "shoot": 75,
+      "tackle": 37,
+      "keeping": 8,
+      "shirtNumber": 18,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Kangin Leeio",
+      "pos": "MF",
+      "age": 25,
+      "pace": 74,
+      "pass": 83,
+      "shoot": 70,
+      "tackle": 65,
+      "keeping": 7,
+      "shirtNumber": 19,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Hyunjun Yange",
+      "pos": "MF",
+      "age": 24,
+      "pace": 62,
+      "pass": 72,
+      "shoot": 57,
+      "tackle": 59,
+      "keeping": 7,
+      "shirtNumber": 20,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Hyeonwoo Joio",
+      "pos": "GK",
+      "age": 34,
+      "pace": 51,
+      "pass": 56,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 77,
+      "shirtNumber": 21,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Youngwoo Seole",
+      "pos": "DF",
+      "age": 27,
+      "pace": 70,
+      "pass": 72,
+      "shoot": 33,
+      "tackle": 77,
+      "keeping": 8,
+      "shirtNumber": 22,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jens Castrope",
+      "pos": "DF",
+      "age": 22,
+      "pace": 55,
+      "pass": 53,
+      "shoot": 38,
+      "tackle": 69,
+      "keeping": 8,
+      "shirtNumber": 23,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jingyu Kimio",
+      "pos": "MF",
+      "age": 29,
+      "pace": 67,
+      "pass": 72,
+      "shoot": 59,
+      "tackle": 62,
+      "keeping": 7,
+      "shirtNumber": 24,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jisung Eomio",
+      "pos": "MF",
+      "age": 24,
+      "pace": 56,
+      "pass": 74,
+      "shoot": 60,
+      "tackle": 53,
+      "keeping": 7,
+      "shirtNumber": 25,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Donggyeong Leeio",
+      "pos": "MF",
+      "age": 28,
+      "pace": 63,
+      "pass": 73,
+      "shoot": 58,
+      "tackle": 64,
+      "keeping": 7,
+      "shirtNumber": 26,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    }
+  ],
+  "defaultLineup": {
+    "formation": "3-4-2-1",
+    "starters": [
+      0,
+      21,
+      12,
+      2,
+      3,
+      1,
+      5,
+      7,
+      6,
+      18,
+      9
+    ]
+  }
+}

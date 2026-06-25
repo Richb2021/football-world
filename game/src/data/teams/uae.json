@@ -1,0 +1,389 @@
+{
+  "id": "uae",
+  "name": "UAE",
+  "short": "UAE",
+  "stadium": "Zayed Sports City Stadium",
+  "strength": 72,
+  "colors": {
+    "home": {
+      "shirt": "#FFFFFF",
+      "shorts": "#FFFFFF",
+      "socks": "#FFFFFF"
+    },
+    "away": {
+      "shirt": "#FF3B30",
+      "shorts": "#FF3B30",
+      "socks": "#FF3B30"
+    }
+  },
+  "players": [
+    {
+      "name": "Khalid Eisae",
+      "pos": "GK",
+      "age": 21,
+      "pace": 55,
+      "pass": 50,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 60,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Ali Khasife",
+      "pos": "GK",
+      "age": 30,
+      "pace": 52,
+      "pass": 47,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 66,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Khalifa Al-Hammadie",
+      "pos": "DF",
+      "age": 28,
+      "pace": 76,
+      "pass": 69,
+      "shoot": 44,
+      "tackle": 72,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Khaled Ibrahime",
+      "pos": "DF",
+      "age": 29,
+      "pace": 64,
+      "pass": 63,
+      "shoot": 55,
+      "tackle": 68,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Zayed Sultane",
+      "pos": "DF",
+      "age": 23,
+      "pace": 68,
+      "pass": 63,
+      "shoot": 55,
+      "tackle": 68,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Bader Abaelazize",
+      "pos": "DF",
+      "age": 31,
+      "pace": 74,
+      "pass": 64,
+      "shoot": 46,
+      "tackle": 71,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Mohammed Al-Attaz",
+      "pos": "DF",
+      "age": 23,
+      "pace": 76,
+      "pass": 67,
+      "shoot": 44,
+      "tackle": 79,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Marcus Melonie",
+      "pos": "DF",
+      "age": 23,
+      "pace": 66,
+      "pass": 65,
+      "shoot": 50,
+      "tackle": 68,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Abdalla Ramadane",
+      "pos": "MF",
+      "age": 23,
+      "pace": 69,
+      "pass": 80,
+      "shoot": 67,
+      "tackle": 59,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Yahia Nadere",
+      "pos": "MF",
+      "age": 22,
+      "pace": 71,
+      "pass": 74,
+      "shoot": 59,
+      "tackle": 65,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Tahnoon Al-Zaabie",
+      "pos": "MF",
+      "age": 22,
+      "pace": 78,
+      "pass": 72,
+      "shoot": 66,
+      "tackle": 59,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Majid Rashide",
+      "pos": "MF",
+      "age": 23,
+      "pace": 68,
+      "pass": 71,
+      "shoot": 64,
+      "tackle": 55,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Harib Abdala",
+      "pos": "MF",
+      "age": 22,
+      "pace": 80,
+      "pass": 70,
+      "shoot": 69,
+      "tackle": 55,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Tahnoon AlZaabie",
+      "pos": "MF",
+      "age": 24,
+      "pace": 70,
+      "pass": 71,
+      "shoot": 71,
+      "tackle": 61,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ali Mabkhoute",
+      "pos": "FW",
+      "age": 32,
+      "pace": 88,
+      "pass": 66,
+      "shoot": 86,
+      "tackle": 44,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Caio Canedoe",
+      "pos": "FW",
+      "age": 28,
+      "pace": 75,
+      "pass": 62,
+      "shoot": 77,
+      "tackle": 42,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Fabio Limae",
+      "pos": "FW",
+      "age": 33,
+      "pace": 88,
+      "pass": 65,
+      "shoot": 85,
+      "tackle": 42,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Sultan Adile",
+      "pos": "FW",
+      "age": 21,
+      "pace": 89,
+      "pass": 67,
+      "shoot": 76,
+      "tackle": 49,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Andre Whelan",
+      "pos": "GK",
+      "age": 28,
+      "pace": 46,
+      "pass": 43,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 60,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Jin Andersson",
+      "pos": "DF",
+      "age": 30,
+      "pace": 62,
+      "pass": 61,
+      "shoot": 48,
+      "tackle": 68,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Magnus Owusu",
+      "pos": "DF",
+      "age": 22,
+      "pace": 66,
+      "pass": 62,
+      "shoot": 40,
+      "tackle": 68,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Milo Fonseca",
+      "pos": "MF",
+      "age": 30,
+      "pace": 67,
+      "pass": 64,
+      "shoot": 59,
+      "tackle": 56,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Dani Lindqvist",
+      "pos": "FW",
+      "age": 26,
+      "pace": 76,
+      "pass": 60,
+      "shoot": 76,
+      "tackle": 37,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    }
+  ]
+}

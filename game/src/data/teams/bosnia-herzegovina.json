@@ -1,0 +1,479 @@
+{
+  "id": "bosnia-herzegovina",
+  "name": "Bosnia and Herzegovina",
+  "short": "BIH",
+  "stadium": "Bilino Polje Stadium",
+  "strength": 72,
+  "colors": {
+    "home": {
+      "shirt": "#1E4FA3",
+      "shorts": "#1E4FA3",
+      "socks": "#FCD116"
+    },
+    "away": {
+      "shirt": "#FFFFFF",
+      "shorts": "#FFFFFF",
+      "socks": "#FFFFFF"
+    }
+  },
+  "players": [
+    {
+      "name": "Nikola Vasilje",
+      "pos": "GK",
+      "age": 30,
+      "pace": 47,
+      "pass": 52,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 74,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "moustache"
+      }
+    },
+    {
+      "name": "Nihad Mujakice",
+      "pos": "DF",
+      "age": 28,
+      "pace": 55,
+      "pass": 50,
+      "shoot": 35,
+      "tackle": 63,
+      "keeping": 8,
+      "shirtNumber": 2,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Dennis Hadzikadunice",
+      "pos": "DF",
+      "age": 27,
+      "pace": 60,
+      "pass": 59,
+      "shoot": 37,
+      "tackle": 66,
+      "keeping": 8,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Tarik Muharemovice",
+      "pos": "DF",
+      "age": 23,
+      "pace": 66,
+      "pass": 52,
+      "shoot": 31,
+      "tackle": 71,
+      "keeping": 8,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Sead Kolasinace",
+      "pos": "DF",
+      "age": 32,
+      "pace": 73,
+      "pass": 65,
+      "shoot": 36,
+      "tackle": 79,
+      "keeping": 8,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Benjamin Tahirovice",
+      "pos": "MF",
+      "age": 23,
+      "pace": 58,
+      "pass": 74,
+      "shoot": 59,
+      "tackle": 65,
+      "keeping": 7,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Amar Dedice",
+      "pos": "DF",
+      "age": 23,
+      "pace": 63,
+      "pass": 56,
+      "shoot": 35,
+      "tackle": 68,
+      "keeping": 8,
+      "shirtNumber": 7,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Armin Gigovice",
+      "pos": "MF",
+      "age": 24,
+      "pace": 51,
+      "pass": 65,
+      "shoot": 51,
+      "tackle": 53,
+      "keeping": 7,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Samed Bazdare",
+      "pos": "FW",
+      "age": 22,
+      "pace": 62,
+      "pass": 55,
+      "shoot": 64,
+      "tackle": 37,
+      "keeping": 8,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ermedin Demirovice",
+      "pos": "FW",
+      "age": 28,
+      "pace": 70,
+      "pass": 66,
+      "shoot": 79,
+      "tackle": 43,
+      "keeping": 8,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Edin Dzekoe",
+      "pos": "FW",
+      "age": 40,
+      "pace": 77,
+      "pass": 75,
+      "shoot": 97,
+      "tackle": 53,
+      "keeping": 8,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#a99f92",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Mladen Jurkaso",
+      "pos": "GK",
+      "age": 18,
+      "pace": 47,
+      "pass": 46,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 61,
+      "shirtNumber": 12,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ivan Basice",
+      "pos": "MF",
+      "age": 24,
+      "pace": 58,
+      "pass": 73,
+      "shoot": 51,
+      "tackle": 60,
+      "keeping": 7,
+      "shirtNumber": 13,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ivan Sunjice",
+      "pos": "MF",
+      "age": 29,
+      "pace": 52,
+      "pass": 66,
+      "shoot": 52,
+      "tackle": 53,
+      "keeping": 7,
+      "shirtNumber": 14,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Amar Memice",
+      "pos": "MF",
+      "age": 25,
+      "pace": 57,
+      "pass": 71,
+      "shoot": 54,
+      "tackle": 58,
+      "keeping": 7,
+      "shirtNumber": 15,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Amir Hadziahmetovice",
+      "pos": "MF",
+      "age": 29,
+      "pace": 57,
+      "pass": 74,
+      "shoot": 52,
+      "tackle": 55,
+      "keeping": 7,
+      "shirtNumber": 16,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Dzenis Burnice",
+      "pos": "MF",
+      "age": 28,
+      "pace": 61,
+      "pass": 68,
+      "shoot": 48,
+      "tackle": 55,
+      "keeping": 7,
+      "shirtNumber": 17,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Nikola Katice",
+      "pos": "DF",
+      "age": 29,
+      "pace": 65,
+      "pass": 60,
+      "shoot": 32,
+      "tackle": 67,
+      "keeping": 8,
+      "shirtNumber": 18,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Kerim Alajbegovice",
+      "pos": "FW",
+      "age": 18,
+      "pace": 63,
+      "pass": 54,
+      "shoot": 67,
+      "tackle": 36,
+      "keeping": 8,
+      "shirtNumber": 19,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Esmir Bajraktarevice",
+      "pos": "FW",
+      "age": 21,
+      "pace": 67,
+      "pass": 54,
+      "shoot": 73,
+      "tackle": 34,
+      "keeping": 8,
+      "shirtNumber": 20,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Stjepan Radeljice",
+      "pos": "DF",
+      "age": 28,
+      "pace": 57,
+      "pass": 48,
+      "shoot": 33,
+      "tackle": 66,
+      "keeping": 8,
+      "shirtNumber": 21,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Martin Zlomislice",
+      "pos": "GK",
+      "age": 27,
+      "pace": 46,
+      "pass": 47,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 66,
+      "shirtNumber": 22,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Haris Tabakovice",
+      "pos": "FW",
+      "age": 31,
+      "pace": 64,
+      "pass": 54,
+      "shoot": 68,
+      "tackle": 33,
+      "keeping": 8,
+      "shirtNumber": 23,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Arjan Malice",
+      "pos": "DF",
+      "age": 20,
+      "pace": 55,
+      "pass": 50,
+      "shoot": 37,
+      "tackle": 62,
+      "keeping": 8,
+      "shirtNumber": 24,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jovo Lukice",
+      "pos": "FW",
+      "age": 27,
+      "pace": 68,
+      "pass": 59,
+      "shoot": 66,
+      "tackle": 33,
+      "keeping": 8,
+      "shirtNumber": 25,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ermin Mahmice",
+      "pos": "MF",
+      "age": 21,
+      "pace": 54,
+      "pass": 62,
+      "shoot": 53,
+      "tackle": 50,
+      "keeping": 7,
+      "shirtNumber": 26,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    }
+  ],
+  "defaultLineup": {
+    "formation": "4-4-2",
+    "starters": [
+      0,
+      6,
+      4,
+      5,
+      17,
+      3,
+      19,
+      12,
+      24,
+      9,
+      14
+    ]
+  }
+}

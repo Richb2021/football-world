@@ -1,0 +1,479 @@
+{
+  "id": "uzbekistan",
+  "name": "Uzbekistan",
+  "short": "UZB",
+  "stadium": "Bunyodkor Stadium",
+  "strength": 74,
+  "colors": {
+    "home": {
+      "shirt": "#FFFFFF",
+      "shorts": "#FFFFFF",
+      "socks": "#FFFFFF"
+    },
+    "away": {
+      "shirt": "#003893",
+      "shorts": "#003893",
+      "socks": "#003893"
+    }
+  },
+  "players": [
+    {
+      "name": "Utkir Yusupove",
+      "pos": "GK",
+      "age": 35,
+      "pace": 49,
+      "pass": 54,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 78,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Abdukodir Khusanove",
+      "pos": "DF",
+      "age": 22,
+      "pace": 64,
+      "pass": 58,
+      "shoot": 31,
+      "tackle": 75,
+      "keeping": 8,
+      "shirtNumber": 2,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Khojiakbar Alijonove",
+      "pos": "DF",
+      "age": 29,
+      "pace": 67,
+      "pass": 65,
+      "shoot": 31,
+      "tackle": 72,
+      "keeping": 8,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Farrukh Sayfieve",
+      "pos": "DF",
+      "age": 35,
+      "pace": 71,
+      "pass": 68,
+      "shoot": 34,
+      "tackle": 77,
+      "keeping": 8,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Rustamjon Ashurmatove",
+      "pos": "DF",
+      "age": 29,
+      "pace": 75,
+      "pass": 68,
+      "shoot": 35,
+      "tackle": 75,
+      "keeping": 8,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Akmal Mozgovoye",
+      "pos": "MF",
+      "age": 27,
+      "pace": 64,
+      "pass": 76,
+      "shoot": 56,
+      "tackle": 59,
+      "keeping": 7,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Otabek Shukurove",
+      "pos": "MF",
+      "age": 29,
+      "pace": 75,
+      "pass": 95,
+      "shoot": 73,
+      "tackle": 72,
+      "keeping": 7,
+      "shirtNumber": 7,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jamshid Iskanderove",
+      "pos": "MF",
+      "age": 32,
+      "pace": 67,
+      "pass": 74,
+      "shoot": 55,
+      "tackle": 59,
+      "keeping": 7,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Odiljon Xamrobekove",
+      "pos": "MF",
+      "age": 30,
+      "pace": 70,
+      "pass": 86,
+      "shoot": 70,
+      "tackle": 63,
+      "keeping": 7,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ruslanbek Jiyanove",
+      "pos": "MF",
+      "age": 25,
+      "pace": 59,
+      "pass": 69,
+      "shoot": 50,
+      "tackle": 54,
+      "keeping": 7,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Oston Urunove",
+      "pos": "MF",
+      "age": 25,
+      "pace": 67,
+      "pass": 76,
+      "shoot": 66,
+      "tackle": 62,
+      "keeping": 7,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Abduvakhid Nematove",
+      "pos": "GK",
+      "age": 25,
+      "pace": 47,
+      "pass": 50,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 68,
+      "shirtNumber": 12,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Sherzod Nasrullaeve",
+      "pos": "DF",
+      "age": 27,
+      "pace": 66,
+      "pass": 65,
+      "shoot": 31,
+      "tackle": 78,
+      "keeping": 8,
+      "shirtNumber": 13,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Eldor Shomurodove",
+      "pos": "FW",
+      "age": 30,
+      "pace": 81,
+      "pass": 76,
+      "shoot": 97,
+      "tackle": 49,
+      "keeping": 8,
+      "shirtNumber": 14,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Umarbek Eshmurodove",
+      "pos": "DF",
+      "age": 33,
+      "pace": 63,
+      "pass": 56,
+      "shoot": 33,
+      "tackle": 68,
+      "keeping": 8,
+      "shirtNumber": 15,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Botirali Ergasheve",
+      "pos": "GK",
+      "age": 30,
+      "pace": 45,
+      "pass": 51,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 66,
+      "shirtNumber": 16,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Dostonbek Khamdamove",
+      "pos": "MF",
+      "age": 29,
+      "pace": 60,
+      "pass": 69,
+      "shoot": 62,
+      "tackle": 56,
+      "keeping": 7,
+      "shirtNumber": 17,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Abdulla Abdullaeve",
+      "pos": "DF",
+      "age": 28,
+      "pace": 63,
+      "pass": 63,
+      "shoot": 30,
+      "tackle": 74,
+      "keeping": 8,
+      "shirtNumber": 18,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Azizjon Ganieve",
+      "pos": "MF",
+      "age": 28,
+      "pace": 55,
+      "pass": 71,
+      "shoot": 51,
+      "tackle": 62,
+      "keeping": 7,
+      "shirtNumber": 19,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Azizbek Amonove",
+      "pos": "FW",
+      "age": 28,
+      "pace": 64,
+      "pass": 56,
+      "shoot": 72,
+      "tackle": 35,
+      "keeping": 8,
+      "shirtNumber": 20,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Igor Sergeeve",
+      "pos": "FW",
+      "age": 33,
+      "pace": 79,
+      "pass": 69,
+      "shoot": 88,
+      "tackle": 50,
+      "keeping": 8,
+      "shirtNumber": 21,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Abbosbek Fayzullaeve",
+      "pos": "MF",
+      "age": 22,
+      "pace": 59,
+      "pass": 71,
+      "shoot": 65,
+      "tackle": 57,
+      "keeping": 7,
+      "shirtNumber": 22,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Sherzod Esanove",
+      "pos": "MF",
+      "age": 23,
+      "pace": 53,
+      "pass": 66,
+      "shoot": 54,
+      "tackle": 51,
+      "keeping": 7,
+      "shirtNumber": 23,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Behruzjon Karimove",
+      "pos": "DF",
+      "age": 18,
+      "pace": 57,
+      "pass": 50,
+      "shoot": 33,
+      "tackle": 67,
+      "keeping": 8,
+      "shirtNumber": 24,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Avazbek Ulmasaliyeve",
+      "pos": "DF",
+      "age": 26,
+      "pace": 59,
+      "pass": 47,
+      "shoot": 31,
+      "tackle": 59,
+      "keeping": 8,
+      "shirtNumber": 25,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jakhongir Urozove",
+      "pos": "DF",
+      "age": 22,
+      "pace": 51,
+      "pass": 47,
+      "shoot": 34,
+      "tackle": 60,
+      "keeping": 8,
+      "shirtNumber": 26,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    }
+  ],
+  "defaultLineup": {
+    "formation": "3-4-2-1",
+    "starters": [
+      0,
+      23,
+      12,
+      4,
+      17,
+      1,
+      5,
+      6,
+      13,
+      21,
+      10
+    ]
+  }
+}

@@ -1,0 +1,479 @@
+{
+  "id": "colombia",
+  "name": "Colombia",
+  "short": "COL",
+  "stadium": "Estadio Metropolitano",
+  "strength": 87,
+  "colors": {
+    "home": {
+      "shirt": "#FDE100",
+      "shorts": "#00205B",
+      "socks": "#FF0000"
+    },
+    "away": {
+      "shirt": "#00205B",
+      "shorts": "#00205B",
+      "socks": "#00205B"
+    }
+  },
+  "players": [
+    {
+      "name": "David Ospinae",
+      "pos": "GK",
+      "age": 37,
+      "pace": 50,
+      "pass": 58,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 91,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Daniel Munozo",
+      "pos": "DF",
+      "age": 30,
+      "pace": 74,
+      "pass": 73,
+      "shoot": 36,
+      "tackle": 81,
+      "keeping": 8,
+      "shirtNumber": 2,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jhon Lucumie",
+      "pos": "DF",
+      "age": 27,
+      "pace": 75,
+      "pass": 75,
+      "shoot": 31,
+      "tackle": 80,
+      "keeping": 8,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Santiago Ariaso",
+      "pos": "DF",
+      "age": 34,
+      "pace": 79,
+      "pass": 74,
+      "shoot": 38,
+      "tackle": 86,
+      "keeping": 8,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Kevin Castanoe",
+      "pos": "MF",
+      "age": 25,
+      "pace": 67,
+      "pass": 78,
+      "shoot": 61,
+      "tackle": 63,
+      "keeping": 7,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Richard Rios Montoyae",
+      "pos": "MF",
+      "age": 26,
+      "pace": 71,
+      "pass": 83,
+      "shoot": 71,
+      "tackle": 66,
+      "keeping": 7,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Luis Diaz Marulandae",
+      "pos": "FW",
+      "age": 29,
+      "pace": 88,
+      "pass": 84,
+      "shoot": 97,
+      "tackle": 42,
+      "keeping": 8,
+      "shirtNumber": 7,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jorge Carrascale",
+      "pos": "MF",
+      "age": 28,
+      "pace": 65,
+      "pass": 79,
+      "shoot": 67,
+      "tackle": 67,
+      "keeping": 7,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Jhon Cordobae",
+      "pos": "FW",
+      "age": 33,
+      "pace": 75,
+      "pass": 65,
+      "shoot": 78,
+      "tackle": 33,
+      "keeping": 8,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "James Rodriguez Rubioe",
+      "pos": "MF",
+      "age": 34,
+      "pace": 86,
+      "pass": 96,
+      "shoot": 90,
+      "tackle": 86,
+      "keeping": 7,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Jhon Ariaso",
+      "pos": "MF",
+      "age": 28,
+      "pace": 74,
+      "pass": 89,
+      "shoot": 78,
+      "tackle": 75,
+      "keeping": 7,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Camilo Vargaso",
+      "pos": "GK",
+      "age": 37,
+      "pace": 50,
+      "pass": 50,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 85,
+      "shirtNumber": 12,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Yerry Minae",
+      "pos": "DF",
+      "age": 31,
+      "pace": 77,
+      "pass": 72,
+      "shoot": 39,
+      "tackle": 78,
+      "keeping": 8,
+      "shirtNumber": 13,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Gustavo Puertae",
+      "pos": "DF",
+      "age": 22,
+      "pace": 71,
+      "pass": 60,
+      "shoot": 34,
+      "tackle": 73,
+      "keeping": 8,
+      "shirtNumber": 14,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Juan Portillae",
+      "pos": "MF",
+      "age": 27,
+      "pace": 61,
+      "pass": 75,
+      "shoot": 62,
+      "tackle": 66,
+      "keeping": 7,
+      "shirtNumber": 15,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jefferson Lermae",
+      "pos": "MF",
+      "age": 31,
+      "pace": 77,
+      "pass": 94,
+      "shoot": 75,
+      "tackle": 81,
+      "keeping": 7,
+      "shirtNumber": 16,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Johan Mojicae",
+      "pos": "DF",
+      "age": 33,
+      "pace": 75,
+      "pass": 74,
+      "shoot": 30,
+      "tackle": 84,
+      "keeping": 8,
+      "shirtNumber": 17,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Willer Dittae",
+      "pos": "DF",
+      "age": 28,
+      "pace": 65,
+      "pass": 56,
+      "shoot": 31,
+      "tackle": 74,
+      "keeping": 8,
+      "shirtNumber": 18,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Juan Hernandezo",
+      "pos": "FW",
+      "age": 27,
+      "pace": 77,
+      "pass": 63,
+      "shoot": 75,
+      "tackle": 32,
+      "keeping": 8,
+      "shirtNumber": 19,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Juan Quinteroe",
+      "pos": "MF",
+      "age": 33,
+      "pace": 69,
+      "pass": 80,
+      "shoot": 70,
+      "tackle": 72,
+      "keeping": 7,
+      "shirtNumber": 20,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jaminton Campazo",
+      "pos": "FW",
+      "age": 26,
+      "pace": 71,
+      "pass": 63,
+      "shoot": 74,
+      "tackle": 32,
+      "keeping": 8,
+      "shirtNumber": 21,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Deiver Machadoe",
+      "pos": "DF",
+      "age": 32,
+      "pace": 67,
+      "pass": 57,
+      "shoot": 36,
+      "tackle": 74,
+      "keeping": 8,
+      "shirtNumber": 22,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "moustache"
+      }
+    },
+    {
+      "name": "Davinson Sanchezo",
+      "pos": "DF",
+      "age": 29,
+      "pace": 87,
+      "pass": 83,
+      "shoot": 35,
+      "tackle": 92,
+      "keeping": 8,
+      "shirtNumber": 23,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Alvaro Monteroe",
+      "pos": "GK",
+      "age": 31,
+      "pace": 49,
+      "pass": 47,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 75,
+      "shirtNumber": 24,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Luis Suarezo",
+      "pos": "FW",
+      "age": 28,
+      "pace": 78,
+      "pass": 67,
+      "shoot": 78,
+      "tackle": 38,
+      "keeping": 8,
+      "shirtNumber": 25,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Carlos Gomezo",
+      "pos": "FW",
+      "age": 23,
+      "pace": 75,
+      "pass": 63,
+      "shoot": 76,
+      "tackle": 31,
+      "keeping": 8,
+      "shirtNumber": 26,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    }
+  ],
+  "defaultLineup": {
+    "formation": "4-3-3",
+    "starters": [
+      11,
+      1,
+      16,
+      15,
+      22,
+      2,
+      13,
+      10,
+      24,
+      9,
+      6
+    ]
+  }
+}

@@ -1,0 +1,479 @@
+{
+  "id": "scotland",
+  "name": "Scotland",
+  "short": "SCO",
+  "stadium": "Hampden Park",
+  "strength": 78,
+  "colors": {
+    "home": {
+      "shirt": "#0B1E36",
+      "shorts": "#FFFFFF",
+      "socks": "#0B1E36"
+    },
+    "away": {
+      "shirt": "#FFFFFF",
+      "shorts": "#0B1E36",
+      "socks": "#FFFFFF"
+    }
+  },
+  "players": [
+    {
+      "name": "Angus Gunne",
+      "pos": "GK",
+      "age": 30,
+      "pace": 49,
+      "pass": 51,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 75,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Aaron Hickeye",
+      "pos": "DF",
+      "age": 24,
+      "pace": 64,
+      "pass": 65,
+      "shoot": 32,
+      "tackle": 77,
+      "keeping": 8,
+      "shirtNumber": 2,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#caa463",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Andrew Robertsone",
+      "pos": "DF",
+      "age": 32,
+      "pace": 84,
+      "pass": 76,
+      "shoot": 39,
+      "tackle": 89,
+      "keeping": 8,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Scott Mctominaye",
+      "pos": "MF",
+      "age": 29,
+      "pace": 74,
+      "pass": 86,
+      "shoot": 78,
+      "tackle": 74,
+      "keeping": 7,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Grant Hanleye",
+      "pos": "DF",
+      "age": 34,
+      "pace": 75,
+      "pass": 70,
+      "shoot": 31,
+      "tackle": 84,
+      "keeping": 8,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Kieran Tierneye",
+      "pos": "DF",
+      "age": 29,
+      "pace": 74,
+      "pass": 66,
+      "shoot": 31,
+      "tackle": 80,
+      "keeping": 8,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "John Mcginne",
+      "pos": "MF",
+      "age": 31,
+      "pace": 81,
+      "pass": 90,
+      "shoot": 88,
+      "tackle": 80,
+      "keeping": 7,
+      "shirtNumber": 7,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Tyler Fletchere",
+      "pos": "MF",
+      "age": 19,
+      "pace": 55,
+      "pass": 68,
+      "shoot": 51,
+      "tackle": 56,
+      "keeping": 7,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Lyndon Dykeso",
+      "pos": "FW",
+      "age": 30,
+      "pace": 72,
+      "pass": 70,
+      "shoot": 85,
+      "tackle": 39,
+      "keeping": 8,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Che Adamso",
+      "pos": "FW",
+      "age": 29,
+      "pace": 80,
+      "pass": 71,
+      "shoot": 85,
+      "tackle": 39,
+      "keeping": 8,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ryan Christiey",
+      "pos": "MF",
+      "age": 31,
+      "pace": 69,
+      "pass": 85,
+      "shoot": 68,
+      "tackle": 65,
+      "keeping": 7,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Liam Kellye",
+      "pos": "GK",
+      "age": 30,
+      "pace": 44,
+      "pass": 49,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 65,
+      "shirtNumber": 12,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jack Hendrye",
+      "pos": "DF",
+      "age": 31,
+      "pace": 70,
+      "pass": 65,
+      "shoot": 37,
+      "tackle": 73,
+      "keeping": 8,
+      "shirtNumber": 13,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ross Stewarte",
+      "pos": "FW",
+      "age": 29,
+      "pace": 64,
+      "pass": 56,
+      "shoot": 66,
+      "tackle": 34,
+      "keeping": 8,
+      "shirtNumber": 14,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "John Souttare",
+      "pos": "DF",
+      "age": 29,
+      "pace": 60,
+      "pass": 56,
+      "shoot": 34,
+      "tackle": 66,
+      "keeping": 8,
+      "shirtNumber": 15,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "moustache"
+      }
+    },
+    {
+      "name": "Dominic Hyame",
+      "pos": "DF",
+      "age": 30,
+      "pace": 55,
+      "pass": 50,
+      "shoot": 36,
+      "tackle": 67,
+      "keeping": 8,
+      "shirtNumber": 16,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Ben Gannon Doake",
+      "pos": "FW",
+      "age": 20,
+      "pace": 66,
+      "pass": 57,
+      "shoot": 72,
+      "tackle": 36,
+      "keeping": 8,
+      "shirtNumber": 17,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "George Hirste",
+      "pos": "FW",
+      "age": 27,
+      "pace": 62,
+      "pass": 55,
+      "shoot": 71,
+      "tackle": 33,
+      "keeping": 8,
+      "shirtNumber": 18,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Lewis Fergusone",
+      "pos": "MF",
+      "age": 26,
+      "pace": 61,
+      "pass": 79,
+      "shoot": 59,
+      "tackle": 63,
+      "keeping": 7,
+      "shirtNumber": 19,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "moustache"
+      }
+    },
+    {
+      "name": "Lawrence Shanklande",
+      "pos": "FW",
+      "age": 30,
+      "pace": 71,
+      "pass": 65,
+      "shoot": 78,
+      "tackle": 41,
+      "keeping": 8,
+      "shirtNumber": 20,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "moustache"
+      }
+    },
+    {
+      "name": "Craig Gordone",
+      "pos": "GK",
+      "age": 43,
+      "pace": 50,
+      "pass": 60,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 84,
+      "shirtNumber": 21,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Nathan Pattersone",
+      "pos": "DF",
+      "age": 24,
+      "pace": 67,
+      "pass": 61,
+      "shoot": 32,
+      "tackle": 71,
+      "keeping": 8,
+      "shirtNumber": 22,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#7a5533",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Kenneth Mcleane",
+      "pos": "MF",
+      "age": 34,
+      "pace": 66,
+      "pass": 79,
+      "shoot": 69,
+      "tackle": 69,
+      "keeping": 7,
+      "shirtNumber": 23,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Anthony Ralstone",
+      "pos": "DF",
+      "age": 27,
+      "pace": 62,
+      "pass": 59,
+      "shoot": 36,
+      "tackle": 73,
+      "keeping": 8,
+      "shirtNumber": 24,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Findlay Curtiso",
+      "pos": "FW",
+      "age": 20,
+      "pace": 61,
+      "pass": 51,
+      "shoot": 68,
+      "tackle": 30,
+      "keeping": 8,
+      "shirtNumber": 25,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Scott Mckennae",
+      "pos": "DF",
+      "age": 29,
+      "pace": 64,
+      "pass": 61,
+      "shoot": 33,
+      "tackle": 73,
+      "keeping": 8,
+      "shirtNumber": 26,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    }
+  ],
+  "defaultLineup": {
+    "formation": "4-4-2",
+    "starters": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      12,
+      16,
+      18,
+      9,
+      19,
+      6
+    ]
+  }
+}

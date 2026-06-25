@@ -1,0 +1,25 @@
+# Correct MIME type for PWA manifest
+AddType application/manifest+json .webmanifest
+
+# Ensure JS service worker is served correctly
+AddType text/javascript .js
+
+# No caching on the service worker (always check for updates)
+<Files "sw.js">
+  Header set Cache-Control "no-cache, no-store, must-revalidate"
+  Header set Pragma "no-cache"
+  Header set Expires "0"
+</Files>
+
+# No caching on the app shell. The service worker precaches index.html, so the
+# browser/CDN must always revalidate it when the page is not SW-controlled yet.
+<Files "index.html">
+  Header set Cache-Control "no-cache, no-store, must-revalidate"
+  Header set Pragma "no-cache"
+  Header set Expires "0"
+</Files>
+
+# No caching on the manifest (always fresh)
+<Files "manifest.webmanifest">
+  Header set Cache-Control "no-cache, no-store, must-revalidate"
+</Files>

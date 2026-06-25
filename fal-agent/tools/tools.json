@@ -1,0 +1,137 @@
+{
+  "tools": [
+    {
+      "name": "generate-image",
+      "command": "python tools/fal_cli.py generate-image",
+      "description": "Generate images from text prompts using FLUX, Recraft, Ideogram, Imagen, and more",
+      "args": "--prompt <text> [--model <alias>] [--width <px>] [--height <px>] [--num-images <n>] [--negative-prompt <text>] [--output-dir <path>] [--param key=value]",
+      "auth": "FAL_KEY env var",
+      "blast_radius": "low",
+      "models": [
+        "flux-schnell",
+        "flux-dev",
+        "flux-pro",
+        "flux-lora",
+        "recraft-v3",
+        "ideogram-v3",
+        "imagen4"
+      ],
+      "trust_tier": "base",
+      "timeout_seconds": 30,
+      "retry_policy": "backoff",
+      "idempotent": true,
+      "side_effects": "none"
+    },
+    {
+      "name": "generate-video",
+      "command": "python tools/fal_cli.py generate-video",
+      "description": "Generate videos from text prompts or images using Kling, Veo3, MiniMax, Wan, LTX",
+      "args": "--prompt <text> [--image-url <url>] [--model <alias>] [--duration <s>] [--aspect-ratio <ratio>] [--output-dir <path>] [--param key=value]",
+      "auth": "FAL_KEY env var",
+      "blast_radius": "low",
+      "models": [
+        "kling",
+        "kling-img2vid",
+        "veo3",
+        "veo3-fast",
+        "minimax-video",
+        "minimax-img2vid",
+        "wan",
+        "wan-img2vid",
+        "ltx-video"
+      ],
+      "trust_tier": "base",
+      "timeout_seconds": 30,
+      "retry_policy": "backoff",
+      "idempotent": true,
+      "side_effects": "none"
+    },
+    {
+      "name": "generate-audio",
+      "command": "python tools/fal_cli.py generate-audio",
+      "description": "Generate speech from text using ElevenLabs TTS models",
+      "args": "--text <text> [--model <alias>] [--voice-id <id>] [--language <code>] [--output-dir <path>] [--param key=value]",
+      "auth": "FAL_KEY env var",
+      "blast_radius": "low",
+      "models": [
+        "elevenlabs-v3",
+        "elevenlabs-turbo",
+        "elevenlabs-multilingual"
+      ],
+      "trust_tier": "base",
+      "timeout_seconds": 30,
+      "retry_policy": "backoff",
+      "idempotent": true,
+      "side_effects": "none"
+    },
+    {
+      "name": "generate-music",
+      "command": "python tools/fal_cli.py generate-music",
+      "description": "Generate music from text descriptions",
+      "args": "--prompt <text> [--model <alias>] [--duration <s>] [--lyrics <text>] [--output-dir <path>] [--param key=value]",
+      "auth": "FAL_KEY env var",
+      "blast_radius": "low",
+      "models": [
+        "minimax-music"
+      ],
+      "trust_tier": "base",
+      "timeout_seconds": 30,
+      "retry_policy": "backoff",
+      "idempotent": true,
+      "side_effects": "none"
+    },
+    {
+      "name": "transcribe",
+      "command": "python tools/fal_cli.py transcribe",
+      "description": "Transcribe audio to text using Whisper",
+      "args": "--audio-url <url> [--model <alias>] [--language <code>] [--param key=value]",
+      "auth": "FAL_KEY env var",
+      "blast_radius": "low",
+      "models": [
+        "whisper"
+      ],
+      "trust_tier": "base",
+      "timeout_seconds": 30,
+      "retry_policy": "backoff",
+      "idempotent": true,
+      "side_effects": "none"
+    },
+    {
+      "name": "list-models",
+      "command": "python tools/fal_cli.py list-models",
+      "description": "List available models, optionally filtered by category",
+      "args": "[--category image|video|audio|music|transcription]",
+      "auth": "none",
+      "blast_radius": "none",
+      "trust_tier": "base",
+      "timeout_seconds": 30,
+      "retry_policy": "backoff",
+      "idempotent": true,
+      "side_effects": "none"
+    },
+    {
+      "name": "raw",
+      "command": "python tools/fal_cli.py raw",
+      "description": "Call any fal.ai endpoint directly by ID with a raw JSON payload",
+      "args": "--endpoint <id> [--payload <json>] [--sync]",
+      "auth": "FAL_KEY env var",
+      "blast_radius": "low",
+      "trust_tier": "standard",
+      "timeout_seconds": 30,
+      "retry_policy": "none",
+      "idempotent": false,
+      "side_effects": "Direct API call \u2014 varies by endpoint"
+    }
+  ],
+  "toolsets": {
+    "read-write": [
+      "generate-image",
+      "generate-video",
+      "generate-audio",
+      "generate-music",
+      "transcribe",
+      "list-models",
+      "raw"
+    ]
+  }
+}

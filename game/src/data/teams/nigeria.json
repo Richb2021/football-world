@@ -1,0 +1,389 @@
+{
+  "id": "nigeria",
+  "name": "Nigeria",
+  "short": "NGA",
+  "stadium": "Abuja National Stadium",
+  "strength": 81,
+  "colors": {
+    "home": {
+      "shirt": "#008751",
+      "shorts": "#FFFFFF",
+      "socks": "#008751"
+    },
+    "away": {
+      "shirt": "#FFFFFF",
+      "shorts": "#008751",
+      "socks": "#FFFFFF"
+    }
+  },
+  "players": [
+    {
+      "name": "Stanley Nwabalie",
+      "pos": "GK",
+      "age": 25,
+      "pace": 53,
+      "pass": 51,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 76,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Maduka Okoyes",
+      "pos": "GK",
+      "age": 31,
+      "pace": 43,
+      "pass": 57,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 70,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "William Troust-Ekong",
+      "pos": "DF",
+      "age": 21,
+      "pace": 71,
+      "pass": 67,
+      "shoot": 51,
+      "tackle": 86,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Calvin Basseie",
+      "pos": "DF",
+      "age": 30,
+      "pace": 70,
+      "pass": 75,
+      "shoot": 57,
+      "tackle": 77,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ola Ainae",
+      "pos": "DF",
+      "age": 24,
+      "pace": 74,
+      "pass": 65,
+      "shoot": 41,
+      "tackle": 80,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Semi Ajayie",
+      "pos": "DF",
+      "age": 24,
+      "pace": 79,
+      "pass": 63,
+      "shoot": 47,
+      "tackle": 87,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Bright Osayi-Samuele",
+      "pos": "DF",
+      "age": 24,
+      "pace": 77,
+      "pass": 71,
+      "shoot": 43,
+      "tackle": 75,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Zaidu Sanusie",
+      "pos": "DF",
+      "age": 32,
+      "pace": 75,
+      "pass": 61,
+      "shoot": 44,
+      "tackle": 77,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Alex Iwobie",
+      "pos": "MF",
+      "age": 29,
+      "pace": 85,
+      "pass": 77,
+      "shoot": 74,
+      "tackle": 59,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Wilfred Ndidie",
+      "pos": "MF",
+      "age": 33,
+      "pace": 85,
+      "pass": 77,
+      "shoot": 75,
+      "tackle": 70,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Frank Onyekae",
+      "pos": "MF",
+      "age": 30,
+      "pace": 83,
+      "pass": 81,
+      "shoot": 71,
+      "tackle": 63,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Raphael Onyedikae",
+      "pos": "MF",
+      "age": 22,
+      "pace": 76,
+      "pass": 78,
+      "shoot": 68,
+      "tackle": 67,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Kelechi Iheanachoe",
+      "pos": "MF",
+      "age": 33,
+      "pace": 78,
+      "pass": 80,
+      "shoot": 67,
+      "tackle": 55,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Alhassan Yusufe",
+      "pos": "MF",
+      "age": 24,
+      "pace": 75,
+      "pass": 79,
+      "shoot": 75,
+      "tackle": 66,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Victor Osimhene",
+      "pos": "FW",
+      "age": 26,
+      "pace": 92,
+      "pass": 70,
+      "shoot": 89,
+      "tackle": 45,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#caa463",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ademola Loukman",
+      "pos": "FW",
+      "age": 27,
+      "pace": 89,
+      "pass": 67,
+      "shoot": 83,
+      "tackle": 38,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Samuel Chukwuezes",
+      "pos": "FW",
+      "age": 31,
+      "pace": 87,
+      "pass": 74,
+      "shoot": 85,
+      "tackle": 40,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Moses Simone",
+      "pos": "FW",
+      "age": 25,
+      "pace": 90,
+      "pass": 76,
+      "shoot": 90,
+      "tackle": 43,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Rory Rivas",
+      "pos": "GK",
+      "age": 24,
+      "pace": 46,
+      "pass": 47,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 63,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Santi Nilsson",
+      "pos": "DF",
+      "age": 27,
+      "pace": 67,
+      "pass": 65,
+      "shoot": 38,
+      "tackle": 75,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Femi Hansen",
+      "pos": "DF",
+      "age": 24,
+      "pace": 65,
+      "pass": 61,
+      "shoot": 41,
+      "tackle": 71,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Iker Andersson",
+      "pos": "MF",
+      "age": 31,
+      "pace": 71,
+      "pass": 75,
+      "shoot": 63,
+      "tackle": 62,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Mateo Camara",
+      "pos": "FW",
+      "age": 28,
+      "pace": 81,
+      "pass": 71,
+      "shoot": 81,
+      "tackle": 35,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    }
+  ]
+}

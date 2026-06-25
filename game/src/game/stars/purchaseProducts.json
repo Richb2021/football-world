@@ -1,0 +1,46 @@
+[
+  {
+    "sku": "tokens_5",
+    "name": "5 Arcade Tokens",
+    "description": "Five Challenge Chronicle entries or retries.",
+    "currency": "GBP",
+    "pricePence": 99,
+    "priceLabel": "£0.99",
+    "coins": 0,
+    "tokens": 5,
+    "art": "store_token_stack.webp"
+  },
+  {
+    "sku": "coins_10000",
+    "name": "10,000 Coins",
+    "description": "Enough coins for a Gold Pack with change.",
+    "currency": "GBP",
+    "pricePence": 199,
+    "priceLabel": "£1.99",
+    "coins": 10000,
+    "tokens": 0,
+    "art": "store_coin_bundle_small.webp"
+  },
+  {
+    "sku": "bundle_25000_5",
+    "name": "25,000 Coins + 5 Tokens",
+    "description": "Premium Pack money plus a weekly token boost.",
+    "currency": "GBP",
+    "pricePence": 399,
+    "priceLabel": "£3.99",
+    "coins": 25000,
+    "tokens": 5,
+    "art": "store_combo_bundle.webp"
+  },
+  {
+    "sku": "bundle_60000_15",
+    "name": "60,000 Coins + 15 Tokens",
+    "description": "A big club-building top up for packs and challenge runs.",
+    "currency": "GBP",
+    "pricePence": 799,
+    "priceLabel": "£7.99",
+    "coins": 60000,
+    "tokens": 15,
+    "art": "store_coin_bundle_large.webp"
+  }
+]

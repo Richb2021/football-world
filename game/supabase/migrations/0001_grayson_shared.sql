@@ -1,0 +1,21 @@
+-- Grayson Games shared schema — REFERENCE ONLY. There is NO migration to run.
+--
+-- The shared Supabase project (itptyfrmxaxnsjyqtwxo) ALREADY contains the
+-- cross-game tables (created by the basketball game). This soccer game reuses
+-- them as-is via `game_id = 'soccer'`. The client (src/net/backend.ts) targets:
+--
+--   saves(user_id, game_id, data jsonb, updated_at)            -- the cloud club blob (PK user_id+game_id)
+--   weekly_points(user_id, game_id, week int, mode, points)    -- challenge/cup points (PK user_id+game_id+week+mode)
+--   cards(id, user_id, game_id, data jsonb, created_at)        -- published user content / squads (future use)
+--   profiles(id, display_name, created_at)                     -- shared identity
+--
+-- Other existing shared tables: matches(...), wallets(user_id, game_id, coins).
+-- (Soccer keeps coins inside the `saves` blob rather than using `wallets`.)
+--
+-- All gameplay tables are game_id-scoped so both games share one set of tables
+-- without colliding. RLS is already configured for own-row access (the
+-- basketball client writes via the anon key + Supabase Auth); the policy on
+-- each table is effectively:
+--   using (auth.uid() = user_id) with check (auth.uid() = user_id)
+-- (profiles keys on `id`). If a brand-new project ever needs the tables, create
+-- them with those columns + that RLS and the soccer client works unchanged.

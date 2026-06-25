@@ -1,0 +1,3455 @@
+{
+  "version": 1,
+  "people": {
+    "commentator": "Malcolm Grange",
+    "pundit": "Jimmy Michaels"
+  },
+  "voices": {
+    "commentator": "JoMRuFCx2fw5HQsMnIwD",
+    "pundit": "sAh8qjaAhJyWC6tan1XB"
+  },
+  "nameStyles": [
+    {
+      "intensity": "calm",
+      "previousText": "The ball is with",
+      "nextText": "as the move settles."
+    },
+    {
+      "intensity": "excited",
+      "previousText": "A chance opens up for",
+      "nextText": "and the crowd senses something."
+    },
+    {
+      "intensity": "big",
+      "previousText": "A huge moment for",
+      "nextText": "and the noise lifts around the ground."
+    }
+  ],
+  "phrases": [
+    {
+      "id": "phrase.commentator.prematch.between.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "We're here for a match between",
+      "nextText": "and their opponents."
+    },
+    {
+      "id": "phrase.commentator.prematch.and.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "and",
+      "previousText": "We're here for a match between the home side",
+      "nextText": "the visitors."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "This should be a proper contest."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting.02",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "The stage is set and the crowd is ready."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting.03",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Both sides have plenty of attacking quality."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting.04",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "A big ninety minutes ahead of us."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting.05",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "There is a real edge to this fixture."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting.06",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "The referee checks both keepers and we are nearly ready."
+    },
+    {
+      "id": "phrase.commentator.prematch.self_intro.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Malcolm Grange here alongside Jimmy Michaels."
+    },
+    {
+      "id": "phrase.commentator.prematch.at_stadium.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "We're coming to you from"
+    },
+    {
+      "id": "phrase.commentator.prematch.head_to.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Let's head to",
+      "previousText": "The teams are ready in the tunnel.",
+      "nextText": "for kick off."
+    },
+    {
+      "id": "phrase.commentator.prematch.welcome.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Welcome in, we're at"
+    },
+    {
+      "id": "phrase.commentator.prematch.fixture.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "The fixture is"
+    },
+    {
+      "id": "phrase.commentator.prematch.pundit_question.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Jimmy, what do you make of this one?"
+    },
+    {
+      "id": "phrase.commentator.kickoff.start.01",
+      "speaker": "commentator",
+      "category": "kickoff",
+      "intensity": "calm",
+      "text": "And away we go."
+    },
+    {
+      "id": "phrase.commentator.kickoff.start.02",
+      "speaker": "commentator",
+      "category": "kickoff",
+      "intensity": "calm",
+      "text": "The ball is rolling."
+    },
+    {
+      "id": "phrase.commentator.kickoff.start.03",
+      "speaker": "commentator",
+      "category": "kickoff",
+      "intensity": "calm",
+      "text": "Kick off taken cleanly."
+    },
+    {
+      "id": "phrase.commentator.kickoff.start.04",
+      "speaker": "commentator",
+      "category": "kickoff",
+      "intensity": "calm",
+      "text": "They get us under way."
+    },
+    {
+      "id": "phrase.commentator.kickoff.restart.01",
+      "speaker": "commentator",
+      "category": "kickoff",
+      "intensity": "calm",
+      "text": "Back under way from the centre spot."
+    },
+    {
+      "id": "phrase.commentator.kickoff.restart.02",
+      "speaker": "commentator",
+      "category": "kickoff",
+      "intensity": "calm",
+      "text": "They restart and look to build again."
+    },
+    {
+      "id": "phrase.commentator.kickoff.restart.03",
+      "speaker": "commentator",
+      "category": "kickoff",
+      "intensity": "calm",
+      "text": "A quick touch from kick off."
+    },
+    {
+      "id": "phrase.commentator.kickoff.restart.04",
+      "speaker": "commentator",
+      "category": "kickoff",
+      "intensity": "calm",
+      "text": "The restart is taken short."
+    },
+    {
+      "id": "phrase.commentator.possession.player.01",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "Now it is with",
+      "nextText": "looking for an angle."
+    },
+    {
+      "id": "phrase.commentator.possession.player.02",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "Touches it on to",
+      "nextText": "who has a little room."
+    },
+    {
+      "id": "phrase.commentator.possession.player.03",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "The pass finds",
+      "nextText": "in space."
+    },
+    {
+      "id": "phrase.commentator.possession.player.04",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "Good feet from",
+      "nextText": "under pressure."
+    },
+    {
+      "id": "phrase.commentator.possession.team.01",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "Patient football from",
+      "nextText": "as they keep the ball."
+    },
+    {
+      "id": "phrase.commentator.possession.player.recycle.01",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "They recycle it through",
+      "nextText": "and stay composed."
+    },
+    {
+      "id": "phrase.commentator.possession.team.03",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "A measured spell now for",
+      "nextText": "in midfield."
+    },
+    {
+      "id": "phrase.commentator.possession.team.04",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "Neat and tidy from",
+      "nextText": "as they wait for a gap."
+    },
+    {
+      "id": "phrase.commentator.pass.01",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "Crisp pass through the middle."
+    },
+    {
+      "id": "phrase.commentator.pass.02",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "That one zips into feet."
+    },
+    {
+      "id": "phrase.commentator.pass.03",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "Played early and played well."
+    },
+    {
+      "id": "phrase.commentator.pass.04",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "Good pace on the pass."
+    },
+    {
+      "id": "phrase.commentator.pass.05",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "Slipped square to keep the move alive."
+    },
+    {
+      "id": "phrase.commentator.pass.06",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "Lovely first touch to move it on."
+    },
+    {
+      "id": "phrase.commentator.pass.07",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "The angle was tight but the pass was clean."
+    },
+    {
+      "id": "phrase.commentator.pass.08",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "A useful ball into the channel."
+    },
+    {
+      "id": "phrase.commentator.pass.to.01",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "passes to"
+    },
+    {
+      "id": "phrase.commentator.pass.to.02",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "finds"
+    },
+    {
+      "id": "phrase.commentator.pass.to.03",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "moves it on to"
+    },
+    {
+      "id": "phrase.commentator.pass.to.04",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "rolls it into"
+    },
+    {
+      "id": "phrase.commentator.pass.tries_find.01",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "tries to find"
+    },
+    {
+      "id": "phrase.commentator.pass.now_has.01",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "Now"
+    },
+    {
+      "id": "phrase.commentator.pass.has_it.01",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "has it."
+    },
+    {
+      "id": "phrase.commentator.pass.picks_out.01",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "picks out"
+    },
+    {
+      "id": "phrase.commentator.pass.into_feet.01",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "into feet for"
+    },
+    {
+      "id": "phrase.commentator.pass.forward_now.01",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "moving it forward now."
+    },
+    {
+      "id": "phrase.commentator.dialogue.ask.01",
+      "speaker": "commentator",
+      "category": "dialogueQuestion",
+      "intensity": "calm",
+      "text": "What do you make of",
+      "nextText": "so far, Jimmy?"
+    },
+    {
+      "id": "phrase.commentator.dialogue.ask.02",
+      "speaker": "commentator",
+      "category": "dialogueQuestion",
+      "intensity": "calm",
+      "text": "so far, Jimmy?"
+    },
+    {
+      "id": "phrase.commentator.attack.01",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "This could open up now."
+    },
+    {
+      "id": "phrase.commentator.attack.02",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "There is space ahead."
+    },
+    {
+      "id": "phrase.commentator.attack.03",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "They are starting to stretch the back line."
+    },
+    {
+      "id": "phrase.commentator.attack.04",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "Runners arriving in the box."
+    },
+    {
+      "id": "phrase.commentator.attack.05",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "A chance to deliver."
+    },
+    {
+      "id": "phrase.commentator.attack.06",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "The defence is being pulled around."
+    },
+    {
+      "id": "phrase.commentator.attack.07",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "They have numbers forward here."
+    },
+    {
+      "id": "phrase.commentator.attack.08",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "The crowd rises as the attack gathers pace."
+    },
+    {
+      "id": "phrase.commentator.cross.01",
+      "speaker": "commentator",
+      "category": "cross",
+      "intensity": "excited",
+      "text": "Cross comes in."
+    },
+    {
+      "id": "phrase.commentator.cross.02",
+      "speaker": "commentator",
+      "category": "cross",
+      "intensity": "excited",
+      "text": "Hung up toward the far post."
+    },
+    {
+      "id": "phrase.commentator.cross.03",
+      "speaker": "commentator",
+      "category": "cross",
+      "intensity": "excited",
+      "text": "Driven across the face."
+    },
+    {
+      "id": "phrase.commentator.cross.04",
+      "speaker": "commentator",
+      "category": "cross",
+      "intensity": "excited",
+      "text": "Whipped into a dangerous area."
+    },
+    {
+      "id": "phrase.commentator.shot.01",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "excited",
+      "text": "He hits it."
+    },
+    {
+      "id": "phrase.commentator.shot.02",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "excited",
+      "text": "Shot comes in."
+    },
+    {
+      "id": "phrase.commentator.shot.03",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "excited",
+      "text": "He lets fly."
+    },
+    {
+      "id": "phrase.commentator.shot.04",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "excited",
+      "text": "Struck with real purpose."
+    },
+    {
+      "id": "phrase.commentator.shot.05",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "excited",
+      "text": "It's hit with real pace!"
+    },
+    {
+      "id": "phrase.commentator.shot.06",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "excited",
+      "text": "A fierce effort toward goal."
+    },
+    {
+      "id": "phrase.commentator.shot.07",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "excited",
+      "text": "He tries his luck from distance."
+    },
+    {
+      "id": "phrase.commentator.shot.08",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "excited",
+      "text": "First time strike."
+    },
+    {
+      "id": "phrase.commentator.near_miss.01",
+      "speaker": "commentator",
+      "category": "nearMiss",
+      "intensity": "excited",
+      "text": "That's not far away!"
+    },
+    {
+      "id": "phrase.commentator.near_miss.02",
+      "speaker": "commentator",
+      "category": "nearMiss",
+      "intensity": "excited",
+      "text": "Just wide of the post!"
+    },
+    {
+      "id": "phrase.commentator.near_miss.03",
+      "speaker": "commentator",
+      "category": "nearMiss",
+      "intensity": "excited",
+      "text": "The keeper was beaten there!"
+    },
+    {
+      "id": "phrase.commentator.near_miss.04",
+      "speaker": "commentator",
+      "category": "nearMiss",
+      "intensity": "excited",
+      "text": "A real warning shot!"
+    },
+    {
+      "id": "phrase.commentator.save.01",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "excited",
+      "text": "Saved by the keeper!"
+    },
+    {
+      "id": "phrase.commentator.save.02",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "excited",
+      "text": "Strong hands to turn it away!"
+    },
+    {
+      "id": "phrase.commentator.save.03",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "excited",
+      "text": "The goalkeeper gets down sharply!"
+    },
+    {
+      "id": "phrase.commentator.save.04",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "excited",
+      "text": "Parried away!"
+    },
+    {
+      "id": "phrase.commentator.save.05",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "excited",
+      "text": "That needed saving, and it was!"
+    },
+    {
+      "id": "phrase.commentator.save.06",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "excited",
+      "text": "Brave goalkeeping at the near post!"
+    },
+    {
+      "id": "phrase.commentator.save.07",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "excited",
+      "text": "The keeper spreads himself and blocks it!"
+    },
+    {
+      "id": "phrase.commentator.save.08",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "excited",
+      "text": "Excellent reflexes from the goalkeeper!"
+    },
+    {
+      "id": "phrase.commentator.post.01",
+      "speaker": "commentator",
+      "category": "post",
+      "intensity": "excited",
+      "text": "Off the woodwork!"
+    },
+    {
+      "id": "phrase.commentator.post.02",
+      "speaker": "commentator",
+      "category": "post",
+      "intensity": "excited",
+      "text": "It crashes against the post!"
+    },
+    {
+      "id": "phrase.commentator.goal.01",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "Goal!"
+    },
+    {
+      "id": "phrase.commentator.goal.02",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "And it's in!"
+    },
+    {
+      "id": "phrase.commentator.goal.03",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "They've scored!"
+    },
+    {
+      "id": "phrase.commentator.goal.04",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "The net ripples!"
+    },
+    {
+      "id": "phrase.commentator.goal.05",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "A huge finish!"
+    },
+    {
+      "id": "phrase.commentator.goal.06",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "That's a brilliant goal!"
+    },
+    {
+      "id": "phrase.commentator.goal.07",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "Listen to the noise now!"
+    },
+    {
+      "id": "phrase.commentator.goal.08",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "The breakthrough arrives!"
+    },
+    {
+      "id": "phrase.commentator.goal.for_team.01",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "Goal for",
+      "nextText": "and they celebrate!"
+    },
+    {
+      "id": "phrase.commentator.goal.scorer.01",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "Scored by",
+      "nextText": "with a ruthless finish!"
+    },
+    {
+      "id": "phrase.commentator.goal.scorer.02",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "The scorer is",
+      "nextText": "and that was clinical!"
+    },
+    {
+      "id": "phrase.commentator.goal.scorer.03",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "The final touch comes from",
+      "nextText": "and the stadium erupts!"
+    },
+    {
+      "id": "phrase.commentator.goal.scorer_only.01",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "It's"
+    },
+    {
+      "id": "phrase.commentator.goal.scorer_only.02",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "The name on everyone's lips is"
+    },
+    {
+      "id": "phrase.commentator.goal.score_now.01",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "It's now"
+    },
+    {
+      "id": "phrase.commentator.goal.score_separator.01",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "against"
+    },
+    {
+      "id": "phrase.commentator.setpiece.corner.01",
+      "speaker": "commentator",
+      "category": "corner",
+      "intensity": "calm",
+      "text": "Corner kick."
+    },
+    {
+      "id": "phrase.commentator.setpiece.corner.02",
+      "speaker": "commentator",
+      "category": "corner",
+      "intensity": "calm",
+      "text": "A corner to defend."
+    },
+    {
+      "id": "phrase.commentator.setpiece.corner.03",
+      "speaker": "commentator",
+      "category": "corner",
+      "intensity": "calm",
+      "text": "They can load the box from this corner."
+    },
+    {
+      "id": "phrase.commentator.setpiece.corner.04",
+      "speaker": "commentator",
+      "category": "corner",
+      "intensity": "calm",
+      "text": "The delivery will be important here."
+    },
+    {
+      "id": "phrase.commentator.setpiece.throw.01",
+      "speaker": "commentator",
+      "category": "throwIn",
+      "intensity": "calm",
+      "text": "Throw in."
+    },
+    {
+      "id": "phrase.commentator.setpiece.throw.02",
+      "speaker": "commentator",
+      "category": "throwIn",
+      "intensity": "calm",
+      "text": "The ball has gone for a throw."
+    },
+    {
+      "id": "phrase.commentator.setpiece.goal_kick.01",
+      "speaker": "commentator",
+      "category": "goalKick",
+      "intensity": "calm",
+      "text": "Goal kick."
+    },
+    {
+      "id": "phrase.commentator.setpiece.goal_kick.02",
+      "speaker": "commentator",
+      "category": "goalKick",
+      "intensity": "calm",
+      "text": "The keeper can restart from the six yard box."
+    },
+    {
+      "id": "phrase.commentator.setpiece.free_kick.01",
+      "speaker": "commentator",
+      "category": "freeKick",
+      "intensity": "calm",
+      "text": "Free kick given."
+    },
+    {
+      "id": "phrase.commentator.setpiece.free_kick.02",
+      "speaker": "commentator",
+      "category": "freeKick",
+      "intensity": "calm",
+      "text": "A chance to put the ball into the area."
+    },
+    {
+      "id": "phrase.commentator.setpiece.free_kick.03",
+      "speaker": "commentator",
+      "category": "freeKick",
+      "intensity": "excited",
+      "text": "This is within shooting range."
+    },
+    {
+      "id": "phrase.commentator.setpiece.penalty.01",
+      "speaker": "commentator",
+      "category": "penalty",
+      "intensity": "big",
+      "text": "Penalty."
+    },
+    {
+      "id": "phrase.commentator.setpiece.penalty.02",
+      "speaker": "commentator",
+      "category": "penalty",
+      "intensity": "big",
+      "text": "The referee points to the spot."
+    },
+    {
+      "id": "phrase.commentator.setpiece.penalty.03",
+      "speaker": "commentator",
+      "category": "penalty",
+      "intensity": "big",
+      "text": "A massive penalty kick coming up."
+    },
+    {
+      "id": "phrase.commentator.discipline.foul.01",
+      "speaker": "commentator",
+      "category": "foul",
+      "intensity": "excited",
+      "text": "That's a foul!"
+    },
+    {
+      "id": "phrase.commentator.discipline.foul.02",
+      "speaker": "commentator",
+      "category": "foul",
+      "intensity": "excited",
+      "text": "The referee had a clear view of that!"
+    },
+    {
+      "id": "phrase.commentator.discipline.foul.03",
+      "speaker": "commentator",
+      "category": "foul",
+      "intensity": "excited",
+      "text": "Too much contact, and the whistle goes!"
+    },
+    {
+      "id": "phrase.commentator.discipline.foul.04",
+      "speaker": "commentator",
+      "category": "foul",
+      "intensity": "excited",
+      "text": "The challenge was mistimed!"
+    },
+    {
+      "id": "phrase.commentator.discipline.yellow.01",
+      "speaker": "commentator",
+      "category": "yellowCard",
+      "intensity": "excited",
+      "text": "Yellow card!"
+    },
+    {
+      "id": "phrase.commentator.discipline.yellow.02",
+      "speaker": "commentator",
+      "category": "yellowCard",
+      "intensity": "excited",
+      "text": "The referee reaches for a booking!"
+    },
+    {
+      "id": "phrase.commentator.discipline.yellow.03",
+      "speaker": "commentator",
+      "category": "yellowCard",
+      "intensity": "excited",
+      "text": "He's in the book now!"
+    },
+    {
+      "id": "phrase.commentator.discipline.red.01",
+      "speaker": "commentator",
+      "category": "redCard",
+      "intensity": "big",
+      "text": "Red card!"
+    },
+    {
+      "id": "phrase.commentator.discipline.red.02",
+      "speaker": "commentator",
+      "category": "redCard",
+      "intensity": "big",
+      "text": "He's sent off!"
+    },
+    {
+      "id": "phrase.commentator.discipline.red.03",
+      "speaker": "commentator",
+      "category": "redCard",
+      "intensity": "big",
+      "text": "The referee's made the big decision!"
+    },
+    {
+      "id": "phrase.commentator.offside.01",
+      "speaker": "commentator",
+      "category": "offside",
+      "intensity": "calm",
+      "text": "The flag is up for offside."
+    },
+    {
+      "id": "phrase.commentator.offside.02",
+      "speaker": "commentator",
+      "category": "offside",
+      "intensity": "calm",
+      "text": "He had moved too early."
+    },
+    {
+      "id": "phrase.commentator.offside.03",
+      "speaker": "commentator",
+      "category": "offside",
+      "intensity": "calm",
+      "text": "Offside is the decision."
+    },
+    {
+      "id": "phrase.commentator.offside.04",
+      "speaker": "commentator",
+      "category": "offside",
+      "intensity": "calm",
+      "text": "The assistant had the flag up straight away."
+    },
+    {
+      "id": "phrase.commentator.time.half_time.01",
+      "speaker": "commentator",
+      "category": "halfTime",
+      "intensity": "calm",
+      "text": "That's half time."
+    },
+    {
+      "id": "phrase.commentator.time.half_time.02",
+      "speaker": "commentator",
+      "category": "halfTime",
+      "intensity": "calm",
+      "text": "The referee brings the first half to a close."
+    },
+    {
+      "id": "phrase.commentator.time.full_time.01",
+      "speaker": "commentator",
+      "category": "fullTime",
+      "intensity": "big",
+      "text": "Full time."
+    },
+    {
+      "id": "phrase.commentator.time.full_time.02",
+      "speaker": "commentator",
+      "category": "fullTime",
+      "intensity": "big",
+      "text": "That's the final whistle!"
+    },
+    {
+      "id": "phrase.commentator.time.signoff.01",
+      "speaker": "commentator",
+      "category": "fullTime",
+      "intensity": "calm",
+      "text": "From Malcolm Grange and Jimmy Michaels, thanks for joining us."
+    },
+    {
+      "id": "phrase.commentator.time.extra_time.01",
+      "speaker": "commentator",
+      "category": "extraTime",
+      "intensity": "calm",
+      "text": "We are heading into extra time."
+    },
+    {
+      "id": "phrase.commentator.time.penalties.01",
+      "speaker": "commentator",
+      "category": "penalties",
+      "intensity": "big",
+      "text": "Penalties will decide it."
+    },
+    {
+      "id": "phrase.pundit.analysis.shape.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "The midfield line needs to be braver there."
+    },
+    {
+      "id": "phrase.pundit.analysis.shape.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "They are defending the box, but not the pass into it."
+    },
+    {
+      "id": "phrase.pundit.analysis.shape.03",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "The back four have to hold their line better."
+    },
+    {
+      "id": "phrase.pundit.analysis.shape.04",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "There is too much space between defence and midfield."
+    },
+    {
+      "id": "phrase.pundit.analysis.press.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "That press worked because the nearest midfielder stepped in."
+    },
+    {
+      "id": "phrase.pundit.analysis.press.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "If they press like that, the wide players must cover behind."
+    },
+    {
+      "id": "phrase.pundit.analysis.attack.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "The run across the defender made the chance."
+    },
+    {
+      "id": "phrase.pundit.analysis.attack.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "That was good movement, but the final pass needed more care."
+    },
+    {
+      "id": "phrase.pundit.analysis.attack.03",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "They are getting joy when they move it early."
+    },
+    {
+      "id": "phrase.pundit.analysis.attack.04",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "The striker has pinned both centre backs there."
+    },
+    {
+      "id": "phrase.pundit.analysis.save.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "That's excellent goalkeeping because he stays big for as long as possible."
+    },
+    {
+      "id": "phrase.pundit.analysis.save.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "The save looks simple, but the footwork before it is the important bit."
+    },
+    {
+      "id": "phrase.pundit.analysis.goal.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "excited",
+      "text": "That goal is all about the timing of the run."
+    },
+    {
+      "id": "phrase.pundit.analysis.goal.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "excited",
+      "text": "The finish is good, but the pass before it is even better."
+    },
+    {
+      "id": "phrase.pundit.analysis.goal.03",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "excited",
+      "text": "They earned that by moving the ball with speed."
+    },
+    {
+      "id": "phrase.pundit.analysis.goal.04",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "excited",
+      "text": "The goalkeeper had no chance once the shot went across him."
+    },
+    {
+      "id": "phrase.pundit.analysis.foul.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "That's the kind of foul that comes from being half a yard late."
+    },
+    {
+      "id": "phrase.pundit.analysis.foul.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "The referee has managed that sensibly."
+    },
+    {
+      "id": "phrase.pundit.analysis.offside.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "The forward has to watch the defensive line there."
+    },
+    {
+      "id": "phrase.pundit.analysis.offside.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "It's a good line from the defence."
+    },
+    {
+      "id": "phrase.pundit.analysis.setpiece.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Set pieces are where concentration matters most."
+    },
+    {
+      "id": "phrase.pundit.analysis.setpiece.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "The first defender has to attack this delivery."
+    },
+    {
+      "id": "phrase.pundit.analysis.penalty.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "big",
+      "text": "This is as much nerve as technique now."
+    },
+    {
+      "id": "phrase.pundit.analysis.penalty.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "big",
+      "text": "The taker has to commit and trust the strike."
+    },
+    {
+      "id": "phrase.pundit.analysis.half_time.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "At half time, the big thing is whether the midfield can keep the back line connected."
+    },
+    {
+      "id": "phrase.pundit.analysis.half_time.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "The first half had spells of control, but both sides can still be sharper in the final third."
+    },
+    {
+      "id": "phrase.pundit.analysis.full_time.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Over the whole match, the side that managed the ball better deserved the result."
+    },
+    {
+      "id": "phrase.pundit.analysis.full_time.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "There were spells where both teams had control, but the decisive moments mattered."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "I think the first twenty minutes will tell us plenty. Whoever settles on the ball should control the rhythm."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook.02",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "The key for me is how quickly both midfields get close to their back four. If the gaps open, there'll be chances."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook.03",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Set pieces could matter today. There are a few players out there who'll attack the first ball with real intent."
+    },
+    {
+      "id": "phrase.pundit.analysis.goal.05",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "excited",
+      "text": "That's exactly what you want in the box: one touch, no hesitation, finish it."
+    },
+    {
+      "id": "phrase.pundit.analysis.goal.06",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "excited",
+      "text": "The defending is stretched, but the run makes the finish possible."
+    },
+    {
+      "id": "phrase.pundit.analysis.save.03",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "He reads the strike early and gets his body behind the line of the ball."
+    },
+    {
+      "id": "phrase.pundit.analysis.save.04",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Good goalkeeping isn't always pretty. That's about narrowing the angle and staying set."
+    },
+    {
+      "id": "phrase.pundit.analysis.miss.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "The idea is right, but he opens his body a fraction too early."
+    },
+    {
+      "id": "phrase.pundit.analysis.miss.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "That's a warning for the defence. The next one might not miss."
+    },
+    {
+      "id": "phrase.pundit.analysis.shape.05",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "The back line has to move with the midfield there, not sit on top of the keeper."
+    },
+    {
+      "id": "phrase.pundit.analysis.shape.06",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "They're compact now, and that makes the pass through the middle much harder."
+    },
+    {
+      "id": "phrase.pundit.dialogue.gk.01",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "He's a steady goalkeeper. His starting position gives the defenders confidence."
+    },
+    {
+      "id": "phrase.pundit.dialogue.df.01",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "He's a defender who likes to step in early. The important thing is keeping the line connected."
+    },
+    {
+      "id": "phrase.pundit.dialogue.mf.01",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "He's a good midfield player. He keeps the ball moving and gives the team a rhythm."
+    },
+    {
+      "id": "phrase.pundit.dialogue.fw.01",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "He's a dangerous forward. If the service comes early, he'll keep the centre backs busy."
+    },
+    {
+      "id": "phrase.pundit.dialogue.gk.02",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "For a keeper, the calm decisions matter as much as the saves."
+    },
+    {
+      "id": "phrase.pundit.dialogue.df.02",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "For a defender, the best work is often done before the tackle has to be made."
+    },
+    {
+      "id": "phrase.pundit.dialogue.mf.02",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "In midfield, he's got to play with his head up and spot the runners."
+    },
+    {
+      "id": "phrase.pundit.dialogue.fw.02",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "As a forward, it's all about timing the movement and staying sharp in the box."
+    },
+    {
+      "id": "phrase.commentator.goal.direct_extra.01",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "It's there! What a strike!",
+      "previousText": "A shot flies towards the top corner.",
+      "nextText": "The ground erupts behind the goal."
+    },
+    {
+      "id": "phrase.commentator.goal.direct_extra.02",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "Oh, that is top drawer!",
+      "previousText": "The ball is lashed beyond the goalkeeper.",
+      "nextText": "The scorer wheels away towards the corner flag."
+    },
+    {
+      "id": "phrase.commentator.goal.direct_extra.03",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "He's buried it!",
+      "previousText": "A chance falls in the heart of the box.",
+      "nextText": "The net is still shaking."
+    },
+    {
+      "id": "phrase.commentator.goal.direct_extra.04",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "Into the roof of the net! Magnificent!",
+      "previousText": "The strike is hit with venom from close range.",
+      "nextText": "Teammates pile in to celebrate."
+    },
+    {
+      "id": "phrase.commentator.goal.direct_extra.05",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "That's a goal worthy of winning any match!",
+      "previousText": "A sweeping move ends with a clinical finish.",
+      "nextText": "The supporters are on their feet."
+    },
+    {
+      "id": "phrase.commentator.goal.direct_extra.06",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "In off the upright! They all count!",
+      "previousText": "The shot clips the post on its way through.",
+      "nextText": "The goalkeeper can only look back at the net."
+    },
+    {
+      "id": "phrase.commentator.goal.direct_extra.07",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "He's caught that one sweetly and it flies in!",
+      "previousText": "The ball sits up nicely on the edge of the area.",
+      "nextText": "A roar goes round the ground."
+    },
+    {
+      "id": "phrase.commentator.goal.direct_extra.08",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "What a finish! Right into the corner!",
+      "previousText": "The forward steadies himself in the box.",
+      "nextText": "The bench is up celebrating."
+    },
+    {
+      "id": "phrase.commentator.goal.direct_extra.09",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "The keeper had no chance whatsoever!",
+      "previousText": "The shot arrows towards the far corner.",
+      "nextText": "The defence stands with hands on hips."
+    },
+    {
+      "id": "phrase.commentator.goal.direct_extra.10",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "Oh yes! That is special!",
+      "previousText": "The ball drops invitingly outside the area.",
+      "nextText": "The crowd salutes a wonderful goal."
+    },
+    {
+      "id": "phrase.commentator.goal.direct_extra.11",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "It's flown in! Absolutely flown in!",
+      "previousText": "A thunderous effort beats the goalkeeper all ends up.",
+      "nextText": "Even the away end applauds that."
+    },
+    {
+      "id": "phrase.commentator.goal.direct_extra.12",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "A goal of the highest quality!",
+      "previousText": "A flowing move is finished in style.",
+      "nextText": "The replay will be worth watching again."
+    },
+    {
+      "id": "phrase.commentator.goal.context.01",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "equalizer",
+      "text": "And they're level! All square once more!",
+      "previousText": "The trailing side finally finds the net.",
+      "nextText": "The match has come alive again."
+    },
+    {
+      "id": "phrase.commentator.goal.context.02",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "equalizer",
+      "text": "The equaliser! Right back in it!",
+      "previousText": "The pressure tells and the ball crosses the line.",
+      "nextText": "Everything to play for now."
+    },
+    {
+      "id": "phrase.commentator.goal.context.03",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "equalizer",
+      "text": "They've pulled themselves level! Game on!",
+      "previousText": "A scramble in the box ends with a goal.",
+      "nextText": "Both benches are animated."
+    },
+    {
+      "id": "phrase.commentator.goal.context.04",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "lead",
+      "text": "And now they lead! The advantage is theirs!",
+      "previousText": "The deadlock is broken at last.",
+      "nextText": "The scorers' end is bouncing."
+    },
+    {
+      "id": "phrase.commentator.goal.context.05",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "lead",
+      "text": "They've got their noses in front!",
+      "previousText": "A patient spell ends with a decisive finish.",
+      "nextText": "The opposition must respond now."
+    },
+    {
+      "id": "phrase.commentator.goal.context.06",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "lead",
+      "text": "The breakthrough, and they lead!",
+      "previousText": "A tight contest is tipped by a single moment.",
+      "nextText": "The manager punches the air on the touchline."
+    },
+    {
+      "id": "phrase.commentator.goal.context.07",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "extend",
+      "text": "And there's more! Daylight between the sides now!",
+      "previousText": "The leading side strikes again.",
+      "nextText": "The travelling supporters fall quiet."
+    },
+    {
+      "id": "phrase.commentator.goal.context.08",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "extend",
+      "text": "They've added to the lead! Surely safe now!",
+      "previousText": "The dominant side finds another goal.",
+      "nextText": "Heads are starting to drop in defence."
+    },
+    {
+      "id": "phrase.commentator.goal.context.09",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "extend",
+      "text": "The cushion grows! They're in complete control!",
+      "previousText": "Another wave of attack brings another goal.",
+      "nextText": "This is turning into a comfortable afternoon."
+    },
+    {
+      "id": "phrase.commentator.goal.context.10",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "late",
+      "text": "A goal at the death! Astonishing scenes!",
+      "previousText": "Deep into the closing stages the ball finds the net.",
+      "nextText": "The ground has gone wild."
+    },
+    {
+      "id": "phrase.commentator.goal.context.11",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "late",
+      "text": "Late, late drama! Would you believe it!",
+      "previousText": "The clock is almost done when the chance arrives.",
+      "nextText": "There is barely time to restart."
+    },
+    {
+      "id": "phrase.commentator.goal.context.12",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "late",
+      "text": "In the dying moments! What a time to score!",
+      "previousText": "A final attack produces the goal.",
+      "nextText": "The bench can hardly contain themselves."
+    },
+    {
+      "id": "phrase.commentator.goal.context.13",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "early",
+      "text": "An early goal! Barely time to settle!",
+      "previousText": "The match has only just begun.",
+      "nextText": "What a start to the contest."
+    },
+    {
+      "id": "phrase.commentator.goal.context.14",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "early",
+      "text": "They've struck inside the opening minutes!",
+      "previousText": "The first attack of the game brings a goal.",
+      "nextText": "The plans of the opposition are torn up already."
+    },
+    {
+      "id": "phrase.commentator.goal.context.15",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "early",
+      "text": "What a start this is!",
+      "previousText": "The net bulges with the game still young.",
+      "nextText": "The crowd has barely found its seats."
+    },
+    {
+      "id": "phrase.commentator.goal.context.16",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "consolation",
+      "text": "They've pulled a goal back, but the mountain remains!",
+      "previousText": "The trailing side finds some reward at last.",
+      "nextText": "Is there time for an unlikely comeback?"
+    },
+    {
+      "id": "phrase.commentator.goal.context.17",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "consolation",
+      "text": "A lifeline, perhaps! Still work to do!",
+      "previousText": "The deficit is reduced with a sharp finish.",
+      "nextText": "The scorers hurry the ball back to the centre circle."
+    },
+    {
+      "id": "phrase.commentator.goal.context.18",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "context": "consolation",
+      "text": "A goal back, but they're still behind!",
+      "previousText": "A rare attack brings a goal against the run of play.",
+      "nextText": "The leaders look rattled for the first time."
+    },
+    {
+      "id": "phrase.commentator.goal.scorer_only.03",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "And the man responsible is",
+      "previousText": "The celebrations spill towards the corner flag.",
+      "nextText": "and he is mobbed by his teammates!"
+    },
+    {
+      "id": "phrase.commentator.goal.scorer_only.04",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "Who else but",
+      "previousText": "The crowd already knows who struck it.",
+      "nextText": "with the decisive touch!"
+    },
+    {
+      "id": "phrase.commentator.goal.scorer_only.05",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "The goal belongs to",
+      "previousText": "The ball is fished out of the net.",
+      "nextText": "and what a moment for him!"
+    },
+    {
+      "id": "phrase.commentator.goal.scorer_only.06",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "Take a bow",
+      "previousText": "The scorer milks the applause.",
+      "nextText": "because that was something special!"
+    },
+    {
+      "id": "phrase.commentator.goal.for_team.02",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "And it's a goal for",
+      "previousText": "The referee signals and the goal stands.",
+      "nextText": "and the celebrations begin!"
+    },
+    {
+      "id": "phrase.commentator.goal.for_team.03",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "What a moment for",
+      "previousText": "The ball nestles in the corner of the net.",
+      "nextText": "and their supporters behind the goal!"
+    },
+    {
+      "id": "phrase.commentator.goal.for_team.04",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "big",
+      "text": "The breakthrough belongs to",
+      "previousText": "A long spell of pressure finally pays off.",
+      "nextText": "and it has been coming!"
+    },
+    {
+      "id": "phrase.commentator.goal.score_now.02",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "excited",
+      "text": "So the score now stands at",
+      "previousText": "The celebrations die down and play is set to resume.",
+      "nextText": "with plenty of football still to be played."
+    },
+    {
+      "id": "phrase.commentator.goal.score_now.03",
+      "speaker": "commentator",
+      "category": "goal",
+      "intensity": "excited",
+      "text": "And that makes it",
+      "previousText": "The scoreboard ticks over after the goal.",
+      "nextText": "here this afternoon."
+    },
+    {
+      "id": "phrase.commentator.pass.to.05",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "slides it across to",
+      "previousText": "The ball is moved along the edge of midfield.",
+      "nextText": "and the move carries on."
+    },
+    {
+      "id": "phrase.commentator.pass.to.06",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "rolls it square for",
+      "previousText": "There is no pressure on the ball just yet.",
+      "nextText": "to take up possession."
+    },
+    {
+      "id": "phrase.commentator.pass.to.07",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "plays it up to",
+      "previousText": "The pass is measured from deep.",
+      "nextText": "with his back to goal."
+    },
+    {
+      "id": "phrase.commentator.pass.to.08",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "knocks it back to",
+      "previousText": "The simple option is taken.",
+      "nextText": "who keeps things ticking over."
+    },
+    {
+      "id": "phrase.commentator.pass.to.09",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "lays it off for",
+      "previousText": "A neat touch around the halfway line.",
+      "nextText": "arriving in support."
+    },
+    {
+      "id": "phrase.commentator.pass.to.10",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "clips it out to",
+      "previousText": "The play is switched towards the touchline.",
+      "nextText": "in a little pocket of space."
+    },
+    {
+      "id": "phrase.commentator.pass.to.11",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "works it along to",
+      "previousText": "The move is patient and unhurried.",
+      "nextText": "who has time to pick his head up."
+    },
+    {
+      "id": "phrase.commentator.pass.to.12",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "nudges it inside for",
+      "previousText": "The ball is shifted away from the flank.",
+      "nextText": "between the lines."
+    },
+    {
+      "id": "phrase.commentator.pass.tries_find.02",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "looks long for",
+      "previousText": "The head goes up and the option is upfield.",
+      "nextText": "making a run beyond the back line."
+    },
+    {
+      "id": "phrase.commentator.pass.tries_find.03",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "hits a hopeful ball towards",
+      "previousText": "There is little on, so the ball goes forward.",
+      "nextText": "in the channel."
+    },
+    {
+      "id": "phrase.commentator.pass.tries_find.04",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "tries to thread it through to",
+      "previousText": "A gap appears in the defensive line.",
+      "nextText": "but the angle is tight."
+    },
+    {
+      "id": "phrase.commentator.pass.tries_find.05",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "goes searching for",
+      "previousText": "The pass is more in hope than expectation.",
+      "nextText": "down the far side."
+    },
+    {
+      "id": "phrase.commentator.pass.picks_out.02",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "threads it beautifully into",
+      "previousText": "A lovely ball is played between the defenders.",
+      "nextText": "and the move quickens."
+    },
+    {
+      "id": "phrase.commentator.pass.picks_out.03",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "picks out the run of",
+      "previousText": "The pass is weighted just right.",
+      "nextText": "in behind the defence."
+    },
+    {
+      "id": "phrase.commentator.pass.picks_out.04",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "slips a lovely ball into",
+      "previousText": "The defence is opened with one pass.",
+      "nextText": "who takes it in his stride."
+    },
+    {
+      "id": "phrase.commentator.pass.picks_out.05",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "opens them up for",
+      "previousText": "The clever pass cuts through the middle.",
+      "nextText": "with space to attack."
+    },
+    {
+      "id": "phrase.commentator.pass.now_has.02",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "Now it falls to",
+      "previousText": "Possession is exchanged in midfield.",
+      "nextText": "to make something happen."
+    },
+    {
+      "id": "phrase.commentator.pass.now_has.03",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "It drops kindly for",
+      "previousText": "A loose ball bounces in midfield.",
+      "nextText": "who gathers it cleanly."
+    },
+    {
+      "id": "phrase.commentator.pass.now_has.04",
+      "speaker": "commentator",
+      "category": "pass",
+      "intensity": "calm",
+      "text": "And here comes",
+      "previousText": "Space opens up ahead of the ball carrier.",
+      "nextText": "striding forward with purpose."
+    },
+    {
+      "id": "phrase.commentator.shot.extra.01",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "excited",
+      "text": "He shapes to shoot, and lets it go!",
+      "previousText": "The defender backs off outside the area.",
+      "nextText": "Everyone in the ground follows the flight."
+    },
+    {
+      "id": "phrase.commentator.shot.extra.02",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "calm",
+      "text": "A snap shot from the edge of the area.",
+      "previousText": "The ball breaks loose near the box.",
+      "nextText": "The goalkeeper adjusts his feet quickly."
+    },
+    {
+      "id": "phrase.commentator.shot.extra.03",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "excited",
+      "text": "Hit on the half volley!",
+      "previousText": "The ball drops over the shoulder.",
+      "nextText": "The crowd holds its breath."
+    },
+    {
+      "id": "phrase.commentator.shot.extra.04",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "calm",
+      "text": "He drills it low towards the near post.",
+      "previousText": "An angle opens up on the right side of the box.",
+      "nextText": "The keeper scrambles across his line."
+    },
+    {
+      "id": "phrase.commentator.shot.extra.05",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "excited",
+      "text": "What a hit that is!",
+      "previousText": "The strike is unleashed from distance.",
+      "nextText": "The whole ground rises to watch it."
+    },
+    {
+      "id": "phrase.commentator.shot.extra.06",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "calm",
+      "text": "An optimistic effort from range.",
+      "previousText": "The shot is taken on early.",
+      "nextText": "The bench wanted a pass there."
+    },
+    {
+      "id": "phrase.commentator.shot.extra.07",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "excited",
+      "text": "He's caught it sweetly!",
+      "previousText": "The ball sits up perfectly to be struck.",
+      "nextText": "It fizzes towards the target."
+    },
+    {
+      "id": "phrase.commentator.shot.extra.08",
+      "speaker": "commentator",
+      "category": "shot",
+      "intensity": "calm",
+      "text": "Worked onto his stronger foot and struck.",
+      "previousText": "A clever shimmy buys half a yard.",
+      "nextText": "The effort is on its way."
+    },
+    {
+      "id": "phrase.commentator.save.extra.01",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "excited",
+      "text": "Tipped over the bar!",
+      "previousText": "The shot climbs towards the top corner.",
+      "nextText": "The corner flag awaits."
+    },
+    {
+      "id": "phrase.commentator.save.extra.02",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "big",
+      "text": "What a save! Simply magnificent!",
+      "previousText": "The header looks destined for the net.",
+      "nextText": "The defenders rush to congratulate their keeper."
+    },
+    {
+      "id": "phrase.commentator.save.extra.03",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "excited",
+      "text": "Down smartly at the foot of the post!",
+      "previousText": "A low drive skids towards the corner.",
+      "nextText": "The danger is smothered."
+    },
+    {
+      "id": "phrase.commentator.save.extra.04",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "big",
+      "text": "He's clawed it off the line! Remarkable!",
+      "previousText": "The ball seems certain to cross the line.",
+      "nextText": "Nobody inside the ground can quite believe it."
+    },
+    {
+      "id": "phrase.commentator.save.extra.05",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "excited",
+      "text": "Beaten away to safety!",
+      "previousText": "The strike is firm and on target.",
+      "nextText": "The rebound is cleared upfield."
+    },
+    {
+      "id": "phrase.commentator.save.extra.06",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "excited",
+      "text": "Fingertips! Just enough to turn it past!",
+      "previousText": "The shot bends late towards the corner.",
+      "nextText": "The keeper picks himself up slowly."
+    },
+    {
+      "id": "phrase.commentator.save.extra.07",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "big",
+      "text": "Oh, that is goalkeeping of the highest order!",
+      "previousText": "A point blank effort is somehow kept out.",
+      "nextText": "The forward cannot believe it has stayed out."
+    },
+    {
+      "id": "phrase.commentator.save.extra.08",
+      "speaker": "commentator",
+      "category": "save",
+      "intensity": "excited",
+      "text": "He stood tall and kept it out!",
+      "previousText": "The striker bears down on goal.",
+      "nextText": "A vital stop at a vital time."
+    },
+    {
+      "id": "phrase.commentator.near_miss.extra.01",
+      "speaker": "commentator",
+      "category": "nearMiss",
+      "intensity": "excited",
+      "text": "Inches wide! So close!",
+      "previousText": "The shot beats the goalkeeper's dive.",
+      "nextText": "The crowd lets out a collective groan."
+    },
+    {
+      "id": "phrase.commentator.near_miss.extra.02",
+      "speaker": "commentator",
+      "category": "nearMiss",
+      "intensity": "excited",
+      "text": "It shaves the upright on its way past!",
+      "previousText": "The effort curls towards the far post.",
+      "nextText": "A goal kick is the harsh reward."
+    },
+    {
+      "id": "phrase.commentator.near_miss.extra.03",
+      "speaker": "commentator",
+      "category": "nearMiss",
+      "intensity": "excited",
+      "text": "Over the top! Agonisingly close!",
+      "previousText": "The strike climbs from the edge of the box.",
+      "nextText": "The shooter holds his head in his hands."
+    },
+    {
+      "id": "phrase.commentator.near_miss.extra.04",
+      "speaker": "commentator",
+      "category": "nearMiss",
+      "intensity": "excited",
+      "text": "He's dragged it just past the post!",
+      "previousText": "The chance opens up on the left side.",
+      "nextText": "The keeper breathes again."
+    },
+    {
+      "id": "phrase.commentator.near_miss.extra.05",
+      "speaker": "commentator",
+      "category": "nearMiss",
+      "intensity": "excited",
+      "text": "A whisker away! The crowd gasps!",
+      "previousText": "The deflected effort drifts goalward.",
+      "nextText": "Play restarts with nerves jangling."
+    },
+    {
+      "id": "phrase.commentator.near_miss.extra.06",
+      "speaker": "commentator",
+      "category": "nearMiss",
+      "intensity": "excited",
+      "text": "It flashes across the face of goal!",
+      "previousText": "The low ball fizzes through the box.",
+      "nextText": "Nobody could apply the final touch."
+    },
+    {
+      "id": "phrase.commentator.near_miss.extra.07",
+      "speaker": "commentator",
+      "category": "nearMiss",
+      "intensity": "excited",
+      "text": "Skimmed the crossbar! Almost something special!",
+      "previousText": "An ambitious effort from long range.",
+      "nextText": "The keeper was rooted to the spot."
+    },
+    {
+      "id": "phrase.commentator.near_miss.extra.08",
+      "speaker": "commentator",
+      "category": "nearMiss",
+      "intensity": "excited",
+      "text": "How has that stayed out? Just wide!",
+      "previousText": "A goalmouth scramble ends with a shot.",
+      "nextText": "The defence finally clears its lines."
+    },
+    {
+      "id": "phrase.commentator.post.extra.01",
+      "speaker": "commentator",
+      "category": "post",
+      "intensity": "big",
+      "text": "The post! It's come back off the post!",
+      "previousText": "The strike beats the goalkeeper completely.",
+      "nextText": "The rebound bounces clear of danger."
+    },
+    {
+      "id": "phrase.commentator.post.extra.02",
+      "speaker": "commentator",
+      "category": "post",
+      "intensity": "big",
+      "text": "Rattled the crossbar! So nearly in!",
+      "previousText": "A dipping effort drops late.",
+      "nextText": "The bar is still trembling."
+    },
+    {
+      "id": "phrase.commentator.post.extra.03",
+      "speaker": "commentator",
+      "category": "post",
+      "intensity": "big",
+      "text": "The woodwork saves them! Unbelievable!",
+      "previousText": "The keeper is stranded as the shot flies in.",
+      "nextText": "The defenders hack the loose ball away."
+    },
+    {
+      "id": "phrase.commentator.post.extra.04",
+      "speaker": "commentator",
+      "category": "post",
+      "intensity": "big",
+      "text": "Off the bar and away! Inches from a goal!",
+      "previousText": "The header is powered towards goal.",
+      "nextText": "Both sets of players stand frozen for a moment."
+    },
+    {
+      "id": "phrase.commentator.attack.extra.01",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "They pour forward in numbers.",
+      "previousText": "The break is on after a turnover.",
+      "nextText": "Defenders scramble to get back."
+    },
+    {
+      "id": "phrase.commentator.attack.extra.02",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "This is a dangerous position now.",
+      "previousText": "The ball is carried to the edge of the final third.",
+      "nextText": "The back line drops deeper and deeper."
+    },
+    {
+      "id": "phrase.commentator.attack.extra.03",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "The full back has joined the attack!",
+      "previousText": "An overlap develops down the flank.",
+      "nextText": "There is an overload on the far side."
+    },
+    {
+      "id": "phrase.commentator.attack.extra.04",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "Suddenly there is room to run into!",
+      "previousText": "The midfield is bypassed with one pass.",
+      "nextText": "The crowd urges them forward."
+    },
+    {
+      "id": "phrase.commentator.attack.extra.05",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "They've turned the defence completely!",
+      "previousText": "A flick sends the ball in behind.",
+      "nextText": "The covering defender is in a foot race."
+    },
+    {
+      "id": "phrase.commentator.attack.extra.06",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "All of a sudden the game has opened up.",
+      "previousText": "Both sides trade attacks at pace.",
+      "nextText": "Chances feel close at either end."
+    },
+    {
+      "id": "phrase.commentator.attack.extra.07",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "A good ball here and they're in!",
+      "previousText": "The runners stretch the defence either side.",
+      "nextText": "The final pass is everything now."
+    },
+    {
+      "id": "phrase.commentator.attack.extra.08",
+      "speaker": "commentator",
+      "category": "attack",
+      "intensity": "excited",
+      "text": "The back line is retreating and inviting pressure.",
+      "previousText": "The attack builds steadily through midfield.",
+      "nextText": "The shooting chance may arrive any moment."
+    },
+    {
+      "id": "phrase.commentator.possession.player.05",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "Plenty of time here for",
+      "previousText": "The tempo drops for a moment.",
+      "nextText": "to weigh up his options."
+    },
+    {
+      "id": "phrase.commentator.possession.player.06",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "Calmly collected by",
+      "previousText": "The loose ball is gathered without fuss.",
+      "nextText": "in the middle of the park."
+    },
+    {
+      "id": "phrase.commentator.possession.player.07",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "Composure here from",
+      "previousText": "Opponents close in but the touch is assured.",
+      "nextText": "to keep the move alive."
+    },
+    {
+      "id": "phrase.commentator.possession.player.08",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "A tidy touch from",
+      "previousText": "The ball is brought under control instantly.",
+      "nextText": "to take it away from trouble."
+    },
+    {
+      "id": "phrase.commentator.possession.player.09",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "No rush at all from",
+      "previousText": "The game settles into a quieter rhythm.",
+      "nextText": "as he strolls forward with it."
+    },
+    {
+      "id": "phrase.commentator.possession.player.10",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "Held up nicely by",
+      "previousText": "The forward shields the ball from his marker.",
+      "nextText": "waiting for support to arrive."
+    },
+    {
+      "id": "phrase.commentator.possession.team.05",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "An unhurried spell from",
+      "previousText": "The ball is passed around the back.",
+      "nextText": "as they look to draw the press."
+    },
+    {
+      "id": "phrase.commentator.possession.team.06",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "All very comfortable for",
+      "previousText": "The opposition sits off and waits.",
+      "nextText": "at this stage of the game."
+    },
+    {
+      "id": "phrase.commentator.possession.team.07",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "No urgency just yet from",
+      "previousText": "The move is built from deep positions.",
+      "nextText": "as they probe for an opening."
+    },
+    {
+      "id": "phrase.commentator.possession.team.08",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "It's all",
+      "previousText": "One side has taken charge of the ball.",
+      "nextText": "at the moment, in fairness."
+    },
+    {
+      "id": "phrase.commentator.possession.team.09",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "The tempo is being set by",
+      "previousText": "The pattern of the half is becoming clear.",
+      "nextText": "in the middle of the pitch."
+    },
+    {
+      "id": "phrase.commentator.possession.team.10",
+      "speaker": "commentator",
+      "category": "possession",
+      "intensity": "calm",
+      "text": "Plenty of the ball just now for",
+      "previousText": "The passing is patient and deliberate.",
+      "nextText": "without seriously threatening yet."
+    },
+    {
+      "id": "phrase.commentator.setpiece.corner.extra.01",
+      "speaker": "commentator",
+      "category": "corner",
+      "intensity": "calm",
+      "text": "Flag kick on the far side.",
+      "previousText": "The ball is touched behind by a defender.",
+      "nextText": "The taker trots over to the quadrant."
+    },
+    {
+      "id": "phrase.commentator.setpiece.corner.extra.02",
+      "speaker": "commentator",
+      "category": "corner",
+      "intensity": "calm",
+      "text": "He'll swing this one in from the corner.",
+      "previousText": "The ball is placed in the quadrant.",
+      "nextText": "The box fills with bodies."
+    },
+    {
+      "id": "phrase.commentator.setpiece.corner.extra.03",
+      "speaker": "commentator",
+      "category": "corner",
+      "intensity": "excited",
+      "text": "The big men are forward for this corner!",
+      "previousText": "The centre halves make their way upfield.",
+      "nextText": "Markers grab hold of shirts in the box."
+    },
+    {
+      "id": "phrase.commentator.setpiece.corner.extra.04",
+      "speaker": "commentator",
+      "category": "corner",
+      "intensity": "excited",
+      "text": "Bodies everywhere in the box as the corner waits!",
+      "previousText": "There is pushing and shoving before the delivery.",
+      "nextText": "The referee has a word before allowing it."
+    },
+    {
+      "id": "phrase.commentator.setpiece.throwIn.extra.01",
+      "speaker": "commentator",
+      "category": "throwIn",
+      "intensity": "calm",
+      "text": "A throw to be taken deep in the corner.",
+      "previousText": "The ball trickles out of play.",
+      "nextText": "The defence pushes up while it can."
+    },
+    {
+      "id": "phrase.commentator.setpiece.throwIn.extra.02",
+      "speaker": "commentator",
+      "category": "throwIn",
+      "intensity": "calm",
+      "text": "He wipes the ball and looks for options.",
+      "previousText": "The thrower takes his time over it.",
+      "nextText": "Teammates shuffle along the touchline."
+    },
+    {
+      "id": "phrase.commentator.setpiece.throwIn.extra.03",
+      "speaker": "commentator",
+      "category": "throwIn",
+      "intensity": "calm",
+      "text": "A long throw might cause problems here.",
+      "previousText": "The throw is within range of the penalty area.",
+      "nextText": "The keeper barks instructions at his defence."
+    },
+    {
+      "id": "phrase.commentator.setpiece.throwIn.extra.04",
+      "speaker": "commentator",
+      "category": "throwIn",
+      "intensity": "calm",
+      "text": "Taken quickly to keep things moving.",
+      "previousText": "There is no delay at the touchline.",
+      "nextText": "Play flows on without a pause."
+    },
+    {
+      "id": "phrase.commentator.setpiece.goalKick.extra.01",
+      "speaker": "commentator",
+      "category": "goalKick",
+      "intensity": "calm",
+      "text": "The keeper will send this one long.",
+      "previousText": "The ball is placed for the goal kick.",
+      "nextText": "Heads go up around the centre circle."
+    },
+    {
+      "id": "phrase.commentator.setpiece.goalKick.extra.02",
+      "speaker": "commentator",
+      "category": "goalKick",
+      "intensity": "calm",
+      "text": "A welcome breather as the goal kick is placed.",
+      "previousText": "The attack fizzles out behind the goal.",
+      "nextText": "Both sides take a moment to reorganise."
+    },
+    {
+      "id": "phrase.commentator.setpiece.goalKick.extra.03",
+      "speaker": "commentator",
+      "category": "goalKick",
+      "intensity": "calm",
+      "text": "He thumps it towards the halfway line.",
+      "previousText": "The goal kick is struck firmly.",
+      "nextText": "The midfielders compete for the drop."
+    },
+    {
+      "id": "phrase.commentator.setpiece.freeKick.extra.01",
+      "speaker": "commentator",
+      "category": "freeKick",
+      "intensity": "calm",
+      "text": "The wall is being organised.",
+      "previousText": "The referee paces out the distance.",
+      "nextText": "The keeper lines everything up carefully."
+    },
+    {
+      "id": "phrase.commentator.setpiece.freeKick.extra.02",
+      "speaker": "commentator",
+      "category": "freeKick",
+      "intensity": "calm",
+      "text": "He places the ball and weighs up the options.",
+      "previousText": "The free kick sits in a tempting spot.",
+      "nextText": "A delivery or a strike, nobody is sure."
+    },
+    {
+      "id": "phrase.commentator.setpiece.freeKick.extra.03",
+      "speaker": "commentator",
+      "category": "freeKick",
+      "intensity": "calm",
+      "text": "A free kick in a useful position.",
+      "previousText": "The foul brings play to a halt.",
+      "nextText": "The attacking players gather around the ball."
+    },
+    {
+      "id": "phrase.commentator.setpiece.penalty.extra.01",
+      "speaker": "commentator",
+      "category": "penalty",
+      "intensity": "big",
+      "text": "A penalty! The ground holds its breath!",
+      "previousText": "The referee points straight to the spot.",
+      "nextText": "Protests are waved away."
+    },
+    {
+      "id": "phrase.commentator.setpiece.penalty.extra.02",
+      "speaker": "commentator",
+      "category": "penalty",
+      "intensity": "big",
+      "text": "It's a spot kick! An enormous moment!",
+      "previousText": "The challenge in the box is punished.",
+      "nextText": "The taker tries to clear his mind."
+    },
+    {
+      "id": "phrase.commentator.setpiece.penalty.extra.03",
+      "speaker": "commentator",
+      "category": "penalty",
+      "intensity": "big",
+      "text": "The keeper sets himself on his line!",
+      "previousText": "The ball sits on the penalty spot.",
+      "nextText": "The whole ground falls quiet."
+    },
+    {
+      "id": "phrase.commentator.foul.extra.01",
+      "speaker": "commentator",
+      "category": "foul",
+      "intensity": "calm",
+      "text": "The free kick is given against",
+      "previousText": "The whistle halts the move.",
+      "nextText": "and few could argue with that."
+    },
+    {
+      "id": "phrase.commentator.foul.extra.02",
+      "speaker": "commentator",
+      "category": "foul",
+      "intensity": "calm",
+      "text": "Careless from",
+      "previousText": "The challenge catches the man rather than the ball.",
+      "nextText": "and the referee spots it."
+    },
+    {
+      "id": "phrase.commentator.foul.extra.03",
+      "speaker": "commentator",
+      "category": "foul",
+      "intensity": "excited",
+      "text": "The whistle goes, and it's a foul by",
+      "previousText": "Bodies tangle in the middle of the park.",
+      "nextText": "right in front of the referee!"
+    },
+    {
+      "id": "phrase.commentator.foul.extra.04",
+      "speaker": "commentator",
+      "category": "foul",
+      "intensity": "calm",
+      "text": "A late challenge there from",
+      "previousText": "The ball had already gone when contact was made.",
+      "nextText": "and the referee has a quiet word."
+    },
+    {
+      "id": "phrase.commentator.foul.extra.05",
+      "speaker": "commentator",
+      "category": "foul",
+      "intensity": "excited",
+      "text": "The referee wants a word with",
+      "previousText": "Tempers flare after a heavy tackle.",
+      "nextText": "before play can continue!"
+    },
+    {
+      "id": "phrase.commentator.foul.extra.06",
+      "speaker": "commentator",
+      "category": "foul",
+      "intensity": "calm",
+      "text": "No complaints about that decision against",
+      "previousText": "The free kick is awarded without protest.",
+      "nextText": "and the game restarts quickly."
+    },
+    {
+      "id": "phrase.commentator.yellowCard.extra.01",
+      "speaker": "commentator",
+      "category": "yellowCard",
+      "intensity": "excited",
+      "text": "Into the book goes",
+      "previousText": "The referee reaches for his pocket.",
+      "nextText": "and he can have no complaints!"
+    },
+    {
+      "id": "phrase.commentator.yellowCard.extra.02",
+      "speaker": "commentator",
+      "category": "yellowCard",
+      "intensity": "excited",
+      "text": "A caution then for",
+      "previousText": "The card is raised above the referee's head.",
+      "nextText": "and he must be careful from here!"
+    },
+    {
+      "id": "phrase.commentator.yellowCard.extra.03",
+      "speaker": "commentator",
+      "category": "yellowCard",
+      "intensity": "excited",
+      "text": "The referee produces yellow for",
+      "previousText": "The foul was always going to be punished.",
+      "nextText": "after a cynical challenge!"
+    },
+    {
+      "id": "phrase.commentator.yellowCard.extra.04",
+      "speaker": "commentator",
+      "category": "yellowCard",
+      "intensity": "excited",
+      "text": "His name is taken, and it's",
+      "previousText": "The referee writes carefully in his notebook.",
+      "nextText": "who walks away shaking his head!"
+    },
+    {
+      "id": "phrase.commentator.redCard.extra.01",
+      "speaker": "commentator",
+      "category": "redCard",
+      "intensity": "big",
+      "text": "An early bath for",
+      "previousText": "The red card settles the argument.",
+      "nextText": "and his afternoon is over!"
+    },
+    {
+      "id": "phrase.commentator.redCard.extra.02",
+      "speaker": "commentator",
+      "category": "redCard",
+      "intensity": "big",
+      "text": "It's red! Off goes",
+      "previousText": "The referee makes the gravest call available to him.",
+      "nextText": "to a chorus of noise from the stands!"
+    },
+    {
+      "id": "phrase.commentator.redCard.extra.03",
+      "speaker": "commentator",
+      "category": "redCard",
+      "intensity": "big",
+      "text": "He's been dismissed! It's",
+      "previousText": "There is no reprieve from the referee.",
+      "nextText": "trudging down the tunnel!"
+    },
+    {
+      "id": "phrase.commentator.offside.extra.01",
+      "speaker": "commentator",
+      "category": "offside",
+      "intensity": "calm",
+      "text": "The flag cuts the move short.",
+      "previousText": "The through ball looks promising for a moment.",
+      "nextText": "The free kick is taken without fuss."
+    },
+    {
+      "id": "phrase.commentator.offside.extra.02",
+      "speaker": "commentator",
+      "category": "offside",
+      "intensity": "calm",
+      "text": "Caught just beyond the last defender.",
+      "previousText": "The run is timed a fraction too soon.",
+      "nextText": "The forward raises a hand in apology."
+    },
+    {
+      "id": "phrase.commentator.offside.extra.03",
+      "speaker": "commentator",
+      "category": "offside",
+      "intensity": "calm",
+      "text": "A well judged trap by the back line.",
+      "previousText": "The defence steps up together.",
+      "nextText": "The linesman's flag stays raised."
+    },
+    {
+      "id": "phrase.commentator.kickoff.extra.01",
+      "speaker": "commentator",
+      "category": "kickoff",
+      "intensity": "calm",
+      "text": "The whistle goes and we begin.",
+      "previousText": "Both sides are set in their positions.",
+      "nextText": "The early exchanges will tell us plenty."
+    },
+    {
+      "id": "phrase.commentator.kickoff.extra.02",
+      "speaker": "commentator",
+      "category": "kickoff",
+      "intensity": "calm",
+      "text": "Off we go again from the middle.",
+      "previousText": "The players return to their halves.",
+      "nextText": "The ball is worked calmly to the back."
+    },
+    {
+      "id": "phrase.commentator.kickoff.extra.03",
+      "speaker": "commentator",
+      "category": "kickoff",
+      "intensity": "calm",
+      "text": "The ball is worked back from the centre circle.",
+      "previousText": "The restart is taken without ceremony.",
+      "nextText": "Both teams feel their way back into it."
+    },
+    {
+      "id": "phrase.commentator.kickoff.extra.04",
+      "speaker": "commentator",
+      "category": "kickoff",
+      "intensity": "calm",
+      "text": "Both sides settled, and play resumes.",
+      "previousText": "The referee checks his watch one last time.",
+      "nextText": "The contest picks up where it left off."
+    },
+    {
+      "id": "phrase.commentator.time.half_time_extra.01",
+      "speaker": "commentator",
+      "category": "halfTime",
+      "intensity": "calm",
+      "text": "Time for a breather and a cup of tea.",
+      "previousText": "The whistle sounds for the interval.",
+      "nextText": "The teams head for the dressing rooms."
+    },
+    {
+      "id": "phrase.commentator.time.half_time_extra.02",
+      "speaker": "commentator",
+      "category": "halfTime",
+      "intensity": "calm",
+      "text": "The players make their way down the tunnel.",
+      "previousText": "The first half comes to a close.",
+      "nextText": "There will be plenty said at the break."
+    },
+    {
+      "id": "phrase.commentator.time.half_time_extra.03",
+      "speaker": "commentator",
+      "category": "halfTime",
+      "intensity": "calm",
+      "text": "An interval to chew over what we've seen.",
+      "previousText": "The half ends with the ball in midfield.",
+      "nextText": "The analysis begins in the studio."
+    },
+    {
+      "id": "phrase.commentator.time.half_time_extra.04",
+      "speaker": "commentator",
+      "category": "halfTime",
+      "intensity": "calm",
+      "text": "The whistle brings the half to a close.",
+      "previousText": "A final attack comes to nothing.",
+      "nextText": "Both managers will have words ready."
+    },
+    {
+      "id": "phrase.commentator.time.full_time_extra.01",
+      "speaker": "commentator",
+      "category": "fullTime",
+      "intensity": "calm",
+      "text": "And that is that.",
+      "previousText": "The final whistle sounds across the ground.",
+      "nextText": "The players exchange handshakes in the centre."
+    },
+    {
+      "id": "phrase.commentator.time.full_time_extra.02",
+      "speaker": "commentator",
+      "category": "fullTime",
+      "intensity": "calm",
+      "text": "The handshakes tell the story at the end.",
+      "previousText": "The contest is over.",
+      "nextText": "Some leave delighted, others crestfallen."
+    },
+    {
+      "id": "phrase.commentator.time.full_time_extra.03",
+      "speaker": "commentator",
+      "category": "fullTime",
+      "intensity": "calm",
+      "text": "Time for the weary legs to rest.",
+      "previousText": "The players sink to the turf at the whistle.",
+      "nextText": "The crowd shows its appreciation."
+    },
+    {
+      "id": "phrase.commentator.time.full_time_extra.04",
+      "speaker": "commentator",
+      "category": "fullTime",
+      "intensity": "calm",
+      "text": "That concludes our afternoon's entertainment.",
+      "previousText": "The ground begins to empty.",
+      "nextText": "Thoughts turn already to the next fixture."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_extra.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "The pitch looks immaculate this afternoon.",
+      "previousText": "The camera pans across the playing surface.",
+      "nextText": "The teams will emerge shortly."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_extra.02",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "The turnstiles have been busy and the terraces are full.",
+      "previousText": "Supporters stream into the ground before kick off.",
+      "nextText": "The atmosphere is building nicely."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_extra.03",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Conditions look ideal for good football.",
+      "previousText": "The flags barely move in the still air.",
+      "nextText": "No excuses for either side today."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_extra.04",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Programmes are out and the anticipation builds.",
+      "previousText": "The pre-match rituals are nearly complete.",
+      "nextText": "Kick off is only moments away."
+    },
+    {
+      "id": "phrase.pundit.analysis.goal_extra.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "excited",
+      "text": "He's caught that sweetly, right off the laces.",
+      "previousText": "The crowd is still roaring as the replay of the goal rolls.",
+      "nextText": "The celebrations settle and play restarts from the centre circle."
+    },
+    {
+      "id": "phrase.pundit.analysis.goal_extra.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Look at the full back arriving late. Nobody picks him up.",
+      "previousText": "The replay of the goal is rolling as the pundit weighs in.",
+      "nextText": "Attention returns to the restart."
+    },
+    {
+      "id": "phrase.pundit.analysis.goal_extra.03",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "excited",
+      "text": "Top drawer, that. You don't save those.",
+      "previousText": "The stadium is still buzzing after a fine strike.",
+      "nextText": "The noise dies down as the teams line up again."
+    },
+    {
+      "id": "phrase.pundit.analysis.goal_extra.04",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "It all starts with one lazy clearance, and they're punished.",
+      "previousText": "A second replay shows the build up to the goal.",
+      "nextText": "Play is about to restart from the centre circle."
+    },
+    {
+      "id": "phrase.pundit.analysis.goal_extra.05",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "excited",
+      "text": "One lovely ball over the top and the defence is gone.",
+      "previousText": "The goal is shown again from behind the play.",
+      "nextText": "The commentator picks up the restart."
+    },
+    {
+      "id": "phrase.pundit.analysis.goal_extra.06",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Simple goals, this game. Get it wide, get it in, gamble.",
+      "previousText": "The pundit gives his view as the replay finishes.",
+      "nextText": "The match resumes from the kick off."
+    },
+    {
+      "id": "phrase.pundit.analysis.save_extra.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "He sets himself early, and that's why the save looks easy.",
+      "previousText": "A fine save has just been shown again in replay.",
+      "nextText": "The match settles back into its rhythm."
+    },
+    {
+      "id": "phrase.pundit.analysis.save_extra.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Quick feet across his line. The hands take care of themselves.",
+      "previousText": "The replay lingers on the goalkeeper's stop.",
+      "nextText": "Play continues from the resulting corner."
+    },
+    {
+      "id": "phrase.pundit.analysis.save_extra.03",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "He shows him the outside, then takes it away. Clever keeping.",
+      "previousText": "The pundit assesses the save as the replay runs.",
+      "nextText": "Attention returns to the action on the pitch."
+    },
+    {
+      "id": "phrase.pundit.analysis.save_extra.04",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Watch his weight stay forward. That's textbook, that.",
+      "previousText": "A slow motion replay picks out the goalkeeper's technique.",
+      "nextText": "The game moves on with a goal kick."
+    },
+    {
+      "id": "phrase.pundit.analysis.foul_extra.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "In my day that's a fair shoulder, but the whistle's gone.",
+      "previousText": "The referee has just blown for a foul.",
+      "nextText": "Players regroup as the free kick is prepared."
+    },
+    {
+      "id": "phrase.pundit.analysis.foul_extra.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "He's gone for the ball and got the man. That's a foul.",
+      "previousText": "The challenge is shown again from the touchline camera.",
+      "nextText": "The free kick is lined up."
+    },
+    {
+      "id": "phrase.pundit.analysis.foul_extra.03",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Soft, for me. They give those far too easily nowadays.",
+      "previousText": "The pundit watches the replay of the challenge.",
+      "nextText": "Play resumes with the free kick."
+    },
+    {
+      "id": "phrase.pundit.analysis.foul_extra.04",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "An honest challenge, just a fraction late. He'll know that himself.",
+      "previousText": "The referee has a quiet word after the tackle.",
+      "nextText": "The game restarts and tempers cool."
+    },
+    {
+      "id": "phrase.pundit.analysis.shape_extra.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Whoever wins the midfield scrap usually wins the afternoon.",
+      "previousText": "A lull in play gives the pundit a moment to assess.",
+      "nextText": "Attention returns to the action on the pitch."
+    },
+    {
+      "id": "phrase.pundit.analysis.shape_extra.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "The far side full back is asleep there. Somebody must tell him.",
+      "previousText": "The camera pans across the defensive line during a stoppage.",
+      "nextText": "The commentator picks up the play once more."
+    },
+    {
+      "id": "phrase.pundit.analysis.shape_extra.03",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "They've gone man for man in midfield and it's a proper battle.",
+      "previousText": "The pundit surveys the pattern of the game.",
+      "nextText": "Play continues in the middle of the park."
+    },
+    {
+      "id": "phrase.pundit.analysis.shape_extra.04",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Both banks of four are sitting deep. Somebody has to take risks.",
+      "previousText": "A wide shot shows both teams holding their positions.",
+      "nextText": "The ball is worked patiently across the pitch."
+    },
+    {
+      "id": "phrase.pundit.analysis.shape_extra.05",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Watch the spare man in the middle. Nobody's picking him up.",
+      "previousText": "The pundit spots something as play slows down.",
+      "nextText": "The commentator returns to calling the action."
+    },
+    {
+      "id": "phrase.pundit.analysis.shape_extra.06",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "The wide men aren't tracking back, and that's where the trouble starts.",
+      "previousText": "A break in play allows a word on the team shape.",
+      "nextText": "The match picks up its pace again."
+    },
+    {
+      "id": "phrase.pundit.analysis.attack_extra.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "excited",
+      "text": "That's lovely stuff, one touch each and never a wasted pass.",
+      "previousText": "A sweeping attacking move has just unfolded.",
+      "nextText": "The commentator picks up the play once more."
+    },
+    {
+      "id": "phrase.pundit.analysis.attack_extra.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Credit the winger there. He commits his man before releasing it.",
+      "previousText": "The replay shows the attack developing down the flank.",
+      "nextText": "Attention returns to the live action."
+    },
+    {
+      "id": "phrase.pundit.analysis.attack_extra.03",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "excited",
+      "text": "They've gone through that midfield like a knife through butter.",
+      "previousText": "The crowd applauds a flowing attacking move.",
+      "nextText": "Play continues at a high tempo."
+    },
+    {
+      "id": "phrase.pundit.analysis.attack_extra.04",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Good old-fashioned wing play, that. Beat your man, get it across.",
+      "previousText": "The pundit reflects on the attack as play slows.",
+      "nextText": "The match settles back into its rhythm."
+    },
+    {
+      "id": "phrase.pundit.analysis.half_time_extra.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "One side has bossed that half. The other needs a long talk.",
+      "previousText": "The half time whistle has gone and the pundit gives his view.",
+      "nextText": "Coverage heads to the interval break."
+    },
+    {
+      "id": "phrase.pundit.analysis.half_time_extra.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Honestly, you couldn't split them. A half of few clear chances.",
+      "previousText": "The teams head down the tunnel at the interval.",
+      "nextText": "The broadcast moves to the half time summary."
+    },
+    {
+      "id": "phrase.pundit.analysis.half_time_extra.03",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "A scrappy old half, lots of effort, not much quality.",
+      "previousText": "The half time whistle brings a pause in the coverage.",
+      "nextText": "The interval analysis continues in the studio."
+    },
+    {
+      "id": "phrase.pundit.analysis.half_time_extra.04",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "End to end, that. Both managers will want it tightened up.",
+      "previousText": "The players walk off after a lively opening half.",
+      "nextText": "Coverage heads to the interval break."
+    },
+    {
+      "id": "phrase.pundit.analysis.full_time_extra.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Over the piece, the better side has come out on top.",
+      "previousText": "The final whistle has blown and the pundit gives his verdict.",
+      "nextText": "The broadcast moves to the closing summary."
+    },
+    {
+      "id": "phrase.pundit.analysis.full_time_extra.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "A fair result, for me. Neither keeper had a quiet afternoon.",
+      "previousText": "The players shake hands as the match ends.",
+      "nextText": "The commentary team wraps up the coverage."
+    },
+    {
+      "id": "phrase.pundit.analysis.full_time_extra.03",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "They've ground that out the hard way, and they won't care a bit.",
+      "previousText": "The final whistle sounds after a hard fought finish.",
+      "nextText": "The broadcast moves to the closing summary."
+    },
+    {
+      "id": "phrase.pundit.analysis.full_time_extra.04",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Not one for the scrapbook, but the points are what matter.",
+      "previousText": "The match ends and the pundit offers a final word.",
+      "nextText": "The commentary team signs off."
+    },
+    {
+      "id": "phrase.pundit.analysis.penalty_extra.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "excited",
+      "text": "Forget the keeper, pick your corner and hit it true.",
+      "previousText": "A penalty has been awarded and tension fills the ground.",
+      "nextText": "The taker places the ball on the spot."
+    },
+    {
+      "id": "phrase.pundit.analysis.penalty_extra.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "excited",
+      "text": "All the pressure is on the taker, and he knows it.",
+      "previousText": "The crowd whistles as the penalty is prepared.",
+      "nextText": "The referee waits for the area to clear."
+    },
+    {
+      "id": "phrase.pundit.analysis.offside_extra.01",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "He's gone too soon. A yard of patience and he's clean through.",
+      "previousText": "The flag has gone up for offside.",
+      "nextText": "The free kick is taken and play moves on."
+    },
+    {
+      "id": "phrase.pundit.analysis.offside_extra.02",
+      "speaker": "pundit",
+      "category": "analysis",
+      "intensity": "calm",
+      "text": "Fair play to the linesman, that's a tight one to spot.",
+      "previousText": "The replay checks the offside decision.",
+      "nextText": "Play resumes with the free kick."
+    },
+    {
+      "id": "phrase.pundit.dialogue.gk.extra.01",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "He talks his back four through the whole ninety. You can't coach that.",
+      "previousText": "The commentator has just asked about the goalkeeper.",
+      "nextText": "Talk returns to the match in progress."
+    },
+    {
+      "id": "phrase.pundit.dialogue.gk.extra.02",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "Crosses are his bread and butter. He comes and claims everything.",
+      "previousText": "The camera lingers on the goalkeeper as the question is asked.",
+      "nextText": "Attention returns to the action on the pitch."
+    },
+    {
+      "id": "phrase.pundit.dialogue.df.extra.01",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "Nothing fancy. Heads it, kicks it, and the winger gets no change.",
+      "previousText": "The commentator has just asked about the defender.",
+      "nextText": "Talk returns to the match in progress."
+    },
+    {
+      "id": "phrase.pundit.dialogue.df.extra.02",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "He reads the game well. The first tackle is rarely needed.",
+      "previousText": "The defender is picked out by the camera during a lull.",
+      "nextText": "The commentary returns to the live play."
+    },
+    {
+      "id": "phrase.pundit.dialogue.mf.extra.01",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "He does the running nobody notices. Every side needs one of those.",
+      "previousText": "The commentator has just asked about the midfielder.",
+      "nextText": "Talk returns to the match in progress."
+    },
+    {
+      "id": "phrase.pundit.dialogue.mf.extra.02",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "Give him a yard and he'll find the forward's feet every time.",
+      "previousText": "The midfielder is the subject of the broadcast chat.",
+      "nextText": "The commentary picks up the action again."
+    },
+    {
+      "id": "phrase.pundit.dialogue.fw.extra.01",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "He only needs one chance. Defenders hate playing against that sort.",
+      "previousText": "The commentator has just asked about the forward.",
+      "nextText": "Talk returns to the match in progress."
+    },
+    {
+      "id": "phrase.pundit.dialogue.fw.extra.02",
+      "speaker": "pundit",
+      "category": "dialogue",
+      "intensity": "calm",
+      "text": "He works the channels well and brings others into the play.",
+      "previousText": "The forward is discussed during a quiet spell.",
+      "nextText": "Attention returns to the action on the pitch."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_extra.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Early tackles set the tone in these games. Expect a few.",
+      "previousText": "Before kick off, the commentator asks for the pundit's view.",
+      "nextText": "The teams make their way out for kick off."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_extra.02",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "The pitch looks quick, so the team that passes it should enjoy today.",
+      "previousText": "The camera sweeps across the ground before the start.",
+      "nextText": "The referee checks his watch ahead of kick off."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_extra.03",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "For me, it comes down to who wants the second ball more.",
+      "previousText": "The pre-match discussion turns to how the game might go.",
+      "nextText": "The players complete their final warm up."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_extra.04",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Both benches will preach patience, but the crowd won't allow it for long.",
+      "previousText": "The pundit offers a final thought before the whistle.",
+      "nextText": "The teams make their way out for kick off."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_friendly.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "A relaxed atmosphere for this friendly match, but pride is still on the line.",
+      "previousText": "The teams take the field for a friendly.",
+      "nextText": "Both captains shake hands before kickoff."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_friendly.02",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "An exhibition match today, giving both managers a chance to try something new.",
+      "previousText": "The players complete their final warmup.",
+      "nextText": "The referee prepares to blow his whistle."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_intl_gp.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "We're in the group stage of the International Cup, where every single goal counts.",
+      "previousText": "National anthems conclude at the stadium.",
+      "nextText": "The players take up their starting positions."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_intl_ko.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Knockout football in the International Cup. No second chances from here on out.",
+      "previousText": "The crowd roars as the captains meet at the center circle.",
+      "nextText": "The match is about to begin."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_intl_qf.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "An International Cup Quarter-Final, with a coveted semi-final place at stake.",
+      "previousText": "The teams line up in the center of the pitch.",
+      "nextText": "The referee looks at his assistant."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_intl_sf.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "The Semi-Final of the International Cup! A historic final is just one win away.",
+      "previousText": "Tens of thousands of fans fill the stadium with color.",
+      "nextText": "The atmosphere is absolutely electric."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_intl_final.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "The International Cup Final! The eyes of the entire world are on this pitch.",
+      "previousText": "The cup trophy stands on a pedestal by the tunnel.",
+      "nextText": "The absolute pinnacle of the international game is here."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_cup_early.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "A classic cup tie today. The magic of the cup is definitely in the air.",
+      "previousText": "Supporters have traveled in numbers for this cup match.",
+      "nextText": "The players are ready to fight for the next round."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_cup_qf.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "A massive cup Quarter-Final match. The semi-finals are within touching distance.",
+      "previousText": "Flags are waving in the home stands.",
+      "nextText": "The captains exchange club pennants."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_cup_sf.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "A tense cup Semi-Final today. Getting this close to the final makes everyone nervous.",
+      "previousText": "The stadium is packed to the rafters for the semi-final.",
+      "nextText": "Kickoff is just moments away."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_cup_final.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "The Cup Final! The biggest day in the domestic calendar, and the trophy is waiting.",
+      "previousText": "The teams walk out side by side to a wall of sound.",
+      "nextText": "A cup final showdown we will not forget."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_league_gen.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "We are set for another crucial fixture in the English Top League.",
+      "previousText": "The terraces are packed for this league match.",
+      "nextText": "The referee gets ready to start play."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_league_gen.02",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "A big afternoon of league action as the battle for points intensifies.",
+      "previousText": "Programmes are sold out and the stadium is buzzing.",
+      "nextText": "The match officials lead the teams out."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_league_top.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "A blockbuster clash near the top of the table. A true test of credentials.",
+      "previousText": "It is a meeting between two heavyweights.",
+      "nextText": "Both managers look focused on the touchline."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_league_bottom.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "A tense basement battle today as both sides fight to escape the drop zone.",
+      "previousText": "Nerves are high for this relegation battle.",
+      "nextText": "Every tackle will matter today."
+    },
+    {
+      "id": "phrase.commentator.prematch.setting_league_gap.01",
+      "speaker": "commentator",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "A classic league encounter between a high-flying side and one fighting at the bottom.",
+      "previousText": "On paper, the difference is clear.",
+      "nextText": "But anything can happen in ninety minutes."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_friendly.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "There are no points at stake, but players are still fighting for their places.",
+      "previousText": "Before kickoff, the pundit looks down at the field.",
+      "nextText": "It should be an open game."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_friendly.02",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "A good chance for both teams to build fitness and test their tactical setups.",
+      "previousText": "The pundit shares his thoughts on the exhibition match.",
+      "nextText": "Managers will want a clean sheet."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_intl_gp.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "In a short group stage, getting a good start is absolutely vital.",
+      "previousText": "Before the match begins, the pundit evaluates the group stage.",
+      "nextText": "A loss here puts you under massive pressure."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_intl_ko.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "It's win or go home now. One mistake could send a nation packing.",
+      "previousText": "The pundit looks ahead to the knockout stage.",
+      "nextText": "No room for errors today."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_intl_qf.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "We are reaching the business end now. Only eight teams remain.",
+      "previousText": "The pundit previews the international quarter-final.",
+      "nextText": "Every single player will feel the pressure."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_intl_sf.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "A nation's hopes rest on this game. The pressure must be immense.",
+      "previousText": "The pundit focuses on the semi-final tension.",
+      "nextText": "Only ninety minutes separate them from the final."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_intl_final.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "This is the ultimate game. Winning today writes your name into history.",
+      "previousText": "The pundit gazes at the cup final crowd.",
+      "nextText": "The champions will be crowned today."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_cup_early.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Cup football is all about who performs on the day. League form goes out the window.",
+      "previousText": "The pundit gives his verdict on this cup match.",
+      "nextText": "Expect a proper cup battle."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_cup_qf.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Getting this close to the final makes teams cautious. Expect a cagey start.",
+      "previousText": "The pundit previews the domestic cup quarter-final.",
+      "nextText": "Neither side will want to concede early."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_cup_sf.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "This is the cruelest round to lose. You can feel the nerves out there.",
+      "previousText": "The pundit discusses the semi-final atmosphere.",
+      "nextText": "It comes down to who handles the nerves."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_cup_final.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Legends are made in finals. These players will remember today forever.",
+      "previousText": "The pundit looks at the trophy before kickoff.",
+      "nextText": "A special afternoon awaits us."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_league_gen.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "At this stage of the campaign, every single point counts.",
+      "previousText": "The pundit assesses the league fixture.",
+      "nextText": "A draw is rarely enough."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_league_gen.02",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "The league table doesn't lie, and today's result will have a major impact.",
+      "previousText": "The pundit looks at the current standings.",
+      "nextText": "A big ninety minutes ahead."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_league_top.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Two of the league's heavyweights going head-to-head. A real six-pointer.",
+      "previousText": "The pundit discusses the top of the table clash.",
+      "nextText": "This is the match everyone wanted to see."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_league_bottom.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "Neither team can afford to lose this. It will be a tense, scrappy match.",
+      "previousText": "The pundit previews the relegation battle.",
+      "nextText": "Expect plenty of commitment in the tackle."
+    },
+    {
+      "id": "phrase.pundit.prematch.outlook_league_gap.01",
+      "speaker": "pundit",
+      "category": "prematch",
+      "intensity": "calm",
+      "text": "On paper it looks like an easy win for the favorites, but surprises happen every week.",
+      "previousText": "The pundit evaluates the gap between the sides.",
+      "nextText": "The underdogs will relish this."
+    }
+  ]
+}

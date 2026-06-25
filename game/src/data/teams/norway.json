@@ -1,0 +1,479 @@
+{
+  "id": "norway",
+  "name": "Norway",
+  "short": "NOR",
+  "stadium": "Ullevaal Stadion",
+  "strength": 81,
+  "colors": {
+    "home": {
+      "shirt": "#C8102E",
+      "shorts": "#FFFFFF",
+      "socks": "#00205B"
+    },
+    "away": {
+      "shirt": "#FFFFFF",
+      "shorts": "#00205B",
+      "socks": "#C8102E"
+    }
+  },
+  "players": [
+    {
+      "name": "Ørjan Nylande",
+      "pos": "GK",
+      "age": 35,
+      "pace": 51,
+      "pass": 54,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 83,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#caa463",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Morten Thorsbye",
+      "pos": "MF",
+      "age": 30,
+      "pace": 65,
+      "pass": 77,
+      "shoot": 65,
+      "tackle": 63,
+      "keeping": 7,
+      "shirtNumber": 2,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Kristoffer Vassbakk Ajere",
+      "pos": "DF",
+      "age": 28,
+      "pace": 72,
+      "pass": 76,
+      "shoot": 35,
+      "tackle": 86,
+      "keeping": 8,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "moustache"
+      }
+    },
+    {
+      "name": "Leo Stigarde",
+      "pos": "DF",
+      "age": 26,
+      "pace": 67,
+      "pass": 68,
+      "shoot": 31,
+      "tackle": 76,
+      "keeping": 8,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "David Møller Wolfey",
+      "pos": "DF",
+      "age": 24,
+      "pace": 73,
+      "pass": 61,
+      "shoot": 33,
+      "tackle": 76,
+      "keeping": 8,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Patrick Berge",
+      "pos": "MF",
+      "age": 28,
+      "pace": 67,
+      "pass": 83,
+      "shoot": 68,
+      "tackle": 68,
+      "keeping": 7,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Alexander Srlothe",
+      "pos": "FW",
+      "age": 30,
+      "pace": 82,
+      "pass": 75,
+      "shoot": 97,
+      "tackle": 45,
+      "keeping": 8,
+      "shirtNumber": 7,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Sander Bergey",
+      "pos": "MF",
+      "age": 28,
+      "pace": 73,
+      "pass": 93,
+      "shoot": 77,
+      "tackle": 72,
+      "keeping": 7,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Erling Braut Haalande",
+      "pos": "FW",
+      "age": 25,
+      "pace": 84,
+      "pass": 70,
+      "shoot": 97,
+      "tackle": 39,
+      "keeping": 8,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#caa463",
+        "hairStyle": "long",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Martin Degaarde",
+      "pos": "MF",
+      "age": 27,
+      "pace": 76,
+      "pass": 94,
+      "shoot": 73,
+      "tackle": 76,
+      "keeping": 7,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#caa463",
+        "hairStyle": "curly",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Jørgen Strand Larsene",
+      "pos": "FW",
+      "age": 26,
+      "pace": 74,
+      "pass": 67,
+      "shoot": 80,
+      "tackle": 42,
+      "keeping": 8,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Sander Tangvike",
+      "pos": "GK",
+      "age": 23,
+      "pace": 46,
+      "pass": 50,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 64,
+      "shirtNumber": 12,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Egil Selvike",
+      "pos": "GK",
+      "age": 28,
+      "pace": 46,
+      "pass": 47,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 68,
+      "shirtNumber": 13,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "moustache"
+      }
+    },
+    {
+      "name": "Fredrik Aursneso",
+      "pos": "MF",
+      "age": 30,
+      "pace": 65,
+      "pass": 78,
+      "shoot": 60,
+      "tackle": 61,
+      "keeping": 7,
+      "shirtNumber": 14,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Fredrik Bjrkane",
+      "pos": "DF",
+      "age": 27,
+      "pace": 64,
+      "pass": 61,
+      "shoot": 31,
+      "tackle": 74,
+      "keeping": 8,
+      "shirtNumber": 15,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Marcus Holmgrene",
+      "pos": "DF",
+      "age": 25,
+      "pace": 66,
+      "pass": 59,
+      "shoot": 35,
+      "tackle": 76,
+      "keeping": 8,
+      "shirtNumber": 16,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Torbjørn Heggeme",
+      "pos": "DF",
+      "age": 27,
+      "pace": 63,
+      "pass": 60,
+      "shoot": 38,
+      "tackle": 72,
+      "keeping": 8,
+      "shirtNumber": 17,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Kristian Thorstvedte",
+      "pos": "MF",
+      "age": 27,
+      "pace": 66,
+      "pass": 77,
+      "shoot": 62,
+      "tackle": 61,
+      "keeping": 7,
+      "shirtNumber": 18,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Thelonious Aasgaarde",
+      "pos": "MF",
+      "age": 24,
+      "pace": 63,
+      "pass": 72,
+      "shoot": 61,
+      "tackle": 54,
+      "keeping": 7,
+      "shirtNumber": 19,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#7a5533",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Antonio Nusae",
+      "pos": "FW",
+      "age": 21,
+      "pace": 70,
+      "pass": 68,
+      "shoot": 79,
+      "tackle": 36,
+      "keeping": 8,
+      "shirtNumber": 20,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Andreas Schjelderupe",
+      "pos": "MF",
+      "age": 22,
+      "pace": 55,
+      "pass": 71,
+      "shoot": 57,
+      "tackle": 55,
+      "keeping": 7,
+      "shirtNumber": 21,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Oscar Bobbe",
+      "pos": "MF",
+      "age": 22,
+      "pace": 66,
+      "pass": 69,
+      "shoot": 54,
+      "tackle": 64,
+      "keeping": 7,
+      "shirtNumber": 22,
+      "appearance": {
+        "skinTone": "#f0c7a4",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jens Haugey",
+      "pos": "MF",
+      "age": 26,
+      "pace": 60,
+      "pass": 71,
+      "shoot": 58,
+      "tackle": 64,
+      "keeping": 7,
+      "shirtNumber": 23,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Sondre Langaso",
+      "pos": "DF",
+      "age": 25,
+      "pace": 62,
+      "pass": 56,
+      "shoot": 36,
+      "tackle": 71,
+      "keeping": 8,
+      "shirtNumber": 24,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Henrik Falchenere",
+      "pos": "DF",
+      "age": 23,
+      "pace": 59,
+      "pass": 55,
+      "shoot": 38,
+      "tackle": 64,
+      "keeping": 8,
+      "shirtNumber": 25,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Julian Ryersone",
+      "pos": "FW",
+      "age": 28,
+      "pace": 76,
+      "pass": 72,
+      "shoot": 86,
+      "tackle": 38,
+      "keeping": 8,
+      "shirtNumber": 26,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    }
+  ],
+  "defaultLineup": {
+    "formation": "4-4-2",
+    "starters": [
+      0,
+      25,
+      4,
+      7,
+      2,
+      16,
+      9,
+      13,
+      8,
+      6,
+      19
+    ]
+  }
+}

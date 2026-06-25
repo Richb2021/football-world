@@ -1,0 +1,389 @@
+{
+  "id": "poland",
+  "name": "Poland",
+  "short": "POL",
+  "stadium": "PGE Narodowy",
+  "strength": 80,
+  "colors": {
+    "home": {
+      "shirt": "#FFFFFF",
+      "shorts": "#E30A17",
+      "socks": "#FFFFFF"
+    },
+    "away": {
+      "shirt": "#E30A17",
+      "shorts": "#E30A17",
+      "socks": "#E30A17"
+    }
+  },
+  "players": [
+    {
+      "name": "Wojciech Szczesnie",
+      "pos": "GK",
+      "age": 32,
+      "pace": 47,
+      "pass": 53,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 74,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Lukasz Skorupskie",
+      "pos": "GK",
+      "age": 32,
+      "pace": 44,
+      "pass": 50,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 66,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Jan Bednareke",
+      "pos": "DF",
+      "age": 28,
+      "pace": 69,
+      "pass": 72,
+      "shoot": 58,
+      "tackle": 82,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jakub Kiwiore",
+      "pos": "DF",
+      "age": 31,
+      "pace": 76,
+      "pass": 69,
+      "shoot": 59,
+      "tackle": 79,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#caa463",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Przemyslaw Frankowskie",
+      "pos": "DF",
+      "age": 28,
+      "pace": 75,
+      "pass": 73,
+      "shoot": 41,
+      "tackle": 87,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Pawel Dawidowicze",
+      "pos": "DF",
+      "age": 25,
+      "pace": 76,
+      "pass": 69,
+      "shoot": 41,
+      "tackle": 75,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Sebastian Walukiewicze",
+      "pos": "DF",
+      "age": 29,
+      "pace": 79,
+      "pass": 65,
+      "shoot": 40,
+      "tackle": 76,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Bartosz Bereszynskie",
+      "pos": "DF",
+      "age": 22,
+      "pace": 67,
+      "pass": 68,
+      "shoot": 44,
+      "tackle": 84,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Piotr Zielinskie",
+      "pos": "MF",
+      "age": 33,
+      "pace": 76,
+      "pass": 74,
+      "shoot": 62,
+      "tackle": 56,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Jakub Modere",
+      "pos": "MF",
+      "age": 28,
+      "pace": 75,
+      "pass": 74,
+      "shoot": 75,
+      "tackle": 67,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#caa463",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Taras Romanczuke",
+      "pos": "MF",
+      "age": 27,
+      "pace": 71,
+      "pass": 76,
+      "shoot": 68,
+      "tackle": 58,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Bartosz Slisze",
+      "pos": "MF",
+      "age": 28,
+      "pace": 79,
+      "pass": 87,
+      "shoot": 65,
+      "tackle": 67,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Sebastian Szymanskie",
+      "pos": "MF",
+      "age": 29,
+      "pace": 74,
+      "pass": 84,
+      "shoot": 64,
+      "tackle": 64,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Kacper Urbanskie",
+      "pos": "MF",
+      "age": 32,
+      "pace": 73,
+      "pass": 87,
+      "shoot": 75,
+      "tackle": 55,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Robert Lewandowskie",
+      "pos": "FW",
+      "age": 34,
+      "pace": 89,
+      "pass": 76,
+      "shoot": 91,
+      "tackle": 37,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Karol Swiderskie",
+      "pos": "FW",
+      "age": 34,
+      "pace": 84,
+      "pass": 66,
+      "shoot": 93,
+      "tackle": 42,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Nicola Zalewskie",
+      "pos": "FW",
+      "age": 28,
+      "pace": 84,
+      "pass": 77,
+      "shoot": 85,
+      "tackle": 44,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Adam Buksae",
+      "pos": "FW",
+      "age": 32,
+      "pace": 90,
+      "pass": 72,
+      "shoot": 79,
+      "tackle": 42,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Emir Pereira",
+      "pos": "GK",
+      "age": 34,
+      "pace": 39,
+      "pass": 47,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 66,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Tunde Rivas",
+      "pos": "DF",
+      "age": 20,
+      "pace": 69,
+      "pass": 60,
+      "shoot": 40,
+      "tackle": 78,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Declan Hayes",
+      "pos": "DF",
+      "age": 30,
+      "pace": 65,
+      "pass": 61,
+      "shoot": 43,
+      "tackle": 76,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Dani Calder",
+      "pos": "MF",
+      "age": 20,
+      "pace": 71,
+      "pass": 72,
+      "shoot": 66,
+      "tackle": 56,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Bruno Pizarro",
+      "pos": "FW",
+      "age": 32,
+      "pace": 79,
+      "pass": 64,
+      "shoot": 79,
+      "tackle": 37,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    }
+  ]
+}

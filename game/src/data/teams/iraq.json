@@ -1,0 +1,479 @@
+{
+  "id": "iraq",
+  "name": "Iraq",
+  "short": "IRQ",
+  "stadium": "Basra International Stadium",
+  "strength": 74,
+  "colors": {
+    "home": {
+      "shirt": "#FFFFFF",
+      "shorts": "#FFFFFF",
+      "socks": "#FFFFFF"
+    },
+    "away": {
+      "shirt": "#007A33",
+      "shorts": "#007A33",
+      "socks": "#007A33"
+    }
+  },
+  "players": [
+    {
+      "name": "Fahad Raheeme",
+      "pos": "GK",
+      "age": 31,
+      "pace": 46,
+      "pass": 48,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 67,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "moustache"
+      }
+    },
+    {
+      "name": "Rebin Adhamate",
+      "pos": "DF",
+      "age": 34,
+      "pace": 62,
+      "pass": 67,
+      "shoot": 35,
+      "tackle": 72,
+      "keeping": 8,
+      "shirtNumber": 2,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Hussein Aliio",
+      "pos": "DF",
+      "age": 24,
+      "pace": 68,
+      "pass": 59,
+      "shoot": 35,
+      "tackle": 68,
+      "keeping": 8,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Zaid Hantooshe",
+      "pos": "DF",
+      "age": 25,
+      "pace": 64,
+      "pass": 59,
+      "shoot": 36,
+      "tackle": 73,
+      "keeping": 8,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Akam Rahmane",
+      "pos": "DF",
+      "age": 27,
+      "pace": 60,
+      "pass": 58,
+      "shoot": 33,
+      "tackle": 72,
+      "keeping": 8,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Munaf Altekreetie",
+      "pos": "DF",
+      "age": 29,
+      "pace": 58,
+      "pass": 57,
+      "shoot": 32,
+      "tackle": 73,
+      "keeping": 8,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Youssef Amyne",
+      "pos": "MF",
+      "age": 22,
+      "pace": 56,
+      "pass": 69,
+      "shoot": 56,
+      "tackle": 53,
+      "keeping": 7,
+      "shirtNumber": 7,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ibrahim Alkaabawie",
+      "pos": "MF",
+      "age": 26,
+      "pace": 76,
+      "pass": 90,
+      "shoot": 69,
+      "tackle": 75,
+      "keeping": 7,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Ali Alhamadie",
+      "pos": "FW",
+      "age": 24,
+      "pace": 68,
+      "pass": 60,
+      "shoot": 75,
+      "tackle": 33,
+      "keeping": 8,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Mohanad Alshammarie",
+      "pos": "FW",
+      "age": 25,
+      "pace": 77,
+      "pass": 68,
+      "shoot": 90,
+      "tackle": 47,
+      "keeping": 8,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ahmed Ahmede",
+      "pos": "FW",
+      "age": 22,
+      "pace": 63,
+      "pass": 50,
+      "shoot": 68,
+      "tackle": 37,
+      "keeping": 8,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jalal Hachime",
+      "pos": "GK",
+      "age": 35,
+      "pace": 53,
+      "pass": 59,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 86,
+      "shirtNumber": 12,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ali Najateey",
+      "pos": "FW",
+      "age": 30,
+      "pace": 58,
+      "pass": 54,
+      "shoot": 65,
+      "tackle": 30,
+      "keeping": 8,
+      "shirtNumber": 13,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Zidane Iqbale",
+      "pos": "MF",
+      "age": 23,
+      "pace": 60,
+      "pass": 73,
+      "shoot": 55,
+      "tackle": 54,
+      "keeping": 7,
+      "shirtNumber": 14,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ahmed Aldeeshaweey",
+      "pos": "DF",
+      "age": 24,
+      "pace": 58,
+      "pass": 48,
+      "shoot": 32,
+      "tackle": 63,
+      "keeping": 8,
+      "shirtNumber": 15,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Amir Alammarie",
+      "pos": "MF",
+      "age": 28,
+      "pace": 68,
+      "pass": 81,
+      "shoot": 64,
+      "tackle": 67,
+      "keeping": 7,
+      "shirtNumber": 16,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ali Altameemie",
+      "pos": "FW",
+      "age": 22,
+      "pace": 76,
+      "pass": 64,
+      "shoot": 74,
+      "tackle": 39,
+      "keeping": 8,
+      "shirtNumber": 17,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Aymen Ghadhbane",
+      "pos": "FW",
+      "age": 30,
+      "pace": 89,
+      "pass": 76,
+      "shoot": 97,
+      "tackle": 47,
+      "keeping": 8,
+      "shirtNumber": 18,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Kevin Yakobe",
+      "pos": "MF",
+      "age": 25,
+      "pace": 53,
+      "pass": 64,
+      "shoot": 55,
+      "tackle": 50,
+      "keeping": 7,
+      "shirtNumber": 19,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Aimar Shere",
+      "pos": "MF",
+      "age": 23,
+      "pace": 56,
+      "pass": 62,
+      "shoot": 50,
+      "tackle": 52,
+      "keeping": 7,
+      "shirtNumber": 20,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Marko Husseine",
+      "pos": "FW",
+      "age": 22,
+      "pace": 60,
+      "pass": 52,
+      "shoot": 71,
+      "tackle": 39,
+      "keeping": 8,
+      "shirtNumber": 21,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ahmed Alfadhlie",
+      "pos": "GK",
+      "age": 29,
+      "pace": 48,
+      "pass": 52,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 69,
+      "shirtNumber": 22,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Merchas Doskie",
+      "pos": "DF",
+      "age": 26,
+      "pace": 65,
+      "pass": 63,
+      "shoot": 35,
+      "tackle": 76,
+      "keeping": 8,
+      "shirtNumber": 23,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Zaid Aldulaimie",
+      "pos": "MF",
+      "age": 24,
+      "pace": 55,
+      "pass": 68,
+      "shoot": 52,
+      "tackle": 59,
+      "keeping": 7,
+      "shirtNumber": 24,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Mustafa Alkorjie",
+      "pos": "DF",
+      "age": 25,
+      "pace": 58,
+      "pass": 54,
+      "shoot": 30,
+      "tackle": 69,
+      "keeping": 8,
+      "shirtNumber": 25,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Frans Haddade",
+      "pos": "DF",
+      "age": 32,
+      "pace": 61,
+      "pass": 53,
+      "shoot": 36,
+      "tackle": 66,
+      "keeping": 8,
+      "shirtNumber": 26,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    }
+  ],
+  "defaultLineup": {
+    "formation": "4-4-2",
+    "starters": [
+      11,
+      2,
+      22,
+      23,
+      3,
+      4,
+      7,
+      15,
+      8,
+      17,
+      16
+    ]
+  }
+}

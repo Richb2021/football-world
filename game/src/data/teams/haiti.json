@@ -1,0 +1,479 @@
+{
+  "id": "haiti",
+  "name": "Haiti",
+  "short": "HAI",
+  "stadium": "Stade Sylvio Cator",
+  "strength": 66,
+  "colors": {
+    "home": {
+      "shirt": "#1B3A8C",
+      "shorts": "#C8102E",
+      "socks": "#1B3A8C"
+    },
+    "away": {
+      "shirt": "#FFFFFF",
+      "shorts": "#FFFFFF",
+      "socks": "#FFFFFF"
+    }
+  },
+  "players": [
+    {
+      "name": "Johny Placidey",
+      "pos": "GK",
+      "age": 38,
+      "pace": 49,
+      "pass": 58,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 77,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#a99f92",
+        "hairStyle": "curly",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Carlens Arcuso",
+      "pos": "DF",
+      "age": 29,
+      "pace": 71,
+      "pass": 61,
+      "shoot": 35,
+      "tackle": 70,
+      "keeping": 8,
+      "shirtNumber": 2,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Keeto Thermoncye",
+      "pos": "DF",
+      "age": 20,
+      "pace": 45,
+      "pass": 47,
+      "shoot": 36,
+      "tackle": 59,
+      "keeping": 8,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ricardo Adeio",
+      "pos": "DF",
+      "age": 36,
+      "pace": 65,
+      "pass": 61,
+      "shoot": 31,
+      "tackle": 69,
+      "keeping": 8,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Hannes Delcroixo",
+      "pos": "DF",
+      "age": 27,
+      "pace": 57,
+      "pass": 53,
+      "shoot": 36,
+      "tackle": 67,
+      "keeping": 8,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Carl Saintey",
+      "pos": "MF",
+      "age": 23,
+      "pace": 55,
+      "pass": 66,
+      "shoot": 52,
+      "tackle": 51,
+      "keeping": 7,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Derrick Etienne Jrio",
+      "pos": "FW",
+      "age": 29,
+      "pace": 64,
+      "pass": 60,
+      "shoot": 75,
+      "tackle": 44,
+      "keeping": 8,
+      "shirtNumber": 7,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Martin Experiencey",
+      "pos": "DF",
+      "age": 27,
+      "pace": 59,
+      "pass": 55,
+      "shoot": 36,
+      "tackle": 63,
+      "keeping": 8,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Duckens Nazone",
+      "pos": "FW",
+      "age": 32,
+      "pace": 78,
+      "pass": 68,
+      "shoot": 93,
+      "tackle": 45,
+      "keeping": 8,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Jean Bellegardey",
+      "pos": "MF",
+      "age": 27,
+      "pace": 52,
+      "pass": 64,
+      "shoot": 55,
+      "tackle": 55,
+      "keeping": 7,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Don Louiciuso",
+      "pos": "FW",
+      "age": 25,
+      "pace": 63,
+      "pass": 61,
+      "shoot": 74,
+      "tackle": 37,
+      "keeping": 8,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Alexandre Pierrey",
+      "pos": "GK",
+      "age": 25,
+      "pace": 47,
+      "pass": 49,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 64,
+      "shirtNumber": 12,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Markhus Lacroixo",
+      "pos": "DF",
+      "age": 32,
+      "pace": 50,
+      "pass": 45,
+      "shoot": 34,
+      "tackle": 59,
+      "keeping": 8,
+      "shirtNumber": 13,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Garven-Michee Metusalae",
+      "pos": "DF",
+      "age": 26,
+      "pace": 55,
+      "pass": 51,
+      "shoot": 32,
+      "tackle": 59,
+      "keeping": 8,
+      "shirtNumber": 14,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ruben Providencey",
+      "pos": "FW",
+      "age": 24,
+      "pace": 61,
+      "pass": 54,
+      "shoot": 66,
+      "tackle": 40,
+      "keeping": 8,
+      "shirtNumber": 15,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Lenny Josephe",
+      "pos": "FW",
+      "age": 25,
+      "pace": 56,
+      "pass": 50,
+      "shoot": 64,
+      "tackle": 31,
+      "keeping": 8,
+      "shirtNumber": 16,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Danley Jeanjacqueso",
+      "pos": "MF",
+      "age": 26,
+      "pace": 55,
+      "pass": 67,
+      "shoot": 58,
+      "tackle": 61,
+      "keeping": 7,
+      "shirtNumber": 17,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Wilson Isidore",
+      "pos": "FW",
+      "age": 25,
+      "pace": 58,
+      "pass": 50,
+      "shoot": 68,
+      "tackle": 32,
+      "keeping": 8,
+      "shirtNumber": 18,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Yassin Fortuney",
+      "pos": "FW",
+      "age": 27,
+      "pace": 56,
+      "pass": 50,
+      "shoot": 60,
+      "tackle": 32,
+      "keeping": 8,
+      "shirtNumber": 19,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Frantzdy Pierrote",
+      "pos": "FW",
+      "age": 31,
+      "pace": 67,
+      "pass": 60,
+      "shoot": 82,
+      "tackle": 42,
+      "keeping": 8,
+      "shirtNumber": 20,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Josue Casimire",
+      "pos": "FW",
+      "age": 24,
+      "pace": 55,
+      "pass": 52,
+      "shoot": 60,
+      "tackle": 39,
+      "keeping": 8,
+      "shirtNumber": 21,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jean-Kevin Duverney",
+      "pos": "DF",
+      "age": 28,
+      "pace": 50,
+      "pass": 48,
+      "shoot": 32,
+      "tackle": 61,
+      "keeping": 8,
+      "shirtNumber": 22,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Josue Duvergere",
+      "pos": "GK",
+      "age": 26,
+      "pace": 45,
+      "pass": 48,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 59,
+      "shirtNumber": 23,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "moustache"
+      }
+    },
+    {
+      "name": "Wilguens Paugaine",
+      "pos": "DF",
+      "age": 24,
+      "pace": 49,
+      "pass": 44,
+      "shoot": 35,
+      "tackle": 60,
+      "keeping": 8,
+      "shirtNumber": 24,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Dominique Simone",
+      "pos": "MF",
+      "age": 25,
+      "pace": 47,
+      "pass": 58,
+      "shoot": 47,
+      "tackle": 47,
+      "keeping": 7,
+      "shirtNumber": 25,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Olivier Pierrey",
+      "pos": "MF",
+      "age": 21,
+      "pace": 48,
+      "pass": 59,
+      "shoot": 46,
+      "tackle": 44,
+      "keeping": 7,
+      "shirtNumber": 26,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    }
+  ],
+  "defaultLineup": {
+    "formation": "4-4-2",
+    "starters": [
+      0,
+      1,
+      7,
+      16,
+      3,
+      4,
+      10,
+      9,
+      17,
+      19,
+      14
+    ]
+  }
+}

@@ -1,0 +1,479 @@
+{
+  "id": "turkey",
+  "name": "Turkey",
+  "short": "TUR",
+  "stadium": "Atatürk Olympic Stadium",
+  "strength": 81,
+  "colors": {
+    "home": {
+      "shirt": "#E30A17",
+      "shorts": "#FFFFFF",
+      "socks": "#E30A17"
+    },
+    "away": {
+      "shirt": "#FFFFFF",
+      "shorts": "#FFFFFF",
+      "socks": "#FFFFFF"
+    }
+  },
+  "players": [
+    {
+      "name": "Fehmi Merte",
+      "pos": "GK",
+      "age": 37,
+      "pace": 48,
+      "pass": 53,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 72,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Mehmet Zeki Celike",
+      "pos": "DF",
+      "age": 29,
+      "pace": 79,
+      "pass": 78,
+      "shoot": 32,
+      "tackle": 82,
+      "keeping": 8,
+      "shirtNumber": 2,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Merih Demirale",
+      "pos": "DF",
+      "age": 28,
+      "pace": 78,
+      "pass": 79,
+      "shoot": 37,
+      "tackle": 87,
+      "keeping": 8,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Caglar Soyuncue",
+      "pos": "DF",
+      "age": 30,
+      "pace": 76,
+      "pass": 70,
+      "shoot": 35,
+      "tackle": 76,
+      "keeping": 8,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Salih Ozcane",
+      "pos": "MF",
+      "age": 28,
+      "pace": 67,
+      "pass": 75,
+      "shoot": 64,
+      "tackle": 64,
+      "keeping": 7,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Orkun Kokcue",
+      "pos": "MF",
+      "age": 25,
+      "pace": 74,
+      "pass": 81,
+      "shoot": 75,
+      "tackle": 71,
+      "keeping": 7,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Muhammed Akturkoglue",
+      "pos": "FW",
+      "age": 27,
+      "pace": 80,
+      "pass": 74,
+      "shoot": 93,
+      "tackle": 44,
+      "keeping": 8,
+      "shirtNumber": 7,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Arda Gulere",
+      "pos": "FW",
+      "age": 21,
+      "pace": 74,
+      "pass": 67,
+      "shoot": 79,
+      "tackle": 34,
+      "keeping": 8,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Deniz Gulio",
+      "pos": "FW",
+      "age": 21,
+      "pace": 66,
+      "pass": 56,
+      "shoot": 68,
+      "tackle": 39,
+      "keeping": 8,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Hakan Calhanoglue",
+      "pos": "MF",
+      "age": 32,
+      "pace": 79,
+      "pass": 96,
+      "shoot": 90,
+      "tackle": 84,
+      "keeping": 7,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Kenan Yildizo",
+      "pos": "FW",
+      "age": 21,
+      "pace": 72,
+      "pass": 66,
+      "shoot": 80,
+      "tackle": 41,
+      "keeping": 8,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Altay Bayindire",
+      "pos": "GK",
+      "age": 28,
+      "pace": 46,
+      "pass": 47,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 69,
+      "shirtNumber": 12,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Evren Eren Elmalie",
+      "pos": "DF",
+      "age": 25,
+      "pace": 60,
+      "pass": 60,
+      "shoot": 38,
+      "tackle": 74,
+      "keeping": 8,
+      "shirtNumber": 13,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Abdulkerim Bardakcie",
+      "pos": "DF",
+      "age": 31,
+      "pace": 72,
+      "pass": 68,
+      "shoot": 32,
+      "tackle": 76,
+      "keeping": 8,
+      "shirtNumber": 14,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ozan Kabake",
+      "pos": "DF",
+      "age": 26,
+      "pace": 62,
+      "pass": 66,
+      "shoot": 36,
+      "tackle": 74,
+      "keeping": 8,
+      "shirtNumber": 15,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ismail Yukseke",
+      "pos": "MF",
+      "age": 27,
+      "pace": 68,
+      "pass": 83,
+      "shoot": 66,
+      "tackle": 68,
+      "keeping": 7,
+      "shirtNumber": 16,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Irfan Kahvecie",
+      "pos": "FW",
+      "age": 30,
+      "pace": 80,
+      "pass": 65,
+      "shoot": 82,
+      "tackle": 37,
+      "keeping": 8,
+      "shirtNumber": 17,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Mert Muldure",
+      "pos": "DF",
+      "age": 27,
+      "pace": 72,
+      "pass": 69,
+      "shoot": 35,
+      "tackle": 78,
+      "keeping": 8,
+      "shirtNumber": 18,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Yunus Akgune",
+      "pos": "FW",
+      "age": 25,
+      "pace": 67,
+      "pass": 60,
+      "shoot": 76,
+      "tackle": 37,
+      "keeping": 8,
+      "shirtNumber": 19,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ferdi Kadioglue",
+      "pos": "DF",
+      "age": 26,
+      "pace": 70,
+      "pass": 68,
+      "shoot": 35,
+      "tackle": 76,
+      "keeping": 8,
+      "shirtNumber": 20,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Barıs Bariso",
+      "pos": "FW",
+      "age": 26,
+      "pace": 76,
+      "pass": 70,
+      "shoot": 86,
+      "tackle": 35,
+      "keeping": 8,
+      "shirtNumber": 21,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Kaan Ayhane",
+      "pos": "MF",
+      "age": 31,
+      "pace": 73,
+      "pass": 85,
+      "shoot": 67,
+      "tackle": 69,
+      "keeping": 7,
+      "shirtNumber": 22,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ugurcan Cakire",
+      "pos": "GK",
+      "age": 30,
+      "pace": 47,
+      "pass": 55,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 82,
+      "shirtNumber": 23,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Oguz Aydine",
+      "pos": "FW",
+      "age": 25,
+      "pace": 66,
+      "pass": 61,
+      "shoot": 76,
+      "tackle": 34,
+      "keeping": 8,
+      "shirtNumber": 24,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Samet Akaydine",
+      "pos": "DF",
+      "age": 32,
+      "pace": 62,
+      "pass": 58,
+      "shoot": 31,
+      "tackle": 71,
+      "keeping": 8,
+      "shirtNumber": 25,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Can Uzune",
+      "pos": "FW",
+      "age": 20,
+      "pace": 61,
+      "pass": 57,
+      "shoot": 67,
+      "tackle": 33,
+      "keeping": 8,
+      "shirtNumber": 26,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    }
+  ],
+  "defaultLineup": {
+    "formation": "4-2-3-1",
+    "starters": [
+      22,
+      1,
+      19,
+      9,
+      2,
+      13,
+      7,
+      15,
+      6,
+      5,
+      20
+    ]
+  }
+}

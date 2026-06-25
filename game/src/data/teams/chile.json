@@ -1,0 +1,389 @@
+{
+  "id": "chile",
+  "name": "Chile",
+  "short": "CHI",
+  "stadium": "Estadio Nacional",
+  "strength": 77,
+  "colors": {
+    "home": {
+      "shirt": "#E30A17",
+      "shorts": "#00205B",
+      "socks": "#FFFFFF"
+    },
+    "away": {
+      "shirt": "#FFFFFF",
+      "shorts": "#FFFFFF",
+      "socks": "#FFFFFF"
+    }
+  },
+  "players": [
+    {
+      "name": "Claudio Bravoe",
+      "pos": "GK",
+      "age": 20,
+      "pace": 42,
+      "pass": 52,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 68,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Brayan Cortez",
+      "pos": "GK",
+      "age": 22,
+      "pace": 45,
+      "pass": 57,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 68,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Mauricio Islae",
+      "pos": "DF",
+      "age": 34,
+      "pace": 64,
+      "pass": 69,
+      "shoot": 59,
+      "tackle": 84,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Guillermo Maripane",
+      "pos": "DF",
+      "age": 21,
+      "pace": 69,
+      "pass": 67,
+      "shoot": 42,
+      "tackle": 72,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Gabriel Suazoe",
+      "pos": "DF",
+      "age": 34,
+      "pace": 65,
+      "pass": 68,
+      "shoot": 45,
+      "tackle": 77,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Paulo Diaze",
+      "pos": "DF",
+      "age": 21,
+      "pace": 67,
+      "pass": 69,
+      "shoot": 41,
+      "tackle": 85,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Igor Lichnovskie",
+      "pos": "DF",
+      "age": 29,
+      "pace": 72,
+      "pass": 66,
+      "shoot": 47,
+      "tackle": 83,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Matias Catalane",
+      "pos": "DF",
+      "age": 32,
+      "pace": 64,
+      "pass": 70,
+      "shoot": 59,
+      "tackle": 75,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Erick Pulgare",
+      "pos": "MF",
+      "age": 21,
+      "pace": 80,
+      "pass": 73,
+      "shoot": 73,
+      "tackle": 61,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Rodrigo Echeverriae",
+      "pos": "MF",
+      "age": 26,
+      "pace": 80,
+      "pass": 78,
+      "shoot": 64,
+      "tackle": 64,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Marcelino Nuneze",
+      "pos": "MF",
+      "age": 28,
+      "pace": 76,
+      "pass": 74,
+      "shoot": 71,
+      "tackle": 56,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Diego Valdez",
+      "pos": "MF",
+      "age": 22,
+      "pace": 83,
+      "pass": 73,
+      "shoot": 73,
+      "tackle": 58,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Cesar Pereze",
+      "pos": "MF",
+      "age": 25,
+      "pace": 72,
+      "pass": 83,
+      "shoot": 60,
+      "tackle": 56,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Esteban Paveze",
+      "pos": "MF",
+      "age": 20,
+      "pace": 70,
+      "pass": 83,
+      "shoot": 61,
+      "tackle": 60,
+      "keeping": 7,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Alexis Sancheze",
+      "pos": "FW",
+      "age": 28,
+      "pace": 91,
+      "pass": 67,
+      "shoot": 83,
+      "tackle": 46,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Eduardo Vargaz",
+      "pos": "FW",
+      "age": 31,
+      "pace": 80,
+      "pass": 69,
+      "shoot": 86,
+      "tackle": 46,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Ben Brereton Diaze",
+      "pos": "FW",
+      "age": 28,
+      "pace": 90,
+      "pass": 72,
+      "shoot": 89,
+      "tackle": 46,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Victor Davilae",
+      "pos": "FW",
+      "age": 21,
+      "pace": 85,
+      "pass": 65,
+      "shoot": 90,
+      "tackle": 41,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Karim Naidu",
+      "pos": "GK",
+      "age": 20,
+      "pace": 38,
+      "pass": 50,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 65,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Tomas Vukovic",
+      "pos": "DF",
+      "age": 20,
+      "pace": 60,
+      "pass": 59,
+      "shoot": 45,
+      "tackle": 79,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Archie Owusu",
+      "pos": "DF",
+      "age": 20,
+      "pace": 61,
+      "pass": 63,
+      "shoot": 38,
+      "tackle": 72,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Pavel Petrov",
+      "pos": "MF",
+      "age": 19,
+      "pace": 66,
+      "pass": 73,
+      "shoot": 66,
+      "tackle": 54,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Jin Marsden",
+      "pos": "FW",
+      "age": 19,
+      "pace": 77,
+      "pass": 63,
+      "shoot": 84,
+      "tackle": 39,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    }
+  ]
+}

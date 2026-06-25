@@ -1,0 +1,479 @@
+{
+  "id": "brazil",
+  "name": "Brazil",
+  "short": "BRA",
+  "stadium": "Maracanã",
+  "strength": 90,
+  "colors": {
+    "home": {
+      "shirt": "#FDE100",
+      "shorts": "#00205B",
+      "socks": "#FFFFFF"
+    },
+    "away": {
+      "shirt": "#00205B",
+      "shorts": "#FFFFFF",
+      "socks": "#00205B"
+    }
+  },
+  "players": [
+    {
+      "name": "Alisson Beckere",
+      "pos": "GK",
+      "age": 33,
+      "pace": 49,
+      "pass": 59,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 94,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Ederson dos Santos Lourenco da Silvae",
+      "pos": "MF",
+      "age": 26,
+      "pace": 65,
+      "pass": 73,
+      "shoot": 60,
+      "tackle": 63,
+      "keeping": 7,
+      "shirtNumber": 2,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Gabriel dos Santos Magalhaeso",
+      "pos": "DF",
+      "age": 28,
+      "pace": 75,
+      "pass": 67,
+      "shoot": 34,
+      "tackle": 77,
+      "keeping": 8,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Marcos Marquinhoso",
+      "pos": "DF",
+      "age": 32,
+      "pace": 89,
+      "pass": 88,
+      "shoot": 36,
+      "tackle": 96,
+      "keeping": 8,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "moustache"
+      }
+    },
+    {
+      "name": "Carlos Casemiroe",
+      "pos": "MF",
+      "age": 34,
+      "pace": 86,
+      "pass": 96,
+      "shoot": 84,
+      "tackle": 87,
+      "keeping": 7,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Alex Lobo Silvae",
+      "pos": "DF",
+      "age": 35,
+      "pace": 76,
+      "pass": 68,
+      "shoot": 32,
+      "tackle": 83,
+      "keeping": 8,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Vinicius Vini Jrio",
+      "pos": "FW",
+      "age": 25,
+      "pace": 89,
+      "pass": 74,
+      "shoot": 90,
+      "tackle": 38,
+      "keeping": 8,
+      "shirtNumber": 7,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Bruno Guimaraes Rodriguez Mourae",
+      "pos": "MF",
+      "age": 28,
+      "pace": 78,
+      "pass": 87,
+      "shoot": 74,
+      "tackle": 77,
+      "keeping": 7,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Matheus Cunhae",
+      "pos": "FW",
+      "age": 27,
+      "pace": 81,
+      "pass": 69,
+      "shoot": 80,
+      "tackle": 36,
+      "keeping": 8,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Neymar da Silva Santos Juniore",
+      "pos": "FW",
+      "age": 34,
+      "pace": 96,
+      "pass": 83,
+      "shoot": 97,
+      "tackle": 50,
+      "keeping": 8,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Raphael Raphinhae",
+      "pos": "FW",
+      "age": 29,
+      "pace": 88,
+      "pass": 72,
+      "shoot": 95,
+      "tackle": 36,
+      "keeping": 8,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Weverton Pereira da Silvae",
+      "pos": "GK",
+      "age": 38,
+      "pace": 46,
+      "pass": 48,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 76,
+      "shirtNumber": 12,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Danilo da Silvae",
+      "pos": "DF",
+      "age": 34,
+      "pace": 77,
+      "pass": 73,
+      "shoot": 33,
+      "tackle": 84,
+      "keeping": 8,
+      "shirtNumber": 13,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Gleison Bremere",
+      "pos": "DF",
+      "age": 29,
+      "pace": 63,
+      "pass": 63,
+      "shoot": 38,
+      "tackle": 73,
+      "keeping": 8,
+      "shirtNumber": 14,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Leonardo Leo Pereirae",
+      "pos": "DF",
+      "age": 30,
+      "pace": 62,
+      "pass": 62,
+      "shoot": 35,
+      "tackle": 76,
+      "keeping": 8,
+      "shirtNumber": 15,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Douglas dos Santos Justino de Meloe",
+      "pos": "DF",
+      "age": 32,
+      "pace": 74,
+      "pass": 68,
+      "shoot": 34,
+      "tackle": 76,
+      "keeping": 8,
+      "shirtNumber": 16,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Fabio Fabinhoe",
+      "pos": "MF",
+      "age": 32,
+      "pace": 73,
+      "pass": 80,
+      "shoot": 63,
+      "tackle": 63,
+      "keeping": 7,
+      "shirtNumber": 17,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Danilo dos Santos de Oliveirae",
+      "pos": "MF",
+      "age": 25,
+      "pace": 68,
+      "pass": 74,
+      "shoot": 62,
+      "tackle": 67,
+      "keeping": 7,
+      "shirtNumber": 18,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Endrick Moreira de Sousa Pessoae",
+      "pos": "FW",
+      "age": 19,
+      "pace": 69,
+      "pass": 67,
+      "shoot": 81,
+      "tackle": 37,
+      "keeping": 8,
+      "shirtNumber": 19,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Lucas Paquetae",
+      "pos": "MF",
+      "age": 28,
+      "pace": 77,
+      "pass": 95,
+      "shoot": 80,
+      "tackle": 82,
+      "keeping": 7,
+      "shirtNumber": 20,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Luiz Henriquey",
+      "pos": "FW",
+      "age": 25,
+      "pace": 75,
+      "pass": 66,
+      "shoot": 80,
+      "tackle": 41,
+      "keeping": 8,
+      "shirtNumber": 21,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Gabriel Martinellie",
+      "pos": "FW",
+      "age": 24,
+      "pace": 77,
+      "pass": 64,
+      "shoot": 85,
+      "tackle": 41,
+      "keeping": 8,
+      "shirtNumber": 22,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ederson Santana de Moraeso",
+      "pos": "GK",
+      "age": 32,
+      "pace": 47,
+      "pass": 49,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 78,
+      "shirtNumber": 23,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Roger Ibanezo",
+      "pos": "DF",
+      "age": 27,
+      "pace": 68,
+      "pass": 65,
+      "shoot": 36,
+      "tackle": 78,
+      "keeping": 8,
+      "shirtNumber": 24,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Igor Thiagoe",
+      "pos": "FW",
+      "age": 24,
+      "pace": 75,
+      "pass": 69,
+      "shoot": 83,
+      "tackle": 34,
+      "keeping": 8,
+      "shirtNumber": 25,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Rayan Simplicio Rochae",
+      "pos": "FW",
+      "age": 19,
+      "pace": 70,
+      "pass": 60,
+      "shoot": 76,
+      "tackle": 31,
+      "keeping": 8,
+      "shirtNumber": 26,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    }
+  ],
+  "defaultLineup": {
+    "formation": "4-2-3-1",
+    "starters": [
+      0,
+      23,
+      15,
+      7,
+      3,
+      2,
+      19,
+      4,
+      24,
+      10,
+      6
+    ]
+  }
+}

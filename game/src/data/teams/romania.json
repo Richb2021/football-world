@@ -1,0 +1,399 @@
+{
+  "id": "romania",
+  "name": "Romania",
+  "short": "ROU",
+  "stadium": "Arena Nationala Bucur",
+  "strength": 71,
+  "colors": {
+    "home": {
+      "shirt": "#FFD700",
+      "shorts": "#003087",
+      "socks": "#CE1126"
+    },
+    "away": {
+      "shirt": "#FFFFFF",
+      "shorts": "#003087",
+      "socks": "#FFFFFF"
+    }
+  },
+  "players": [
+    {
+      "name": "Florin Ciobanu",
+      "pos": "GK",
+      "age": 29,
+      "pace": 46,
+      "pass": 51,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 75,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Radu Petrescu",
+      "pos": "DF",
+      "age": 26,
+      "pace": 74,
+      "pass": 64,
+      "shoot": 40,
+      "tackle": 78,
+      "keeping": 8,
+      "shirtNumber": 2,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Andrei Matei",
+      "pos": "DF",
+      "age": 28,
+      "pace": 72,
+      "pass": 63,
+      "shoot": 41,
+      "tackle": 77,
+      "keeping": 8,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#7a5533",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Cristian Dobre",
+      "pos": "DF",
+      "age": 25,
+      "pace": 73,
+      "pass": 65,
+      "shoot": 42,
+      "tackle": 76,
+      "keeping": 8,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Lucian Negrescu",
+      "pos": "DF",
+      "age": 27,
+      "pace": 71,
+      "pass": 62,
+      "shoot": 38,
+      "tackle": 75,
+      "keeping": 8,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Mihai Dragan",
+      "pos": "MF",
+      "age": 25,
+      "pace": 78,
+      "pass": 75,
+      "shoot": 66,
+      "tackle": 61,
+      "keeping": 7,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ionuț Barbu",
+      "pos": "MF",
+      "age": 27,
+      "pace": 76,
+      "pass": 73,
+      "shoot": 64,
+      "tackle": 59,
+      "keeping": 7,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Alexandru Vlad",
+      "pos": "MF",
+      "age": 23,
+      "pace": 77,
+      "pass": 72,
+      "shoot": 62,
+      "tackle": 60,
+      "keeping": 7,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#caa463",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Bogdan Iorga",
+      "pos": "FW",
+      "age": 26,
+      "pace": 82,
+      "pass": 68,
+      "shoot": 79,
+      "tackle": 36,
+      "keeping": 8,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#caa463",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Cosmin Enache",
+      "pos": "FW",
+      "age": 24,
+      "pace": 80,
+      "pass": 66,
+      "shoot": 76,
+      "tackle": 35,
+      "keeping": 8,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ezra Wisla",
+      "pos": "GK",
+      "age": 33,
+      "pace": 43,
+      "pass": 48,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 74,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Karim Radic",
+      "pos": "GK",
+      "age": 20,
+      "pace": 44,
+      "pass": 44,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 72,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Kai Vega",
+      "pos": "DF",
+      "age": 27,
+      "pace": 64,
+      "pass": 53,
+      "shoot": 39,
+      "tackle": 73,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Arjun Lombard",
+      "pos": "DF",
+      "age": 25,
+      "pace": 69,
+      "pass": 55,
+      "shoot": 33,
+      "tackle": 72,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jin Camara",
+      "pos": "DF",
+      "age": 30,
+      "pace": 61,
+      "pass": 53,
+      "shoot": 37,
+      "tackle": 66,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Vasco Castel",
+      "pos": "DF",
+      "age": 25,
+      "pace": 62,
+      "pass": 51,
+      "shoot": 31,
+      "tackle": 68,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Stefan Novak",
+      "pos": "MF",
+      "age": 22,
+      "pace": 69,
+      "pass": 68,
+      "shoot": 54,
+      "tackle": 58,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Lars Brennan",
+      "pos": "MF",
+      "age": 21,
+      "pace": 71,
+      "pass": 69,
+      "shoot": 53,
+      "tackle": 51,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Sefu Wisla",
+      "pos": "MF",
+      "age": 24,
+      "pace": 66,
+      "pass": 64,
+      "shoot": 58,
+      "tackle": 51,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Marek Yamoto",
+      "pos": "MF",
+      "age": 32,
+      "pace": 69,
+      "pass": 68,
+      "shoot": 56,
+      "tackle": 46,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Dragan Whelan",
+      "pos": "FW",
+      "age": 33,
+      "pace": 71,
+      "pass": 63,
+      "shoot": 74,
+      "tackle": 35,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Archie Sharm",
+      "pos": "FW",
+      "age": 32,
+      "pace": 72,
+      "pass": 61,
+      "shoot": 67,
+      "tackle": 35,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ravi Stankov",
+      "pos": "FW",
+      "age": 19,
+      "pace": 74,
+      "pass": 55,
+      "shoot": 69,
+      "tackle": 35,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    }
+  ]
+}

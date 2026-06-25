@@ -1,0 +1,479 @@
+{
+  "id": "czechia",
+  "name": "Czechia",
+  "short": "CZE",
+  "stadium": "Fortuna Arena",
+  "strength": 74,
+  "colors": {
+    "home": {
+      "shirt": "#D7141A",
+      "shorts": "#FFFFFF",
+      "socks": "#11457E"
+    },
+    "away": {
+      "shirt": "#FFFFFF",
+      "shorts": "#FFFFFF",
+      "socks": "#D7141A"
+    }
+  },
+  "players": [
+    {
+      "name": "Matej Kovare",
+      "pos": "GK",
+      "age": 26,
+      "pace": 47,
+      "pass": 50,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 70,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "David Zimae",
+      "pos": "DF",
+      "age": 25,
+      "pace": 59,
+      "pass": 57,
+      "shoot": 37,
+      "tackle": 69,
+      "keeping": 8,
+      "shirtNumber": 2,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Tomas Holeso",
+      "pos": "DF",
+      "age": 33,
+      "pace": 58,
+      "pass": 59,
+      "shoot": 35,
+      "tackle": 69,
+      "keeping": 8,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Robin Hranace",
+      "pos": "DF",
+      "age": 26,
+      "pace": 64,
+      "pass": 54,
+      "shoot": 36,
+      "tackle": 67,
+      "keeping": 8,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Vladimir Coufale",
+      "pos": "DF",
+      "age": 33,
+      "pace": 69,
+      "pass": 67,
+      "shoot": 35,
+      "tackle": 82,
+      "keeping": 8,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Stepan Chaloupeke",
+      "pos": "DF",
+      "age": 23,
+      "pace": 56,
+      "pass": 56,
+      "shoot": 37,
+      "tackle": 66,
+      "keeping": 8,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ladislav Krejcie",
+      "pos": "DF",
+      "age": 27,
+      "pace": 62,
+      "pass": 64,
+      "shoot": 35,
+      "tackle": 77,
+      "keeping": 8,
+      "shirtNumber": 7,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Vladimir Daridae",
+      "pos": "MF",
+      "age": 35,
+      "pace": 70,
+      "pass": 78,
+      "shoot": 70,
+      "tackle": 64,
+      "keeping": 7,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Adam Hlozeke",
+      "pos": "FW",
+      "age": 23,
+      "pace": 70,
+      "pass": 65,
+      "shoot": 78,
+      "tackle": 43,
+      "keeping": 8,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Patrik Schicke",
+      "pos": "FW",
+      "age": 30,
+      "pace": 75,
+      "pass": 69,
+      "shoot": 93,
+      "tackle": 47,
+      "keeping": 8,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jan Kuchtae",
+      "pos": "FW",
+      "age": 29,
+      "pace": 63,
+      "pass": 57,
+      "shoot": 69,
+      "tackle": 43,
+      "keeping": 8,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Lukas Cerve",
+      "pos": "MF",
+      "age": 25,
+      "pace": 59,
+      "pass": 64,
+      "shoot": 54,
+      "tackle": 57,
+      "keeping": 7,
+      "shirtNumber": 12,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Mojmir Chytile",
+      "pos": "FW",
+      "age": 27,
+      "pace": 65,
+      "pass": 54,
+      "shoot": 70,
+      "tackle": 37,
+      "keeping": 8,
+      "shirtNumber": 13,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "David Juraseke",
+      "pos": "DF",
+      "age": 25,
+      "pace": 64,
+      "pass": 50,
+      "shoot": 33,
+      "tackle": 69,
+      "keeping": 8,
+      "shirtNumber": 14,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Pavel Sulce",
+      "pos": "FW",
+      "age": 25,
+      "pace": 72,
+      "pass": 65,
+      "shoot": 75,
+      "tackle": 40,
+      "keeping": 8,
+      "shirtNumber": 15,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jindrich Staneke",
+      "pos": "GK",
+      "age": 30,
+      "pace": 48,
+      "pass": 50,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 65,
+      "shirtNumber": 16,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Lukas Provode",
+      "pos": "MF",
+      "age": 29,
+      "pace": 63,
+      "pass": 77,
+      "shoot": 66,
+      "tackle": 61,
+      "keeping": 7,
+      "shirtNumber": 17,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Michal Sadileke",
+      "pos": "MF",
+      "age": 27,
+      "pace": 57,
+      "pass": 76,
+      "shoot": 62,
+      "tackle": 58,
+      "keeping": 7,
+      "shirtNumber": 18,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Tomas Chorye",
+      "pos": "FW",
+      "age": 31,
+      "pace": 68,
+      "pass": 56,
+      "shoot": 71,
+      "tackle": 36,
+      "keeping": 8,
+      "shirtNumber": 19,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jaroslav Zelenye",
+      "pos": "DF",
+      "age": 33,
+      "pace": 60,
+      "pass": 59,
+      "shoot": 31,
+      "tackle": 70,
+      "keeping": 8,
+      "shirtNumber": 20,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "moustache"
+      }
+    },
+    {
+      "name": "David Douderae",
+      "pos": "DF",
+      "age": 28,
+      "pace": 56,
+      "pass": 54,
+      "shoot": 38,
+      "tackle": 62,
+      "keeping": 8,
+      "shirtNumber": 21,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Tomas Souceke",
+      "pos": "MF",
+      "age": 31,
+      "pace": 78,
+      "pass": 91,
+      "shoot": 78,
+      "tackle": 77,
+      "keeping": 7,
+      "shirtNumber": 22,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Lukas Horniceke",
+      "pos": "GK",
+      "age": 23,
+      "pace": 48,
+      "pass": 49,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 60,
+      "shirtNumber": 23,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Alexandr Sojkae",
+      "pos": "MF",
+      "age": 23,
+      "pace": 53,
+      "pass": 68,
+      "shoot": 50,
+      "tackle": 53,
+      "keeping": 7,
+      "shirtNumber": 24,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Hugo Sochureke",
+      "pos": "MF",
+      "age": 18,
+      "pace": 48,
+      "pass": 63,
+      "shoot": 45,
+      "tackle": 53,
+      "keeping": 7,
+      "shirtNumber": 25,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Denis Visinskye",
+      "pos": "FW",
+      "age": 23,
+      "pace": 62,
+      "pass": 49,
+      "shoot": 65,
+      "tackle": 30,
+      "keeping": 8,
+      "shirtNumber": 26,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    }
+  ],
+  "defaultLineup": {
+    "formation": "3-4-2-1",
+    "starters": [
+      0,
+      4,
+      19,
+      6,
+      3,
+      5,
+      21,
+      23,
+      9,
+      16,
+      14
+    ]
+  }
+}

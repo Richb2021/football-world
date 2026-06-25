@@ -1,0 +1,479 @@
+{
+  "id": "australia",
+  "name": "Australia",
+  "short": "AUS",
+  "stadium": "Accor Stadium",
+  "strength": 77,
+  "colors": {
+    "home": {
+      "shirt": "#FFD100",
+      "shorts": "#007A33",
+      "socks": "#FFD100"
+    },
+    "away": {
+      "shirt": "#00205B",
+      "shorts": "#00205B",
+      "socks": "#00205B"
+    }
+  },
+  "players": [
+    {
+      "name": "Mathew Ryane",
+      "pos": "GK",
+      "age": 34,
+      "pace": 51,
+      "pass": 59,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 83,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Milos Degeneke",
+      "pos": "DF",
+      "age": 32,
+      "pace": 69,
+      "pass": 63,
+      "shoot": 31,
+      "tackle": 79,
+      "keeping": 8,
+      "shirtNumber": 2,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Alessandro Circatie",
+      "pos": "DF",
+      "age": 22,
+      "pace": 60,
+      "pass": 62,
+      "shoot": 37,
+      "tackle": 69,
+      "keeping": 8,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jacob Italianoe",
+      "pos": "DF",
+      "age": 24,
+      "pace": 65,
+      "pass": 60,
+      "shoot": 32,
+      "tackle": 71,
+      "keeping": 8,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jordan Bosio",
+      "pos": "DF",
+      "age": 23,
+      "pace": 69,
+      "pass": 66,
+      "shoot": 32,
+      "tackle": 70,
+      "keeping": 8,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jason Geriae",
+      "pos": "DF",
+      "age": 33,
+      "pace": 57,
+      "pass": 57,
+      "shoot": 34,
+      "tackle": 68,
+      "keeping": 8,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Mathew Leckiey",
+      "pos": "FW",
+      "age": 35,
+      "pace": 82,
+      "pass": 71,
+      "shoot": 84,
+      "tackle": 43,
+      "keeping": 8,
+      "shirtNumber": 7,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "beard"
+      }
+    },
+    {
+      "name": "Connor Metcalfey",
+      "pos": "MF",
+      "age": 26,
+      "pace": 70,
+      "pass": 76,
+      "shoot": 66,
+      "tackle": 65,
+      "keeping": 7,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Mohamed Tourey",
+      "pos": "FW",
+      "age": 22,
+      "pace": 66,
+      "pass": 56,
+      "shoot": 74,
+      "tackle": 37,
+      "keeping": 8,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ajdin Hrustice",
+      "pos": "FW",
+      "age": 29,
+      "pace": 76,
+      "pass": 59,
+      "shoot": 73,
+      "tackle": 41,
+      "keeping": 8,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Awer Mabile",
+      "pos": "FW",
+      "age": 30,
+      "pace": 71,
+      "pass": 63,
+      "shoot": 76,
+      "tackle": 40,
+      "keeping": 8,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Paul Izzoe",
+      "pos": "GK",
+      "age": 31,
+      "pace": 46,
+      "pass": 51,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 66,
+      "shirtNumber": 12,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Aiden Oneille",
+      "pos": "MF",
+      "age": 27,
+      "pace": 67,
+      "pass": 75,
+      "shoot": 61,
+      "tackle": 66,
+      "keeping": 7,
+      "shirtNumber": 13,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Cameron Devline",
+      "pos": "MF",
+      "age": 28,
+      "pace": 59,
+      "pass": 68,
+      "shoot": 56,
+      "tackle": 53,
+      "keeping": 7,
+      "shirtNumber": 14,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Kai Trewine",
+      "pos": "DF",
+      "age": 25,
+      "pace": 62,
+      "pass": 51,
+      "shoot": 33,
+      "tackle": 65,
+      "keeping": 8,
+      "shirtNumber": 15,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Aziz Behiche",
+      "pos": "DF",
+      "age": 35,
+      "pace": 74,
+      "pass": 74,
+      "shoot": 35,
+      "tackle": 83,
+      "keeping": 8,
+      "shirtNumber": 16,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "crop",
+        "facialHair": "moustache"
+      }
+    },
+    {
+      "name": "Nestory Irankundae",
+      "pos": "FW",
+      "age": 20,
+      "pace": 68,
+      "pass": 63,
+      "shoot": 75,
+      "tackle": 35,
+      "keeping": 8,
+      "shirtNumber": 17,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#2b1a12",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Patrick Beache",
+      "pos": "GK",
+      "age": 22,
+      "pace": 47,
+      "pass": 47,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 66,
+      "shirtNumber": 18,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Harry Souttare",
+      "pos": "DF",
+      "age": 27,
+      "pace": 74,
+      "pass": 69,
+      "shoot": 34,
+      "tackle": 81,
+      "keeping": 8,
+      "shirtNumber": 19,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Cristian Volpatoe",
+      "pos": "FW",
+      "age": 22,
+      "pace": 58,
+      "pass": 52,
+      "shoot": 66,
+      "tackle": 33,
+      "keeping": 8,
+      "shirtNumber": 20,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Cameron Burgesso",
+      "pos": "DF",
+      "age": 30,
+      "pace": 69,
+      "pass": 64,
+      "shoot": 35,
+      "tackle": 74,
+      "keeping": 8,
+      "shirtNumber": 21,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Jackson Irviney",
+      "pos": "MF",
+      "age": 33,
+      "pace": 75,
+      "pass": 87,
+      "shoot": 70,
+      "tackle": 69,
+      "keeping": 7,
+      "shirtNumber": 22,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Nishan Velupillaye",
+      "pos": "FW",
+      "age": 25,
+      "pace": 60,
+      "pass": 59,
+      "shoot": 70,
+      "tackle": 36,
+      "keeping": 8,
+      "shirtNumber": 23,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Paul Okonengstlere",
+      "pos": "MF",
+      "age": 21,
+      "pace": 64,
+      "pass": 72,
+      "shoot": 54,
+      "tackle": 60,
+      "keeping": 7,
+      "shirtNumber": 24,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Lucas Herringtone",
+      "pos": "DF",
+      "age": 18,
+      "pace": 59,
+      "pass": 51,
+      "shoot": 37,
+      "tackle": 65,
+      "keeping": 8,
+      "shirtNumber": 25,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Tete Yengie",
+      "pos": "FW",
+      "age": 25,
+      "pace": 68,
+      "pass": 53,
+      "shoot": 70,
+      "tackle": 36,
+      "keeping": 8,
+      "shirtNumber": 26,
+      "appearance": {
+        "skinTone": "#4a2b1d",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    }
+  ],
+  "defaultLineup": {
+    "formation": "5-4-1",
+    "starters": [
+      17,
+      3,
+      4,
+      20,
+      18,
+      2,
+      7,
+      12,
+      8,
+      23,
+      16
+    ]
+  }
+}

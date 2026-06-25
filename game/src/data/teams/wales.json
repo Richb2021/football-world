@@ -1,0 +1,399 @@
+{
+  "id": "wales",
+  "name": "Wales",
+  "short": "WAL",
+  "stadium": "Principality Park",
+  "strength": 73,
+  "colors": {
+    "home": {
+      "shirt": "#C8102E",
+      "shorts": "#C8102E",
+      "socks": "#C8102E"
+    },
+    "away": {
+      "shirt": "#FFFFFF",
+      "shorts": "#C8102E",
+      "socks": "#FFFFFF"
+    }
+  },
+  "players": [
+    {
+      "name": "Dewi Parrington",
+      "pos": "GK",
+      "age": 29,
+      "pace": 48,
+      "pass": 53,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 77,
+      "shirtNumber": 1,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#caa463",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Rhys Coleman",
+      "pos": "DF",
+      "age": 28,
+      "pace": 76,
+      "pass": 68,
+      "shoot": 42,
+      "tackle": 81,
+      "keeping": 8,
+      "shirtNumber": 2,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "curly",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Owain Meredith",
+      "pos": "DF",
+      "age": 25,
+      "pace": 74,
+      "pass": 66,
+      "shoot": 40,
+      "tackle": 79,
+      "keeping": 8,
+      "shirtNumber": 5,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#caa463",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Gareth Bateman",
+      "pos": "DF",
+      "age": 30,
+      "pace": 72,
+      "pass": 64,
+      "shoot": 44,
+      "tackle": 78,
+      "keeping": 8,
+      "shirtNumber": 6,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#caa463",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Idris Griffon",
+      "pos": "DF",
+      "age": 24,
+      "pace": 78,
+      "pass": 67,
+      "shoot": 41,
+      "tackle": 76,
+      "keeping": 8,
+      "shirtNumber": 3,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#caa463",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Cai Walcroft",
+      "pos": "MF",
+      "age": 26,
+      "pace": 80,
+      "pass": 78,
+      "shoot": 68,
+      "tackle": 64,
+      "keeping": 7,
+      "shirtNumber": 10,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Lewys Saunton",
+      "pos": "MF",
+      "age": 27,
+      "pace": 77,
+      "pass": 76,
+      "shoot": 66,
+      "tackle": 62,
+      "keeping": 7,
+      "shirtNumber": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Bryn Hooper",
+      "pos": "MF",
+      "age": 23,
+      "pace": 75,
+      "pass": 74,
+      "shoot": 63,
+      "tackle": 60,
+      "keeping": 7,
+      "shirtNumber": 4,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#caa463",
+        "hairStyle": "curly",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Aled Harrington",
+      "pos": "FW",
+      "age": 27,
+      "pace": 85,
+      "pass": 71,
+      "shoot": 82,
+      "tackle": 38,
+      "keeping": 8,
+      "shirtNumber": 9,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Emlyn Preece",
+      "pos": "FW",
+      "age": 24,
+      "pace": 83,
+      "pass": 68,
+      "shoot": 79,
+      "tackle": 36,
+      "keeping": 8,
+      "shirtNumber": 11,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Kayo Costas",
+      "pos": "GK",
+      "age": 25,
+      "pace": 42,
+      "pass": 46,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 67,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Marek Toure",
+      "pos": "GK",
+      "age": 23,
+      "pace": 44,
+      "pass": 44,
+      "shoot": 30,
+      "tackle": 30,
+      "keeping": 62,
+      "appearance": {
+        "skinTone": "#2f1b14",
+        "hairColor": "#17110d",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Bruno Quintero",
+      "pos": "DF",
+      "age": 20,
+      "pace": 67,
+      "pass": 63,
+      "shoot": 35,
+      "tackle": 72,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Ravi Stokes",
+      "pos": "DF",
+      "age": 32,
+      "pace": 71,
+      "pass": 62,
+      "shoot": 31,
+      "tackle": 68,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "stubble"
+      }
+    },
+    {
+      "name": "Lars Garrido",
+      "pos": "DF",
+      "age": 30,
+      "pace": 67,
+      "pass": 59,
+      "shoot": 30,
+      "tackle": 70,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#7a4a2b",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Yusuf Bramall",
+      "pos": "DF",
+      "age": 32,
+      "pace": 69,
+      "pass": 61,
+      "shoot": 34,
+      "tackle": 71,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Dev Novak",
+      "pos": "MF",
+      "age": 26,
+      "pace": 76,
+      "pass": 67,
+      "shoot": 59,
+      "tackle": 54,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Dragan Jansen",
+      "pos": "MF",
+      "age": 29,
+      "pace": 75,
+      "pass": 67,
+      "shoot": 53,
+      "tackle": 50,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "curly",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Aleks Salas",
+      "pos": "MF",
+      "age": 23,
+      "pace": 70,
+      "pass": 67,
+      "shoot": 54,
+      "tackle": 54,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#a96a42",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Stefan Pizarro",
+      "pos": "MF",
+      "age": 22,
+      "pace": 72,
+      "pass": 63,
+      "shoot": 56,
+      "tackle": 50,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#4b2d1b",
+        "hairStyle": "crop",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Rory Rivas",
+      "pos": "FW",
+      "age": 32,
+      "pace": 81,
+      "pass": 62,
+      "shoot": 76,
+      "tackle": 35,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#17110d",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Rory Wisla",
+      "pos": "FW",
+      "age": 24,
+      "pace": 80,
+      "pass": 58,
+      "shoot": 73,
+      "tackle": 35,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#bf8154",
+        "hairColor": "#2b1a12",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    },
+    {
+      "name": "Luka Petrov",
+      "pos": "FW",
+      "age": 27,
+      "pace": 75,
+      "pass": 61,
+      "shoot": 76,
+      "tackle": 35,
+      "keeping": 8,
+      "appearance": {
+        "skinTone": "#d9a173",
+        "hairColor": "#7a5533",
+        "hairStyle": "short",
+        "facialHair": "none"
+      }
+    }
+  ]
+}
