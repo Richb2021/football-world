@@ -288,6 +288,9 @@ export interface GoalLogEntry {
   player: string;
   minute: number;
   ownGoal?: boolean;
+  /** the team-mate who set up the goal (the last different kicker before the scorer),
+   *  when one can be credited within a recent window */
+  assist?: string;
 }
 
 export interface MatchState {

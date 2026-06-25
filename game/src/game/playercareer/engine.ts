@@ -85,7 +85,7 @@ export function avatarOf(pcs: PlayerCareerState): ManagerPlayer | undefined {
 // -------------------------------------------------------------- match performance
 
 interface PlayerLine { goals: number; assists: number; rating: number; result: 'win' | 'draw' | 'loss'; }
-type ScorerEntry = { team: 0 | 1; player: string; minute: number; ownGoal?: boolean };
+type ScorerEntry = { team: 0 | 1; player: string; minute: number; ownGoal?: boolean; assist?: string };
 
 function derivePlayerLine(pcs: PlayerCareerState, score: [number, number], userIsHome: boolean, rng: Rng, scorers?: ScorerEntry[]): PlayerLine {
   const av = avatarOf(pcs);
@@ -104,9 +104,17 @@ function derivePlayerLine(pcs: PlayerCareerState, score: [number, number], userI
     goals = 0;
     for (let g = 0; g < teamGoals; g++) if (rng.next() < goalChance) goals++;
   }
-  const astChance = pcs.pos === 'FW' || pcs.pos === 'MF' ? 0.18 : pcs.pos === 'DF' ? 0.08 : 0;
-  let assists = 0;
-  for (let g = 0; g < teamGoals - goals; g++) if (rng.next() < astChance) assists++;
+  // Real assists come from the goal log's `assist` field when available; otherwise
+  // they're estimated from the remaining team goals.
+  let assists: number;
+  if (scorers) {
+    const userSide: 0 | 1 = userIsHome ? 0 : 1;
+    assists = scorers.filter((s) => s.team === userSide && !s.ownGoal && s.assist === pcs.playerName).length;
+  } else {
+    const astChance = pcs.pos === 'FW' || pcs.pos === 'MF' ? 0.18 : pcs.pos === 'DF' ? 0.08 : 0;
+    assists = 0;
+    for (let g = 0; g < teamGoals - goals; g++) if (rng.next() < astChance) assists++;
+  }
   let rating = 6.4 + (result === 'win' ? 0.6 : result === 'loss' ? -0.6 : 0) + goals * 1.0 + assists * 0.5 + (rng.next() - 0.5) * 0.8;
   rating = clamp(rating, 3, 10);
   return { goals, assists, rating, result };

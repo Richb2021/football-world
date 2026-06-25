@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { Rng } from '../../../sim/rng';
 import {
   createManagerCareer, leagueTableOf, quickSimUserFixture, advance, takeJob,
-  standingsForUserLeague,
+  standingsForUserLeague, simPlayoff,
 } from '../engine';
 
 /** Run a career forward one full season (quick-simming the user's fixtures). */
@@ -57,6 +57,14 @@ describe('manager engine', () => {
     expect(counts[2]).toBe(24);
     expect(counts[3]).toBe(24);
     expect(counts[4]).toBe(24);
+  });
+
+  it('simPlayoff resolves to one of the entrants (and a solo entrant walks over)', () => {
+    const s = createManagerCareer({ nationId: 'england', clubId: 'fulham', managerName: 'Gaffer', seed: 1 });
+    const ids = ['chelsea', 'fulham', 'brighton', 'brentford'];
+    const winner = simPlayoff(s, ids, new Rng(7));
+    expect(ids).toContain(winner);
+    expect(simPlayoff(s, ['chelsea'], new Rng(1))).toBe('chelsea');
   });
 
   it('takeJob moves the manager to a new club and resets the board', () => {

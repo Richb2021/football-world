@@ -2016,7 +2016,7 @@ export class App {
   private async playMatch(
     cfg: MatchConfig,
     localTeam: 0 | 1,
-    onEnd: (outcome: { score: [number, number]; winner: -1 | 0 | 1; momentum?: [number, number]; reason?: string; scorers?: { team: 0 | 1; player: string; minute: number; ownGoal?: boolean }[] }) => void,
+    onEnd: (outcome: { score: [number, number]; winner: -1 | 0 | 1; momentum?: [number, number]; reason?: string; scorers?: { team: 0 | 1; player: string; minute: number; ownGoal?: boolean; assist?: string }[] }) => void,
     net?: { session: NetTransport; role: 'host' | 'guest' },
     skipIntro = false,
   ) {
@@ -2071,7 +2071,7 @@ export class App {
   private playMatchWithPrematch(
     cfg: MatchConfig,
     localTeam: 0 | 1,
-    onEnd: (outcome: { score: [number, number]; winner: -1 | 0 | 1; momentum?: [number, number]; reason?: string; scorers?: { team: 0 | 1; player: string; minute: number; ownGoal?: boolean }[] }) => void,
+    onEnd: (outcome: { score: [number, number]; winner: -1 | 0 | 1; momentum?: [number, number]; reason?: string; scorers?: { team: 0 | 1; player: string; minute: number; ownGoal?: boolean; assist?: string }[] }) => void,
     net?: { session: NetTransport; role: 'host' | 'guest' },
   ) {
     const bgUrl = this.assets.uiUrls.prematchStadium ?? this.assets.uiUrls.teamSelect;

@@ -38,8 +38,9 @@ export interface MatchOutcome {
   /** set when the match ended by forfeit, for the result-screen note */
   reason?: string;
   /** the goal log, so career modes can credit a Be-A-Pro avatar for goals they
-   *  actually scored (player = scorer name; ownGoal flags own goals). */
-  scorers?: { team: 0 | 1; player: string; minute: number; ownGoal?: boolean }[];
+   *  actually scored (player = scorer name; ownGoal flags own goals; assist = the
+   *  team-mate who set it up). */
+  scorers?: { team: 0 | 1; player: string; minute: number; ownGoal?: boolean; assist?: string }[];
 }
 
 interface RunnerOpts {

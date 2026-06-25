@@ -24,6 +24,8 @@ Take over a club and run it across **ongoing seasons** with promotion & relegati
 - **An in-season cup** — a knockout bracket (with byes) drawn from the nation's entrants,
   played on cup matchdays spread across the season alongside the league. Your league game
   on a cup day is auto-simmed while you play the tie; follow the run on the bracket screen.
+- **Promotion playoffs** — the top sides go up automatically, then the next four in the
+  lower tier play a simulated knockout for one extra promotion spot.
 - **Season targets & board confidence** — miss them and the pressure builds; fail badly
   and **you're sacked**, forced to take over another club from the job market.
 
@@ -31,8 +33,9 @@ Take over a club and run it across **ongoing seasons** with promotion & relegati
 A New-Star-Soccer-style career where you **are a single footballer**:
 - Start as a 16-year-old at a small club and rise through the leagues.
 - **Play matches as just yourself** — the camera follows you and you control only your
-  player while the AI runs your ten team-mates (Be-A-Pro control + camera). Your goals in
-  a played match are credited from the actual goal log.
+  player while the AI runs your ten team-mates (Be-A-Pro control + camera). Your goals
+  *and assists* in a played match are credited from the actual goal log (the sim now
+  tracks the passer on each goal).
 - Earn **ratings, goals and assists**, grow your attributes through **training XP**,
   build **reputation**, earn **international call-ups**, and **transfer to bigger clubs**.
 - Age, retire, and leave a career behind.

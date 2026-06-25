@@ -322,19 +322,54 @@ export function advance(state: ManagerState, rng: Rng): { seasonEnded: boolean }
   return { seasonEnded: false };
 }
 
-function applyPromotionRelegation(state: ManagerState): void {
+/** Simulate a neutral knockout among a set of club ids (2–N, with byes) → winner. */
+export function simPlayoff(state: ManagerState, ids: string[], rng: Rng): string | null {
+  if (ids.length < 1) return null;
+  let round = ids.filter((id) => state.squads[id]);
+  if (round.length < 1) return null;
+  while (round.length > 1) {
+    const next: string[] = [];
+    for (let i = 0; i < round.length; i += 2) {
+      const a = round[i];
+      const b = round[i + 1];
+      if (!b) { next.push(a); continue; } // bye (odd number out)
+      const res = simulateKnockout(clubStrength(state.squads[a] ?? []), clubStrength(state.squads[b] ?? []), rng);
+      next.push(res.winner === 0 ? a : b);
+    }
+    round = next;
+  }
+  return round[0] ?? null;
+}
+
+/**
+ * Promotion & relegation between each tier pair. The top `autoUp` sides in the
+ * lower tier go up automatically; if the nation uses playoffs, the next four play a
+ * neutral knockout for one extra spot. Relegation is sized to balance promotion so
+ * league membership counts stay stable (e.g. England: 2 auto + 1 playoff up, 3 down).
+ */
+function applyPromotionRelegation(state: ManagerState, rng: Rng): void {
   const nation = nationById(state.nationId);
   if (!nation || nation.type !== 'pyramid') return;
   const P = nation.promotion ?? 3;
-  const R = nation.relegation ?? 3;
+  const usePlayoffs = nation.playoffs ?? false;
+  const autoUp = usePlayoffs ? Math.max(1, P - 1) : P;
+  const playoffPromotes = usePlayoffs ? 1 : 0;
+  const relegatedCount = autoUp + playoffPromotes;
   const sortedTiers = tiersOf(nation).slice().sort((a, b) => a.tier - b.tier);
   for (let k = 0; k < sortedTiers.length - 1; k++) {
     const upper = sortedTiers[k];
     const lower = sortedTiers[k + 1];
     const upperTable = leagueTableOf(state, upper.leagueId);
     const lowerTable = leagueTableOf(state, lower.leagueId);
-    const relegated = upperTable.slice(-R).map((r) => r.clubId);
-    const promoted = lowerTable.slice(0, P).map((r) => r.clubId);
+
+    const promoted: string[] = lowerTable.slice(0, autoUp).map((r) => r.clubId);
+    if (playoffPromotes > 0) {
+      const playoffEntrants = lowerTable.slice(autoUp, autoUp + 4).map((r) => r.clubId);
+      const winner = simPlayoff(state, playoffEntrants, rng);
+      if (winner && !promoted.includes(winner)) promoted.push(winner);
+    }
+    const relegated = upperTable.slice(-relegatedCount).map((r) => r.clubId);
+
     for (const id of promoted) { state.clubTier[id] = upper.tier; state.clubLeagueId[id] = upper.leagueId; }
     for (const id of relegated) { state.clubTier[id] = lower.tier; state.clubLeagueId[id] = lower.leagueId; }
   }
@@ -366,7 +401,7 @@ export function endSeason(state: ManagerState, rng: Rng): void {
   else if (userFinish === 1) lines.push(`<b style="color:#39d98a">CHAMPIONS! The fans will never forget this season.</b>`);
   state.lastSeasonReview = lines;
 
-  applyPromotionRelegation(state);
+  applyPromotionRelegation(state, rng);
 
   if (evalResult.sacked) state.phase = 'job-offers';
   else startNextSeason(state, rng);

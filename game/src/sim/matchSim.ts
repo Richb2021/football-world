@@ -282,6 +282,10 @@ export class MatchSim {
   private prevLastTouchTeam: 0 | 1 = 0;
   private prevLastKicker = -1;
   private lastTouchTick = 0;
+  /** the last DIFFERENT kicker before the current one (a candidate assister), and the
+   *  tick at which the current kicker took over from them */
+  private lastAssisterIdx = -1;
+  private lastAssisterTick = -99999;
   /** low-pass-filtered ball position used for team shape (line height, formation
    * shift) so the block glides with play instead of twitching on every touch */
   private smoothBall: Vec2 = { x: 0, y: 0 };
@@ -1016,6 +1020,12 @@ export class MatchSim {
 
     const ball = st.ball;
     if (ball.lastTouchTeam !== this.prevLastTouchTeam || ball.lastKicker !== this.prevLastKicker) {
+      // when the kicker changes, the outgoing kicker is the last DIFFERENT kicker —
+      // remember them as a candidate assister for the next goal scored by the new owner
+      if (ball.lastKicker !== this.prevLastKicker && this.prevLastKicker >= 0) {
+        this.lastAssisterIdx = this.prevLastKicker;
+        this.lastAssisterTick = st.tick;
+      }
       this.lastTouchTick = st.tick;
       this.prevLastTouchTeam = ball.lastTouchTeam;
       this.prevLastKicker = ball.lastKicker;
@@ -4761,7 +4771,16 @@ export class MatchSim {
     const scorer = st.players[st.ball.lastKicker];
     const ownGoal = !!scorer && scorer.team !== team;
     const name = scorer ? `${scorer.attrs.name}${ownGoal ? ' (OG)' : ''}` : 'Unknown scorer';
-    st.goals.push({ team, player: name, minute: this.matchMinute(), ownGoal });
+    // credit an assist to the last DIFFERENT kicker (the passer) if they're a team-mate
+    // of the scorer and the scorer has only had the ball briefly since the pass
+    let assist: string | undefined;
+    if (!ownGoal && scorer) {
+      const prev = st.players[this.lastAssisterIdx];
+      if (prev && prev.team === team && prev.idx !== scorer.idx && st.tick - this.lastAssisterTick < 900) {
+        assist = prev.attrs.name;
+      }
+    }
+    st.goals.push({ team, player: name, minute: this.matchMinute(), ownGoal, assist });
     st.phase = 'goalCelebration';
     st.restartTimer = 3.2;
     this.celebrationTeam = team;
