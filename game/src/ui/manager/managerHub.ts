@@ -13,6 +13,8 @@ import { moneyM } from '../../game/manager/types';
 import { clubNameOf } from '../../game/manager/utils';
 import { standingsForUserLeague, userLeagueId, currentTierOf } from '../../game/manager/engine';
 import type { ManagerTransferListing, BidResult } from '../../game/manager/market';
+import { freeAgentFee } from '../../game/manager/market';
+import type { PressConference, PressQuestion, PressAnswer } from '../../meta/metaTypes';
 import { evaluateTarget, type JobOffer } from '../../game/manager/targets';
 import { overallRating } from '../../sim/formations';
 import { playerValue } from '../../game/transfers';
@@ -220,10 +222,10 @@ export function managerTransfers(
   listings: ManagerTransferListing[],
   onBid: (clubId: string, squadIdx: number, offer: number) => BidResult,
   onSell: (squadIdx: number, asking: number) => BidResult,
-  onSignFree: () => BidResult,
+  onSignFA: (faIdx: number) => BidResult,
   onBack: () => void,
 ): void {
-  let tab: 'buy' | 'sell' = 'buy';
+  let tab: 'buy' | 'sell' | 'free' = 'buy';
   const squad = state.squads[state.userClubId] ?? [];
   const render = (msg = '') => {
     let body = '';
@@ -248,6 +250,26 @@ export function managerTransfers(
           </tr>`;
         }).join('')}
       </table>`;
+    } else if (tab === 'free') {
+      const fas = state.freeAgents;
+      body = fas.length
+        ? `<table class="tbl">
+            <tr><th>POS</th><th>PLAYER</th><th>AGE</th><th>OVR</th><th>FEE</th><th></th></tr>
+            ${fas.map((p, i) => {
+              const fee = freeAgentFee(p);
+              const afford = state.transferBudget >= fee && squad.length < 27;
+              return `<tr>
+                <td>${esc(p.pos)}</td><td>${esc(p.name)}</td>
+                <td class="num">${p.age}</td>
+                <td class="num">${Math.round(overallRating(p))}</td>
+                <td class="num money">${moneyM(fee)}</td>
+                <td class="row" style="gap:4px;justify-content:flex-end">
+                  <button class="btn small" data-fa="${i}" ${afford ? '' : 'disabled'}>SIGN</button>
+                </td>
+              </tr>`;
+            }).join('')}
+          </table>`
+        : '<div class="notice">No free agents available right now — the pool refreshes each off-season.</div>';
     } else {
       body = `<table class="tbl">
         <tr><th>POS</th><th>PLAYER</th><th>OVR</th><th>VALUE</th><th></th></tr>
@@ -268,20 +290,20 @@ export function managerTransfers(
         <div class="seg">
           <button id="tab-buy" class="${tab === 'buy' ? 'on' : ''}">BUY</button>
           <button id="tab-sell" class="${tab === 'sell' ? 'on' : ''}">SELL</button>
+          <button id="tab-free" class="${tab === 'free' ? 'on' : ''}">FREE</button>
         </div>
         <span class="tag">BUDGET <span class="money">${moneyM(state.transferBudget)}</span></span>
         <span class="tag">SQUAD ${squad.length}/27</span>
       </div>
-      ${state.windowPhase === 'closed' ? '<div class="notice">Transfer window is closed — deals are still possible but clubs drive a harder bargain.</div>' : ''}
+      ${tab === 'buy' ? '<div class="notice">Unscouted players show "??" — assign a scout to reveal their true rating. Stars may hold out for a bigger club; overpay to convince them.</div>' : ''}
       ${msg ? `<div class="notice" style="margin-bottom:8px">${esc(msg)}</div>` : ''}
       <div class="panel">${body}</div>
       <div class="menu-col" style="margin-top:12px;width:min(300px,80vw)">
-        <button class="btn small" id="free">SIGN FREE AGENT</button>
         <button class="btn small" id="back">◀ DONE</button>
       </div>`);
     bind('tab-buy', () => { tab = 'buy'; render(); });
     bind('tab-sell', () => { tab = 'sell'; render(); });
-    bind('free', () => { const r = onSignFree(); render(r.message); });
+    bind('tab-free', () => { tab = 'free'; render(); });
     bind('back', onBack);
     ui.root.querySelectorAll<HTMLElement>('[data-buy]').forEach((b) => {
       b.addEventListener('click', () => {
@@ -294,6 +316,12 @@ export function managerTransfers(
       b.addEventListener('click', () => {
         const [idx, asking] = b.dataset.sell!.split('|');
         const r = onSell(parseInt(idx, 10), parseInt(asking, 10));
+        render(r.message);
+      });
+    });
+    ui.root.querySelectorAll<HTMLElement>('[data-fa]').forEach((b) => {
+      b.addEventListener('click', () => {
+        const r = onSignFA(parseInt(b.dataset.fa!, 10));
         render(r.message);
       });
     });
@@ -413,28 +441,42 @@ export function jobOffersScreen(ui: UI, state: ManagerState, offers: JobOffer[],
 
 export function managerPress(
   ui: UI,
-  conference: { title: string; subtitle?: string; questions: { reporter: string; text: string; answers: { id: string; text: string }[] }[] },
-  qIndex: number,
-  onAnswer: (answerId: string) => void,
+  conference: PressConference,
+  onAnswer: (ans: PressAnswer) => void,
   onDone: () => void,
   onBack: () => void,
 ): void {
-  if (qIndex >= conference.questions.length) { onDone(); return; }
-  const q = conference.questions[qIndex];
-  const answers = q.answers.map((a) => `<button class="btn small" data-ans="${esc(a.id)}" style="text-align:left">${esc(a.text)}</button>`).join('');
-  uiScreen(ui, `
-    <h1 class="h-screen">${esc(conference.title.toUpperCase())}</h1>
-    ${conference.subtitle ? `<div class="subtle" style="text-align:center;margin-bottom:8px">${esc(conference.subtitle)}</div>` : ''}
-    <div class="panel" style="text-align:center">
-      <div class="subtle">${esc(q.reporter)}</div>
-      <div style="font-size:18px;font-weight:700;margin:10px 0">${esc(q.text)}</div>
-    </div>
-    <div class="menu-col" style="margin-top:12px">${answers}</div>
-    <div class="menu-col" style="margin-top:8px"><button class="btn small" id="back">◀ BACK</button></div>`);
-  ui.root.querySelectorAll<HTMLElement>('[data-ans]').forEach((b) => {
-    b.addEventListener('click', () => onAnswer(b.dataset.ans!));
-  });
-  bind('back', onBack);
+  const queue: PressQuestion[] = [...conference.questions];
+  const base = new Set(conference.questions);
+  let qPos = 0;
+  const ask = () => {
+    if (qPos >= queue.length) { onDone(); return; }
+    const q = queue[qPos];
+    const isFollowUp = !base.has(q);
+    const answers = q.answers.map((an) => `<button class="btn small" data-ans="${esc(an.id)}" style="text-align:left">${esc(an.text)}<span class="press-tone" style="margin-left:6px;opacity:0.6">${an.tone}</span></button>`).join('');
+    uiScreen(ui, `
+      <h1 class="h-screen">${esc(conference.title.toUpperCase())}</h1>
+      ${conference.subtitle ? `<div class="subtle" style="text-align:center;margin-bottom:8px">${esc(conference.subtitle)}</div>` : ''}
+      ${isFollowUp ? '<div class="notice" style="text-align:center;margin-bottom:8px">FOLLOW-UP QUESTION</div>' : ''}
+      <div class="panel" style="text-align:center">
+        <div class="subtle">${esc(q.reporter)}</div>
+        <div style="font-size:18px;font-weight:700;margin:10px 0">${esc(q.text)}</div>
+      </div>
+      <div class="menu-col" style="margin-top:12px">${answers}</div>
+      <div class="menu-col" style="margin-top:8px"><button class="btn small" id="back">◀ BACK</button></div>`);
+    ui.root.querySelectorAll<HTMLElement>('[data-ans]').forEach((b) => {
+      b.addEventListener('click', () => {
+        const ans = q.answers.find((x) => x.id === b.dataset.ans);
+        if (!ans) return;
+        onAnswer(ans);
+        if (ans.followUp) queue.splice(qPos + 1, 0, ans.followUp); // prompt a follow-up
+        qPos++;
+        ask();
+      });
+    });
+    bind('back', onBack);
+  };
+  ask();
 }
 
 export function managerCup(ui: UI, state: ManagerState, onBack: () => void): void {

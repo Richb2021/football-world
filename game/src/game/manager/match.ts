@@ -3,7 +3,7 @@
  * The user side is controller:'human'; the other is 'ai'. Matches are launched
  * via App.playMatchWithPrematch(cfg, userSide, onEnd).
  */
-import type { MatchConfig, MatchTeamConfig, FormationId, Lineup } from '../../sim/types';
+import type { MatchConfig, MatchTeamConfig, FormationId, Lineup, TeamData } from '../../sim/types';
 import type { ManagerState, ManagerPlayer } from './types';
 import { teamDataOf, resolveLineup, formMap, pickManagerKits } from './utils';
 
@@ -52,5 +52,35 @@ export function buildManagerMatch(state: ManagerState, opts: BuildManagerMatchOp
     isFriendly: false,
     leagueId: state.clubLeagueId[opts.homeClubId],
     stadiumName: homeTeam.stadium,
+  };
+}
+
+/** Exhibition / friendly: build a MatchConfig from two arbitrary teams (any league,
+ *  clubs or nations). Used so Exhibition can stage club vs club, or cross-league ties. */
+export function buildExhibitionMatch(
+  home: TeamData,
+  away: TeamData,
+  userSide: 0 | 1,
+  userLineup: Lineup,
+  opts: { halfLengthSec?: number; difficulty?: 0 | 1 | 2 | 3; seed?: number },
+): MatchConfig {
+  const [homeKit, awayKit] = pickManagerKits(home.colors, away.colors);
+  const userPref = { formation: userLineup.formation, starters: userLineup.starters };
+  const mk = (team: TeamData, controller: 'human' | 'ai', kit: MatchTeamConfig['kit'], isUser: boolean): MatchTeamConfig => ({
+    data: team,
+    lineup: resolveLineup(team.players, team.defaultLineup, isUser ? userPref : undefined),
+    kit,
+    controller,
+  });
+  const h = mk(home, userSide === 0 ? 'human' : 'ai', homeKit, userSide === 0);
+  const a = mk(away, userSide === 1 ? 'human' : 'ai', awayKit, userSide === 1);
+  return {
+    teams: [h, a],
+    halfLengthSec: opts.halfLengthSec ?? 150,
+    difficulty: opts.difficulty ?? 1,
+    cupTie: false,
+    seed: opts.seed ?? (Date.now() & 0xffffff),
+    isFriendly: true,
+    stadiumName: home.stadium,
   };
 }

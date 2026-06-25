@@ -16,7 +16,7 @@ import type { ManagerState, ManagerPlayer, LeagueStanding, PendingFixture, Seaso
 import { clamp, playerKey } from './types';
 import { clubStrength, teamDataOf, toManagerPlayer, clubNameOf, resolveLineup } from './utils';
 import { ensureManagerSystems } from './saves';
-import { cpuTransferMarket, youthIntake, tickScouting } from './market';
+import { cpuTransferMarket, youthIntake, tickScouting, refreshFreeAgents } from './market';
 import { applyTrainingTick, ageAndDevelopOffseason } from './training';
 import { seasonTargetFor, applyBoardEvaluation, evaluateTarget } from './targets';
 import { recordUserMatchNarrative, seedManagerInbox } from './meta';
@@ -100,6 +100,7 @@ export function createManagerCareer(opts: { nationId: string; clubId: string; ma
     transferBudget: clubBudget(userStr),
     wageBudget: Math.max(50, Math.round(clubBudget(userStr) / 40)),
     windowPhase: 'summer',
+    freeAgents: [],
     scoutAssignments: [],
     scoutedPlayers: {},
     trainingFocus: 'balanced',
@@ -123,6 +124,7 @@ export function createManagerCareer(opts: { nationId: string; clubId: string; ma
 
   state.board.target = seasonTargetFor(state, opts.clubId, userTier);
   state.cup = buildSeasonCup(state, rng);
+  refreshFreeAgents(state, rng);
   seedManagerInbox(state);
   state.pendingUserFixture = userFixtureThisMatchday(state);
   return ensureManagerSystems(state);
@@ -444,6 +446,7 @@ export function startNextSeason(state: ManagerState, rng: Rng): void {
   }
   state.totalRounds = Math.max(0, ...Object.values(state.fixtures).map((f) => f.length));
   state.cup = buildSeasonCup(state, rng);
+  refreshFreeAgents(state, rng);
 
   const userStr = clubStrength(state.squads[state.userClubId] ?? []);
   state.transferBudget = clubBudget(userStr) + Math.round(state.transferBudget * 0.25);

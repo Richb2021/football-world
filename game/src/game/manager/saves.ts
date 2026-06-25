@@ -42,6 +42,7 @@ export function ensureManagerSystems(s: ManagerState): ManagerState {
   s.clubLeagueId = s.clubLeagueId ?? {};
   s.windowPhase = s.windowPhase ?? 'closed';
   s.cup = s.cup ?? null;
+  s.freeAgents = s.freeAgents ?? [];
   s.trainingFocus = s.trainingFocus ?? 'balanced';
   s.pendingUserFixture = s.pendingUserFixture ?? null;
   s.reputation = s.reputation ?? 40;

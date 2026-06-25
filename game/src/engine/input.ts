@@ -13,6 +13,9 @@ export class InputManager {
   constructor() {
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
+      // don't capture keys — or block Space / arrows — while typing in a text field
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
       this.keys.add(e.code);
       if (e.code === 'Escape' || e.code === 'KeyP') this.onPause?.();
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();

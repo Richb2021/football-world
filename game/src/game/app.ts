@@ -5,10 +5,10 @@ import { InputManager } from '../engine/input';
 import { pickKits } from '../engine/kitTint';
 import type { PitchBoardCreative } from '../engine/stadium';
 import { TEAMS } from '../data/teams';
-import { setActiveLeague, setCupTeams, allNations } from '../data/leagues';
+import { setActiveLeague, setCupTeams, allNations, LEAGUES, type LeagueDef } from '../data/leagues';
 import { GROUPS_BY_ID, WORLD_CUP_VENUES } from '../data/worldCup';
 import { autoLineup, normalizeLineupForFormation, normalizeTactics, teamDefaultLineup } from '../sim/formations';
-import type { KitColors, Lineup, MatchConfig, MatchTeamConfig, MatchTimeOfDay, MatchWeather } from '../sim/types';
+import type { KitColors, Lineup, MatchConfig, MatchTeamConfig, MatchTimeOfDay, MatchWeather, FormationId } from '../sim/types';
 import { Hud } from '../ui/hud';
 import { UI } from '../ui/screens';
 import {
@@ -60,7 +60,7 @@ import {
   createManagerCareer, quickSimUserFixture, advance as advanceManager,
   takeJob, recordUserResult, standingsForUserLeague,
 } from './manager/engine';
-import { buildManagerMatch } from './manager/match';
+import { buildManagerMatch, buildExhibitionMatch } from './manager/match';
 import { managerSlots, saveManager, loadManager } from './manager/saves';
 import type { ManagerState } from './manager/types';
 import { listingsFor, makeBid, offerPlayer, signFreeAgent, assignScout } from './manager/market';
@@ -81,7 +81,7 @@ import {
 import { buildPlayerMatch } from './playercareer/match';
 import { playerSlots, savePlayerCareer, loadPlayerCareer } from './playercareer/saves';
 import type { PlayerCareerState, PlayerTrainingFocus } from './playercareer/types';
-import type { Pos } from '../sim/types';
+import type { Pos, TeamData } from '../sim/types';
 // Football World — Customisation Mode
 import {
   customiseHub, createTeamScreen, customTeamsScreen, customNationsScreen,
@@ -793,10 +793,7 @@ export class App {
     managerTransfers(this.ui, state, listings,
       (cid, idx, offer) => { const r = makeBid(state, { clubId: cid, squadIdx: idx }, offer, rng()); saveManager(state); return r; },
       (idx, asking) => { const r = offerPlayer(state, idx, asking, rng()); saveManager(state); return r; },
-      () => {
-        const r = signFreeAgent(state, rng()); saveManager(state);
-        return { status: r.player ? 'accepted' : 'blocked', message: r.player ? `${r.player.name} signs on a free!` : 'No free agent available right now.' };
-      },
+      (faIdx) => { const r = signFreeAgent(state, faIdx, rng()); saveManager(state); return r; },
       () => this.managerHub());
   }
 
@@ -832,13 +829,10 @@ export class App {
     const fx = state.pendingUserFixture;
     const opp = fx ? (fx.homeClubId === state.userClubId ? fx.awayClubId : fx.homeClubId) : undefined;
     const conf = managerPressConference(state, 'pre-match', opp);
-    let qi = 0;
-    const ask = () => managerPress(this.ui, conf, qi, (ansId) => {
-      const ans = conf.questions[qi].answers.find((a) => a.id === ansId);
-      if (ans) applyManagerMorale(state, ans.effect);
-      saveManager(state); qi++; ask();
-    }, () => { saveManager(state); back(); }, back);
-    ask();
+    managerPress(this.ui, conf,
+      (ans) => { applyManagerMorale(state, ans.effect); saveManager(state); },
+      () => { saveManager(state); back(); },
+      back);
   }
 
   // ------------------------------------------------------------ player career
@@ -1056,28 +1050,22 @@ export class App {
   // ------------------------------------------------------------ exhibition
 
   private exhibitionFlow() {
-    // Exhibition draws from every nation in the game (qualifiers and not), so
-    // any team can play any team.
-    setActiveLeague('all-nations');
-    this.ui.teamSelect('PICK <span class="accent">HOME</span> TEAM', (a) => {
-      this.ui.teamSelect('PICK <span class="accent">AWAY</span> TEAM', (b) => {
-        this.ui.matchPreview(TEAMS[a], TEAMS[b], (side) => {
-          const myTeam = side === 0 ? a : b;
+    this.exhibitionPickTeam('HOME', (home) => {
+      this.exhibitionPickTeam('AWAY', (away) => {
+        this.ui.matchPreview(home, away, (side) => {
+          const myTeam = side === 0 ? home : away;
           this.ui.lineupSelect({
             title: 'PICK <span class="accent">YOUR XI</span>',
-            team: TEAMS[myTeam],
-            initial: this.defaultLineup(myTeam),
+            team: myTeam,
+            initial: myTeam.defaultLineup ?? { formation: '4-2-3-1' as FormationId, starters: autoLineup(myTeam.players, '4-2-3-1') },
             onConfirm: (lineup) => {
-              const overrides: [Lineup | undefined, Lineup | undefined] = side === 0 ? [lineup, undefined] : [undefined, lineup];
-              const cfg = this.buildMatch(
-                a, b,
-                side === 0 ? 'human' : 'ai',
-                side === 1 ? 'human' : 'ai',
-                false, Date.now() & 0xffffff, undefined, overrides,
-              );
+              const cfg = buildExhibitionMatch(home, away, side, lineup, {
+                halfLengthSec: this.settings.halfLengthSec,
+                difficulty: this.settings.difficulty,
+              });
               this.playMatchWithPrematch(cfg, side, (outcome) => {
                 this.ui.result({
-                  teamA: TEAMS[a], teamB: TEAMS[b], score: outcome.score,
+                  teamA: home, teamB: away, score: outcome.score,
                   onContinue: () => this.mainMenu(),
                 });
               });
@@ -1085,8 +1073,42 @@ export class App {
             onBack: () => this.exhibitionFlow(),
           });
         }, () => this.exhibitionFlow());
-      }, () => this.exhibitionFlow(), a);
+      }, () => this.exhibitionFlow());
     }, () => this.mainMenu());
+  }
+
+  /** Pick a league, then a team from it — used for each Exhibition side (so the two
+   *  sides can come from different leagues, e.g. a top-flight club vs a nation). */
+  private exhibitionPickTeam(sideLabel: string, onPick: (t: TeamData) => void, onBack: () => void) {
+    this.exhibitionLeagueSelect(sideLabel, (league) => {
+      this.exhibitionTeamSelect(sideLabel, league, onPick, () => this.exhibitionPickTeam(sideLabel, onPick, onBack));
+    }, onBack);
+  }
+
+  private exhibitionLeagueSelect(sideLabel: string, onPick: (league: LeagueDef) => void, onBack: () => void) {
+    const leagues = LEAGUES.filter((l) => l.teams.length >= 2);
+    const cards = leagues.map((l) => `<button class="team-card" data-league="${l.id}" style="text-align:left">
+        <div class="tname">${l.name}</div><div class="tmeta">${l.teams.length} teams</div></button>`).join('');
+    this.mgrRender(`
+      <h1 class="h-screen">PICK <span class="accent">${sideLabel}</span> LEAGUE</h1>
+      <div class="menu-col">${cards}</div>
+      <div class="menu-col" style="margin-top:10px"><button class="btn small" id="back">◀ BACK</button></div>`);
+    this.ui.root.querySelectorAll<HTMLElement>('[data-league]').forEach((b) =>
+      b.addEventListener('click', () => { const lg = leagues.find((l) => l.id === b.dataset.league); if (lg) onPick(lg); }));
+    document.getElementById('back')?.addEventListener('click', onBack);
+  }
+
+  private exhibitionTeamSelect(sideLabel: string, league: LeagueDef, onPick: (t: TeamData) => void, onBack: () => void) {
+    const teams = league.teams.slice().sort((a, b) => a.name.localeCompare(b.name));
+    const rows = teams.map((t) => `<tr data-team="${t.id}" class="pick-row" style="cursor:pointer">
+        <td style="text-align:left">${t.name}</td><td class="num">${t.strength}</td></tr>`).join('');
+    this.mgrRender(`
+      <h1 class="h-screen">${league.name.toUpperCase()} · PICK <span class="accent">${sideLabel}</span></h1>
+      <div class="panel"><table class="tbl"><tr><th style="text-align:left">TEAM</th><th>STR</th></tr>${rows}</table></div>
+      <div class="menu-col" style="margin-top:10px"><button class="btn small" id="back">◀ BACK</button></div>`);
+    this.ui.root.querySelectorAll<HTMLElement>('[data-team]').forEach((tr) =>
+      tr.addEventListener('click', () => { const t = teams.find((x) => x.id === tr.dataset.team); if (t) onPick(t); }));
+    document.getElementById('back')?.addEventListener('click', onBack);
   }
 
   // ------------------------------------------------------------ careers

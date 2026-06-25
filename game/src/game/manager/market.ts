@@ -222,12 +222,39 @@ export function listingsFor(state: ManagerState): ManagerTransferListing[] {
   return out.sort((a, b) => b.value - a.value);
 }
 
+// -------------------------------------------------------------- player willingness
+
+/**
+ * A player weighs up the move — not just the fee. A star (rated well above the
+ * user's squad) holds out for a bigger club or a heftier offer; a reputable club
+ * or an overpay convinces them. Returns whether they're willing and why not.
+ */
+function playerWilling(
+  state: ManagerState,
+  target: ManagerPlayer,
+  offer: number,
+  rng: Rng,
+): { willing: boolean; reason: string } {
+  const rating = overallRating(target);
+  const clubStr = clubStrength(state.squads[state.userClubId] ?? []);
+  const gap = rating - clubStr; // positive: the player is above the club's level
+  const ratio = offer / Math.max(1, playerValue(target));
+  const score = ratio + state.reputation / 100 - Math.max(0, gap) * 0.045 + rng.range(-0.08, 0.08);
+  const willing = score >= 0.98;
+  const reason = willing
+    ? ''
+    : gap > 6
+      ? `${target.name} isn't convinced by the project — try a bigger offer or improve the squad.`
+      : `${target.name} wants a better deal. Make a stronger offer.`;
+  return { willing, reason };
+}
+
 // -------------------------------------------------------------- bids
 
 /**
- * Bid for a listed player. Thin wrapper over negotiateBuyPlayer; on acceptance
- * the arriving player's form/morale resets and is marked scouted. Guards against
- * a stale squad index by name match.
+ * Bid for a listed player. The player must want the move (see playerWilling), then
+ * the selling club negotiates the fee (negotiateBuyPlayer). On acceptance the
+ * arriving player's form/morale resets and is marked scouted.
  */
 export function makeBid(
   state: ManagerState,
@@ -238,6 +265,10 @@ export function makeBid(
   const seller = state.squads[listing.clubId];
   const target = seller?.[listing.squadIdx];
   if (!target) return { status: 'blocked', message: 'Player no longer available' };
+
+  // the player must also want the move — a star holds out for a bigger club / deal
+  const will = playerWilling(state, target, offer, rng);
+  if (!will.willing) return { status: 'rejected', message: will.reason };
 
   // guard: index must still point at the same player by name
   const res = negotiateBuyPlayer(
@@ -303,32 +334,56 @@ export function offerPlayer(
 // -------------------------------------------------------------- free agents
 
 /**
- * Sign a free agent into the user's squad at the thinnest position. Cost is half
- * the player's value; if the budget can't cover it nothing happens. The player is
- * aged 19-26 and rated roughly clubStrength - 6 (with spread).
+ * Refresh the free-agent pool for a new off-season: keep a handful of unsettled
+ * names and add a fresh crop — veteran journeymen plus young "regen" prospects —
+ * so there are always out-of-contract players to pick up (and new talent appears
+ * as older players retire).
  */
-export function signFreeAgent(
-  state: ManagerState,
-  rng: Rng,
-): { player: ManagerPlayer | null; cost: number } {
-  const squad = state.squads[state.userClubId] ?? [];
-  if (squad.length >= MAX_SQUAD) return { player: null, cost: 0 };
+export function refreshFreeAgents(state: ManagerState, rng: Rng): void {
+  const carry = state.freeAgents.filter(() => rng.next() < 0.25).slice(0, 6);
+  const fresh: ManagerPlayer[] = [];
+  const n = 14 + rng.int(8); // 14–21 new faces
+  for (let i = 0; i < n; i++) {
+    const young = rng.next() < 0.45;
+    const rating = young ? 40 + rng.int(22) : 50 + rng.int(28);
+    const pos = rng.pick<Pos>(['GK', 'DF', 'MF', 'FW']);
+    const attrs = attrsFor(pos, rating, rng);
+    attrs.name = makeName(rng);
+    attrs.age = young ? 17 + rng.int(3) : 24 + rng.int(11);
+    fresh.push(mintPlayer(attrs, rng, rating));
+  }
+  state.freeAgents = [...carry, ...fresh].sort((a, b) => playerValue(b) - playerValue(a));
+}
 
-  const str = clubStrength(squad);
-  const pos = thinnestPosition(squad);
-  const rating = clamp(str - 6 + rng.range(-4, 5), 34, 82);
-  const attrs = attrsFor(pos, rating, rng);
-  attrs.name = makeName(rng);
-  attrs.age = 19 + rng.int(8);
+/** Signing fee for a free agent (60% of market value — no club to pay). */
+export function freeAgentFee(p: ManagerPlayer): number {
+  return roundMoney(playerValue(p) * 0.6);
+}
 
-  const player = mintPlayer(attrs, rng, rating);
-  const cost = roundMoney(playerValue(player) * 0.5);
-
-  if (cost > state.transferBudget) return { player: null, cost: 0 };
-
-  state.transferBudget -= cost;
-  squad.push(player);
-  return { player, cost };
+/**
+ * Sign a free agent from the pool by index. Costs 60% of their value; the player
+ * still has to want the move (a star may hold out). On success they join the user
+ * squad and leave the pool.
+ */
+export function signFreeAgent(state: ManagerState, faIdx: number, rng: Rng): BidResult {
+  const pool = state.freeAgents;
+  const fa = pool[faIdx];
+  if (!fa) return { status: 'blocked', message: 'That free agent has already signed elsewhere.' };
+  const userSquad = state.squads[state.userClubId] ?? [];
+  if (userSquad.length >= MAX_SQUAD) return { status: 'blocked', message: 'Your squad is full.' };
+  const fee = freeAgentFee(fa);
+  if (fee > state.transferBudget) return { status: 'blocked', message: `Not enough budget — needs ${moneyM(fee)}.` };
+  const will = playerWilling(state, fa, fee, rng);
+  if (!will.willing) {
+    pool.splice(faIdx, 1);
+    return { status: 'rejected', message: `${fa.name} turns you down — holding out for a bigger move.` };
+  }
+  state.transferBudget -= fee;
+  pool.splice(faIdx, 1);
+  const joined: ManagerPlayer = { ...fa, form: 50, morale: 70, contractYears: 2 + rng.int(3), scouted: true };
+  userSquad.push(joined);
+  state.scoutedPlayers[playerKey(state.userClubId, joined.name)] = true;
+  return { status: 'accepted', message: `${joined.name} signs on a free for ${moneyM(fee)}!`, newBudget: state.transferBudget };
 }
 
 /**

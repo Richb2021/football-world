@@ -160,6 +160,8 @@ export interface ManagerState {
   transferBudget: number; // £k available to the user club
   wageBudget: number; // £k/week wage ceiling for the user club
   windowPhase: 'summer' | 'winter' | 'closed';
+  /** generated free agents available to sign (refreshed each off-season) */
+  freeAgents: ManagerPlayer[];
 
   // ---- scouting ----
   scoutAssignments: ScoutingAssignment[];

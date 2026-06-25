@@ -15,7 +15,13 @@ const a = (
   effect: MoraleDelta,
   reaction: string,
   narrative?: PressAnswer['narrative'],
-): PressAnswer => ({ id, text, tone, effect, reaction, narrative });
+  followUp?: PressQuestion,
+): PressAnswer => ({ id, text, tone, effect, reaction, narrative, followUp });
+
+/** Build a follow-up question (shown right after the answer that prompts it). */
+const fu = (id: string, reporter: string, text: string, answers: PressAnswer[]): PressQuestion => ({
+  id, reporter, reporterSeed: reporter, text, answers,
+});
 
 interface QTemplate {
   id: string;
@@ -32,7 +38,12 @@ const POOL: QTemplate[] = [
     id: 'expectation', tones: ['pre-tournament'], reporter: 'Sky Sports',
     text: 'The nation expects. Are {team} here to win this tournament, or just to compete?',
     answers: [
-      a('a1', "We're here to win it. Nothing less is acceptable.", 'confident', { fans: 8, squad: 4, pressure: 9, board: 5 }, 'The room sits up — bold words that just raised the stakes.'),
+      a('a1', "We're here to win it. Nothing less is acceptable.", 'confident', { fans: 8, squad: 4, pressure: 9, board: 5 }, 'The room sits up — bold words that just raised the stakes.', undefined,
+        fu('expectation-fu', 'The Athletic', 'Bold. Then name your biggest rival for the title.', [
+          a('f1', 'Ourselves. Beat that and the rest follows.', 'calm', { media: 3, pressure: -2 }, "A diplomat's answer."),
+          a('f2', 'Everyone. We fear no one.', 'defiant', { fans: 4, squad: 3, pressure: 3 }, 'A rallying cry.'),
+          a('f3', "I'm not handing anyone a headline.", 'deflect', { media: -2 }, 'A wry smile — moving on.'),
+        ])),
       a('a2', 'One game at a time. Respect every opponent.', 'humble', { media: 6, pressure: -4, board: 3 }, 'A measured, safe answer. The press nod along.'),
       a('a3', "We've got the talent to trouble anyone. Watch us.", 'defiant', { fans: 6, squad: 6, media: -3, pressure: 4 }, 'A few smiles in the room, a couple of raised eyebrows.'),
       a('a4', "I'd rather let the football do the talking.", 'deflect', { media: -2, pressure: -2 }, 'A reporter sighs — not much of a headline there.'),
@@ -136,7 +147,12 @@ const POOL: QTemplate[] = [
     id: 'win-star', tones: ['post-win'], reporter: 'Sky Sports',
     text: '{star} was the difference-maker. Is he the best in the tournament?',
     answers: [
-      a('a1', 'On that form? Nobody touches him.', 'confident', { players: [{ name: '{star}', delta: 10 }], media: 3, pressure: 4 }, '{star} will be buzzing reading that.'),
+      a('a1', 'On that form? Nobody touches him.', 'confident', { players: [{ name: '{star}', delta: 10 }], media: 3, pressure: 4 }, '{star} will be buzzing reading that.', undefined,
+        fu('win-star-fu', 'Sky Sports', 'So is {star} the player of the season, no debate?', [
+          a('f1', "No debate. He's been unplayable.", 'confident', { players: [{ name: '{star}', delta: 6 }], fans: 4, pressure: 3 }, 'A bold endorsement — that writes itself.'),
+          a('f2', "He's in the conversation. Let others decide.", 'humble', { media: 4, players: [{ name: '{star}', delta: 2 }] }, 'A politic answer.'),
+          a('f3', 'Individual awards are a distraction.', 'deflect', { media: -3, squad: 2 }, 'The room wanted more.'),
+        ])),
       a('a2', "He's a team player. The win was collective.", 'humble', { squad: 5, players: [{ name: '{star}', delta: 3 }] }, 'A unifying message.'),
       a('a3', "Let's not get carried away. He'll keep his feet on the ground.", 'calm', { players: [{ name: '{star}', delta: -2 }], board: 3 }, 'Keeping the hype in check.'),
     ],
@@ -145,7 +161,12 @@ const POOL: QTemplate[] = [
     id: 'loss-blame', tones: ['post-loss'], reporter: 'The Sun',
     text: 'A damaging defeat. Who takes responsibility for that?',
     answers: [
-      a('a1', "I do. The buck stops with me.", 'honest', { board: 5, fans: 6, media: 6, pressure: -3 }, 'A statesmanlike answer that wins the room over.'),
+      a('a1', "I do. The buck stops with me.", 'honest', { board: 5, fans: 6, media: 6, pressure: -3 }, 'A statesmanlike answer that wins the room over.', undefined,
+        fu('loss-blame-fu', 'BBC Sport', 'Will you shake up the team after that?', [
+          a('f1', 'If needed, yes. No one is undroppable.', 'honest', { squad: -3, media: 4, pressure: 2 }, 'A warning shot across the dressing room.'),
+          a('f2', 'I back this group to respond. Few changes.', 'protective', { squad: 5, board: 2 }, 'The players will rally round that.'),
+          a('f3', "You'll see on matchday.", 'deflect', { media: -2, pressure: 1 }, 'A smirk — no clues given.'),
+        ])),
       a('a2', "We win together, we lose together. No one's hiding.", 'calm', { squad: 7, fans: 3 }, 'The players will appreciate the cover.'),
       a('a3', 'Some individuals have to look at themselves.', 'fiery', { squad: -8, media: 4, pressure: 5 }, 'Gasps — that will land hard in the dressing room.'),
       a('a4', "Ask me after the next game.", 'deflect', { media: -5, board: -3, pressure: 3 }, 'A non-answer that frustrates everyone.'),
@@ -216,6 +237,34 @@ const POOL: QTemplate[] = [
       a('a3', 'This is where leaders step forward.', 'public', { players: [{ name: '{star}', delta: 5 }], squad: 2, pressure: 2 }, 'The senior players have been challenged.'),
     ],
   },
+  {
+    id: 'squad-depth', tones: ['pre-match', 'post-win', 'post-draw'], reporter: 'The Athletic',
+    text: 'A few injuries about. Is the squad deep enough to cope with the run-in?',
+    answers: [
+      a('a1', 'That is exactly why we have a squad. Trust the lads coming in.', 'calm', { squad: 5, board: 3 }, 'Reassuring — the fringe players hear that.'),
+      a('a2', 'Depth can always be better. We work with what we have.', 'honest', { media: 4, board: 2 }, 'A candid nod to the board.'),
+      a('a3', 'Injuries are an excuse for people who want them.', 'defiant', { squad: 3, media: -2, pressure: 2 }, 'No room for excuses there.'),
+    ],
+  },
+  {
+    id: 'youth-prospect', tones: ['pre-match', 'post-win', 'form', 'selection'], reporter: 'BBC Sport',
+    text: 'There is excitement about a young player in the group. Will we see him given a chance?',
+    answers: [
+      a('a1', 'If he earns it in training, yes. The door is open.', 'honest', { squad: 3, media: 4 }, 'A meritocratic line the press like.'),
+      a('a2', "He is one for the future — we will not rush him.", 'calm', { board: 3, squad: 2 }, 'Protective and patient.'),
+      a('a3', "He is ready now. Age is just a number.", 'confident', { fans: 5, squad: 2, pressure: 3 }, 'A headline for the back pages.'),
+    ],
+  },
+  {
+    id: 'mind-games', tones: ['pre-match'], reporter: 'TalkSport',
+    text: 'The {opponent} manager has been talking you up all week. Mind games, or genuine respect?',
+    when: (ctx) => !!ctx.opponent,
+    answers: [
+      a('a1', 'I do not do mind games. I prepare a team to win.', 'calm', { media: 4, board: 3 }, 'A measured swat of the question.'),
+      a('a2', 'Respect or not, we will see who is smiling at full time.', 'defiant', { fans: 5, pressure: 3 }, 'A spark for the build-up.'),
+      a('a3', 'Let him talk. It says more about them than us.', 'deflect', { media: -1, squad: 2 }, 'Brushed aside coolly.'),
+    ],
+  },
 ];
 
 const UNIVERSAL: QTemplate[] = [
@@ -240,38 +289,49 @@ function fill(text: string, ctx: MetaContext): string {
     .replace(/\{outOfForm\}/g, ctx.outOfForm ?? ctx.star ?? 'the lad');
 }
 
-function materialize(t: QTemplate, ctx: MetaContext): PressQuestion {
+function fillAnswer(ans: PressAnswer, ctx: MetaContext, depth: number): PressAnswer {
   return {
-    id: t.id,
-    reporter: t.reporter,
-    reporterSeed: t.reporter,
-    text: fill(t.text, ctx),
-    answers: t.answers.map((ans) => ({
-      ...ans,
-      text: fill(ans.text, ctx),
-      effect: {
-        ...ans.effect,
-        players: ans.effect.players?.map((pl) => ({ name: fill(pl.name, ctx), delta: pl.delta })),
-      },
-      narrative: ans.narrative ? {
-        ...ans.narrative,
-        headline: ans.narrative.headline ? {
-          ...ans.narrative.headline,
-          title: fill(ans.narrative.headline.title, ctx),
-          body: ans.narrative.headline.body ? fill(ans.narrative.headline.body, ctx) : undefined,
-        } : undefined,
-        message: ans.narrative.message ? {
-          ...ans.narrative.message,
-          text: fill(ans.narrative.message.text, ctx),
-          replies: ans.narrative.message.replies?.map((reply) => ({
-            ...reply,
-            text: fill(reply.text, ctx),
-            response: reply.response ? fill(reply.response, ctx) : undefined,
-          })),
-        } : undefined,
+    ...ans,
+    text: fill(ans.text, ctx),
+    effect: {
+      ...ans.effect,
+      players: ans.effect.players?.map((pl) => ({ name: fill(pl.name, ctx), delta: pl.delta })),
+    },
+    narrative: ans.narrative ? {
+      ...ans.narrative,
+      headline: ans.narrative.headline ? {
+        ...ans.narrative.headline,
+        title: fill(ans.narrative.headline.title, ctx),
+        body: ans.narrative.headline.body ? fill(ans.narrative.headline.body, ctx) : undefined,
       } : undefined,
-    })),
+      message: ans.narrative.message ? {
+        ...ans.narrative.message,
+        text: fill(ans.narrative.message.text, ctx),
+        replies: ans.narrative.message.replies?.map((reply) => ({
+          ...reply,
+          text: fill(reply.text, ctx),
+          response: reply.response ? fill(reply.response, ctx) : undefined,
+        })),
+      } : undefined,
+    } : undefined,
+    followUp: depth > 0 && ans.followUp ? materializeQuestion(ans.followUp, ctx, depth - 1) : undefined,
   };
+}
+
+function materializeQuestion(q: PressQuestion, ctx: MetaContext, depth: number): PressQuestion {
+  return {
+    ...q,
+    text: fill(q.text, ctx),
+    answers: q.answers.map((ans) => fillAnswer(ans, ctx, depth)),
+  };
+}
+
+function materialize(t: QTemplate, ctx: MetaContext): PressQuestion {
+  return materializeQuestion(
+    { id: t.id, reporter: t.reporter, reporterSeed: t.reporter, text: t.text, answers: t.answers },
+    ctx,
+    1, // allow one level of follow-up beneath a base question
+  );
 }
 
 /** Build a 3-question conference appropriate to the context. `rng` lets tests
@@ -280,12 +340,16 @@ export function buildPressConference(ctx: MetaContext, room: string, opts: { cou
   const rng = opts.rng ?? Math.random;
   const count = opts.count ?? 3;
   const relevant = POOL.filter((t) => t.tones.includes(ctx.tone) && (!t.when || t.when(ctx)));
-  // shuffle relevant, then top up with universal questions
-  const pickFrom = [...relevant];
-  for (let i = pickFrom.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [pickFrom[i], pickFrom[j]] = [pickFrom[j], pickFrom[i]];
-  }
+  const shuffle = (arr: QTemplate[]): QTemplate[] => {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  };
+  // Context-specific (gated) questions are the most topical — surface them first,
+  // then vary the rest. Keeps hostile/crisis/fairytale situations on-topic.
+  const pickFrom = [...shuffle(relevant.filter((t) => t.when)), ...shuffle(relevant.filter((t) => !t.when))];
   const chosen: QTemplate[] = pickFrom.slice(0, count);
   if (chosen.length < count) chosen.push(...UNIVERSAL);
   const questions = chosen.slice(0, count).map((t) => materialize(t, ctx));

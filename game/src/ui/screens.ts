@@ -469,14 +469,14 @@ export class UI {
       <h1 class="h-screen">MAIN <span class="accent">MENU</span></h1>
       <div class="menu-col">
         ${opts.hasSave ? `<button class="btn primary" id="m-continue">CONTINUE — ${opts.saveLabel}<span class="arrow">▶</span></button>` : ''}
-        <button class="btn" id="m-manager">MANAGER MODE <span class="arrow">▶</span></button>
-        <button class="btn" id="m-player">PLAYER CAREER <span class="arrow">▶</span></button>
-        <button class="btn" id="m-customise">CUSTOMISE <span class="arrow">▶</span></button>
         <button class="btn" id="m-exhibition">EXHIBITION <span class="arrow">▶</span></button>
         <button class="btn" id="m-challenge">CHALLENGE MODE <span class="arrow">▶</span></button>
         <button class="btn" id="m-stars">ALL STAR CLUB <span class="arrow">▶</span></button>
         <button class="btn" id="m-online">ONLINE <span class="arrow">▶</span></button>
         <button class="btn" id="m-journey">${MAIN_MENU_JOURNEY_LABEL} <span class="arrow">▶</span></button>
+        <button class="btn" id="m-manager">MANAGER MODE <span class="arrow">▶</span></button>
+        <button class="btn" id="m-player">PLAYER CAREER <span class="arrow">▶</span></button>
+        <button class="btn" id="m-customise">CUSTOMISE <span class="arrow">▶</span></button>
         <button class="btn small" id="m-settings">SETTINGS</button>
         <button class="btn small" id="m-sync">${opts.syncLabel}</button>
       </div>

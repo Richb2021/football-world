@@ -113,6 +113,9 @@ export interface PressAnswer {
   /** the room's reaction line */
   reaction?: string;
   narrative?: PressAnswerNarrative;
+  /** a follow-up question this answer prompts (shown immediately after, before the
+   *  next base question) — makes press conferences feel like a real back-and-forth */
+  followUp?: PressQuestion;
 }
 
 export interface PressResult {
