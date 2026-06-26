@@ -42,6 +42,51 @@ function stripRootMotion(clip: THREE.AnimationClip) {
   }
 }
 
+// Rebase a fall/get-up mocap clip onto the rig's rest pose. The library clips were
+// authored at a stray origin (the fall's Hips sits ~157 units off in Z), so freezing
+// that raw X/Z would fling the body sideways and through the turf. Instead anchor the
+// Hips to the rig's bind position: pin X/Z to rest (the sim owns the horizontal skid)
+// and keep ONLY the vertical drop, applied as a delta from the anchor frame — the fall
+// anchors on its first frame (starts standing, drops to the ground), the get-up on its
+// last (ends standing, starts on the ground) so neither pops when locomotion resumes.
+// Every other bone's translation is frozen (limbs are driven by rotation), as with the
+// other action clips.
+function rebaseFallClip(
+  clip: THREE.AnimationClip,
+  bindHips: { x: number; y: number; z: number },
+  // The clip's STANDING frame, anchored to the rig's rest height. A fall STARTS standing
+  // (anchorLast=false → frame 0); a get-up ENDS standing (anchorLast=true → last frame).
+  anchorLast: boolean,
+) {
+  // The raw knock-down throws the pelvis ~1.8m into the air (a theatrical "blown off
+  // your feet" launch). That's far too much air for a tackle, so the part of the drop
+  // that rises ABOVE the standing pose is compressed to a believable hop while the part
+  // that goes toward the turf (and so the lying ground contact) is kept exactly.
+  const LIFT = 0.38;
+  // ...but don't let the pelvis sink so low the laid-out body clips through the turf.
+  const LIE_FLOOR = bindHips.y * 0.33;
+  for (const track of clip.tracks) {
+    if (!track.name.endsWith('.position')) continue;
+    const v = track.values;
+    if (track.name === 'Hips.position') {
+      const n = v.length / 3;
+      const anchorY = v[(anchorLast ? n - 1 : 0) * 3 + 1];
+      for (let i = 0; i < v.length; i += 3) {
+        const dy = v[i + 1] - anchorY;
+        v[i] = bindHips.x;
+        v[i + 1] = Math.max(LIE_FLOOR, bindHips.y + (dy > 0 ? dy * LIFT : dy));
+        v[i + 2] = bindHips.z;
+      }
+    } else {
+      for (let i = 3; i < v.length; i += 3) {
+        v[i] = v[0];
+        v[i + 1] = v[1];
+        v[i + 2] = v[2];
+      }
+    }
+  }
+}
+
 /**
  * Mirror a skeletal clip across the rig's lateral (X) axis: Left/Right bone
  * tracks swap, X positions negate, and quaternions conjugate through the
@@ -150,6 +195,14 @@ export async function loadAssets(onProgress: (msg: string, frac: number) => void
   const rigged = await loadGltf(riggedUrl);
   if (rigged) {
     const clips: THREE.AnimationClip[] = [...(rigged.animations || [])];
+    // the rig's rest Hips position — the fall/get-up clips are rebased onto it so the
+    // body drops to the turf without inheriting the library clips' stray world origin
+    const bindHips = { x: 0, y: 0, z: 0 };
+    rigged.scene?.traverse((o: any) => {
+      if (o.name === 'Hips' && (bindHips.x === 0 && bindHips.y === 0 && bindHips.z === 0)) {
+        bindHips.x = o.position.x; bindHips.y = o.position.y; bindHips.z = o.position.z;
+      }
+    });
     onProgress('Teaching them to run…', 0.45);
     // clip donor GLBs share the rig's skeleton; renamed clip names must avoid
     // the 'run'/'walk' substrings the action mapper keys on
@@ -169,15 +222,27 @@ export async function loadAssets(onProgress: (msg: string, frac: number) => void
       ['playerAnim_celebrate_cheer', 'celebrate2'],
       ['playerAnim_idle', 'idlestand'],
       ['playerAnim_tired_idle', 'idletired'],
+      // real mocap fall (taking a tackle/foul) + get-up — rebased onto the rig so the
+      // body drops to the turf and rises, instead of inheriting the clip's stray origin.
+      // 'fall' topples backward (a tackle into his front); 'fallforward' pitches him onto
+      // his front (clipped from behind), picked by the shove direction at runtime.
+      ['playerAnim_fall', 'fall'],
+      ['playerAnim_fall_forward', 'fallforward'],
+      ['playerAnim_getup', 'getup'],
+      ['playerAnim_getup_front', 'getupfront'],
     ];
     const donors = await Promise.all(CLIP_DONORS.map(([key]) => loadGltf(url(key))));
     donors.forEach((g, i) => {
       if (g?.animations?.length) {
         const clip = g.animations[0].clone();
-        clip.name = CLIP_DONORS[i][1];
+        const name = CLIP_DONORS[i][1];
+        clip.name = name;
         // run/walk are already authored in place; the action-library clips
-        // (slides, dives, leaps) carry root motion that fights the sim
-        if (i >= 2) stripRootMotion(clip);
+        // (slides, dives, leaps) carry root motion that fights the sim. The fall and
+        // get-up keep only their vertical drop, rebased onto the rig's rest pose.
+        if (name === 'fall' || name === 'fallforward') rebaseFallClip(clip, bindHips, false);
+        else if (name === 'getup' || name === 'getupfront') rebaseFallClip(clip, bindHips, true);
+        else if (i >= 2) stripRootMotion(clip);
         clips.push(clip);
       }
     });

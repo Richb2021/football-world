@@ -96,6 +96,24 @@ export function tintKitTexture(source: THREE.Texture, kit: KitColors, options: T
         if (overlay) multiplyOverlay(px, overlay, i);
         continue;
       }
+      // A bright/low-sat pixel the COLOUR classifier read as shirt, but that the body map
+      // places below the shirt hem, is really a highlight on the SHORTS — paint it the
+      // shorts colour. Without this, a kit with dark shorts (e.g. England's navy) is
+      // speckled white wherever the base shorts texture is bright (the "blotchy" look).
+      // Socks (<0.28) are handled above and bare-leg skin is the null region (never here),
+      // so anything left below ~0.50 is shorts. (0.50 ≈ the shirt hem in body height.)
+      if (body && body.ht < 0.50) {
+        if (uvMode) {
+          pullPixelTowards(px, i, shorts, 0.84);
+        } else {
+          const shade = clampNum(light * 1.55, 0.42, 1.08);
+          px[i] = Math.min(255, shorts[0] * shade);
+          px[i + 1] = Math.min(255, shorts[1] * shade);
+          px[i + 2] = Math.min(255, shorts[2] * shade);
+        }
+        if (overlay) multiplyOverlay(px, overlay, i);
+        continue;
+      }
       // shirt areas -> patterned shirt colour (keeps shading via multiply)
       let c = body
         ? shirtPatternColorBody(style, shirt, secondary, body.lat, body.ht)
@@ -396,4 +414,16 @@ export function pickKits(home: { home: KitColors; away: KitColors }, away: { hom
   if (!kitsClash(h, away.away)) return [h, away.away];
   // both stored kits still merge with the home shirt from above — go emergency
   return [h, contrastFallback(visibleShirtColours(h))];
+}
+
+/**
+ * Pick a kit for a team that does NOT clash with an opponent whose kit is already fixed
+ * (e.g. the user's club in Stars/World-Tour). Tries the team's home, then away, then an
+ * emergency contrast colour — the overhead clash test all the way through, so two near-white
+ * sides never take the field together.
+ */
+export function pickNonClashingKit(opponentKit: KitColors, colors: { home: KitColors; away: KitColors }): KitColors {
+  if (!kitsClash(opponentKit, colors.home)) return colors.home;
+  if (!kitsClash(opponentKit, colors.away)) return colors.away;
+  return contrastFallback(visibleShirtColours(opponentKit));
 }

@@ -55,6 +55,8 @@ export class MatchRenderer {
   private playerVisuals: PlayerVisual[] = [];
   private ball!: THREE.Group;
   private ballMesh!: THREE.Mesh;
+  private _ballHandA = new THREE.Vector3();
+  private _ballHandB = new THREE.Vector3();
   private camTarget = new THREE.Vector3();
   private camPos = new THREE.Vector3(0, 46, 20);
   private shake = 0;
@@ -453,13 +455,79 @@ export class MatchRenderer {
         ballH = Math.max(ballH, 2.06);
       }
     }
-    // a caught ball is carried in the keeper's hands at chest height
+    // a caught ball is carried in the keeper's hands in front of his chest. The
+    // sim already lerps b.z to hand height (chest standing, low when sprawled), so
+    // track it rather than forcing a fixed floor that would float the ball above a
+    // diving keeper's body.
     if (b.held && b.ownerIdx >= 0) {
       const gk = state.players[b.ownerIdx];
-      if (gk) {
-        ballX = gk.pos.x + Math.cos(gk.facing) * 0.38;
-        ballZ = gk.pos.y + Math.sin(gk.facing) * 0.38;
-        ballH = Math.max(ballH, 1.05);
+      const gv = this.playerVisuals[b.ownerIdx];
+      const sprawled = !!gk && (gk.diving || gk.anim === 'dive' || gk.anim === 'smother'
+        || (!!gv && (gv.recoverTime ?? 0) > 0));
+      // runOut is LATCHED on the visual (the sim clears gk.diveKind mid-hold, which otherwise
+      // dropped a still-sliding smother into the lateral/hands branch — the ball trailing off
+      // to his side).
+      const runOut = !!gv && !!gv.diveRunOut;
+      const recovering = !!gv && gv.current === 'recover';
+      if (sprawled && runOut && gk && gv) {
+        // A rush-out smother/spread lies face-down ON the ball. Carry it at his BODY CENTRE
+        // (midpoint of hips and chest) so it sits under his belly however he's laid out —
+        // his ground spot alone is at his hips and can be a metre off his forward-thrown
+        // chest on a spread. Clamp it near the ground spot so a stray bone pose can't fling
+        // it away, and keep it low.
+        const hips = gv.group.getObjectByName('Hips');
+        const chest = gv.group.getObjectByName('Spine1') ?? gv.group.getObjectByName('Spine');
+        if (hips && chest) {
+          const a = this._ballHandA; const c = this._ballHandB;
+          hips.getWorldPosition(a); chest.getWorldPosition(c);
+          let cx = (a.x + c.x) / 2, cz = (a.z + c.z) / 2;
+          const dx = cx - gk.pos.x, dz = cz - gk.pos.y;
+          const d = Math.hypot(dx, dz);
+          if (d > 0.6) { cx = gk.pos.x + dx / d * 0.6; cz = gk.pos.y + dz / d * 0.6; }
+          ballX = cx; ballZ = cz; ballH = 0.28;
+        } else {
+          const visFacing = gv.baseRotY - gv.visualRotY;
+          ballX = gk.pos.x + Math.cos(visFacing) * 0.18;
+          ballZ = gk.pos.y + Math.sin(visFacing) * 0.18;
+          ballH = 0.28;
+        }
+      } else if (sprawled && recovering && gv && gk) {
+        // Getting up after a lateral save: clamp the ball to his CHEST (torso centre, between
+        // head and hips) so it rises with him, secured to his body — not jittering around to
+        // his side with his planting hands as he stands.
+        const head = gv.group.getObjectByName('Head');
+        const hips = gv.group.getObjectByName('Hips');
+        if (head && hips) {
+          const a = this._ballHandA; const c = this._ballHandB;
+          head.getWorldPosition(a); hips.getWorldPosition(c);
+          const visFacing = gv.baseRotY - gv.visualRotY;
+          ballX = (a.x + c.x) / 2 + Math.cos(visFacing) * 0.18;
+          ballZ = (a.z + c.z) / 2 + Math.sin(visFacing) * 0.18;
+          ballH = Math.max(0.2, (a.y + c.y) / 2);
+        }
+      } else if (sprawled && gv) {
+        // A LATERAL dive reaches both hands at the ball — carry it in his ACTUAL hands (from
+        // the rig) so it makes contact with him instead of floating on the ring at his feet.
+        const a = this._ballHandA.set(gk.pos.x, 1, gk.pos.y);
+        const c = this._ballHandB.set(gk.pos.x, 1, gk.pos.y);
+        const lh = gv.group.getObjectByName('LeftHand');
+        const rh = gv.group.getObjectByName('RightHand');
+        if (lh) lh.getWorldPosition(a);
+        if (rh) rh.getWorldPosition(c);
+        if (lh && !rh) c.copy(a);
+        if (rh && !lh) a.copy(c);
+        if (lh || rh) {
+          ballX = (a.x + c.x) / 2;
+          ballZ = (a.z + c.z) / 2;
+          ballH = Math.max(0.12, (a.y + c.y) / 2);
+        }
+      } else if (gk) {
+        // standing hold: in front of the keeper's ACTUAL rendered body. During recover his body
+        // holds the dive yaw while gk.facing (sim) is forced upfield — using gk.facing put the
+        // ball off to the side. Derive his facing from the visual yaw instead.
+        const visFacing = gv ? gv.baseRotY - gv.visualRotY : gk.facing;
+        ballX = gk.pos.x + Math.cos(visFacing) * 0.38;
+        ballZ = gk.pos.y + Math.sin(visFacing) * 0.38;
       }
     }
     // when the ball is close to a diving keeper, clamp its rendered height so

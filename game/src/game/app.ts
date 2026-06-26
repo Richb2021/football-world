@@ -2,7 +2,7 @@ import { loadAssets, type GameAssets } from '../engine/assets';
 import { AudioEngine } from '../engine/audio';
 import { CommentaryEngine } from '../engine/commentary';
 import { InputManager } from '../engine/input';
-import { pickKits } from '../engine/kitTint';
+import { pickKits, pickNonClashingKit } from '../engine/kitTint';
 import type { PitchBoardCreative } from '../engine/stadium';
 import { TEAMS } from '../data/teams';
 import { setActiveLeague, setCupTeams, allNations, LEAGUES, type LeagueDef } from '../data/leagues';
@@ -1738,7 +1738,9 @@ export class App {
     // incomplete XI. The play/cup screens also guard, but this covers every path.
     if (this.stars.squad.starters.some((id) => !id)) return;
     const home = starsMatchTeam(this.stars, 'human');
-    const away: MatchTeamConfig = { data: opp.team, lineup: opp.lineup, kit: opp.kit, controller: 'ai' };
+    // resolve any kit clash so the AI side doesn't take the field in a near-identical strip
+    const awayKit = pickNonClashingKit(home.kit, opp.team.colors);
+    const away: MatchTeamConfig = { data: opp.team, lineup: opp.lineup, kit: awayKit, controller: 'ai' };
     const cfg: MatchConfig = {
       teams: [home, away],
       halfLengthSec: this.settings.halfLengthSec,
@@ -1864,7 +1866,8 @@ export class App {
         const opponent = worldTourOpponents(state, weekKey)[stageIndex];
         if (!stage || !opponent || state.squad.starters.some((id) => !id)) return;
         const home = starsMatchTeam(state, 'human');
-        const away: MatchTeamConfig = { data: opponent.team, lineup: opponent.lineup, kit: opponent.kit, controller: 'ai' };
+        const awayKit = pickNonClashingKit(home.kit, opponent.team.colors);
+        const away: MatchTeamConfig = { data: opponent.team, lineup: opponent.lineup, kit: awayKit, controller: 'ai' };
         const cfg: MatchConfig = {
           teams: [home, away],
           halfLengthSec: this.settings.halfLengthSec,

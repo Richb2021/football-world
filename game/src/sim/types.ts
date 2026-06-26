@@ -224,8 +224,9 @@ export interface SimPlayer {
   diving?: boolean;
   /** stable roll side for a goalkeeper save; avoids deriving the pose from changing velocity */
   diveSide?: -1 | 0 | 1;
-  /** distinguishes a lateral line save from a forward smother */
-  diveKind?: 'line' | 'smother' | null;
+  /** distinguishes a lateral line save from a forward smother, and a rushed-out spread
+   * (the keeper charges an attacker and slides out, rather than a lateral line dive) */
+  diveKind?: 'line' | 'smother' | 'spread' | null;
   /** true while the keeper is committed to a dive he cannot actually reach — he
    * makes the full attempt but is beaten, so the diving-reach save is suppressed */
   diveBeaten?: boolean;
@@ -234,6 +235,12 @@ export interface SimPlayer {
   /** >0 while the player is down after a foul or a hard tackle — he lies on the
    * turf (anim 'fall') and can't act until he gets back to his feet */
   downTimer?: number;
+  /** how hard the challenge that put him down was, 0..1 — drives the size of the
+   * fall (launch height, roll, skid). A clean-tackle stumble is low, a heavy foul high. */
+  fallPower?: number;
+  /** true when the shove went with his facing (clipped from behind) so he pitches onto
+   * his front; false/undefined topples him backward (a tackle into his front) */
+  fallForward?: boolean;
 }
 
 export interface SimBall {

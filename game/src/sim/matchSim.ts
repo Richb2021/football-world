@@ -225,6 +225,9 @@ export class MatchSim {
   private addedTimeSec = -1;
   /** once regulation + stoppage is up, true while we wait for a neutral moment to blow the whistle */
   private awaitingHalfEnd = false;
+  /** the tick we started waiting for the half-end whistle, so the clock can crawl during the
+   * wait (it looks better than racing minutes past full time) with a real-time backstop */
+  private halfEndArmTick = -1;
   /** international-cup drinks break: true once past the half's midpoint, waiting for a dead ball */
   private awaitingHydration = false;
   /** which halves have already had their hydration break (so it fires once each) */
@@ -306,6 +309,11 @@ export class MatchSim {
   /** short goalkeeper close-down commitment, so a keeper who steps out stays big
    * instead of snapping back to his line when the carrier hovers on a threshold */
   private gkRushCommit = new Map<number, { ownerIdx: number; target: Vec2; until: number }>();
+  /** low-passed keeper steering target, so his read switching references near the decision
+   * boundary (rush=attacker, line=ball, which a dribbler knocks ahead) can't twitch him */
+  private gkTargetMemo = new Map<number, Vec2>();
+  /** last tick each AI side made a substitution, so the CPU paces its changes */
+  private aiLastSubTick: [number, number] = [-99999, -99999];
   /** sticky dribble-dodge side so the carrier commits to a way round a defender */
   private dodgeState = new Map<number, number>();
   /** sticky "open channel" Y per team so runs don't snap between gaps each tick */
@@ -514,6 +522,7 @@ export class MatchSim {
     this.aiAim.clear();
     this.chaseCommit.clear();
     this.gkRushCommit.clear();
+    this.gkTargetMemo.clear();
     return true;
   }
 
@@ -1008,6 +1017,7 @@ export class MatchSim {
     this.livePassTargetUntil = -1;
     this.pendingOffside = null;
     this.gkRushCommit.clear();
+    this.gkTargetMemo.clear();
     this.enforceRestartSpacing();
   }
 
@@ -1167,6 +1177,7 @@ export class MatchSim {
     this.integratePlayers(inputs, false);
 
     if (isRestart) {
+      this.aiConsiderSubstitutions();
       this.applyRestartTakerPose();
       this.maybeTakeRestart(inputs);
     } else {
@@ -1186,7 +1197,11 @@ export class MatchSim {
     const halfLen = st.half <= 2 ? this.cfg.halfLengthSec : this.cfg.halfLengthSec / 3;
     if (st.phase === 'play') {
       st.penaltyAim = 0;
-      st.clock += DT;
+      // once we're past stoppage time and just waiting for the ball to go dead, let the clock
+      // CRAWL — racing the minutes 5+ past full time while the move plays out looks broken;
+      // a slow creep reads like proper added time. It runs normally otherwise (and resets
+      // fresh each half because clock starts at 0 with awaitingHalfEnd cleared).
+      st.clock += this.awaitingHalfEnd ? DT * 0.18 : DT;
       if (st.clock >= halfLen) {
         if (this.addedTimeSec < 0) {
           // first tick past regulation: decide stoppage time and announce it
@@ -1194,7 +1209,10 @@ export class MatchSim {
           st.addedTime = this.addedTimeSec;
           this.emit({ type: 'addedTime', seconds: Math.round(this.addedTimeSec) });
         }
-        if (st.clock >= halfLen + this.addedTimeSec) this.awaitingHalfEnd = true;
+        if (st.clock >= halfLen + this.addedTimeSec && !this.awaitingHalfEnd) {
+          this.awaitingHalfEnd = true;
+          this.halfEndArmTick = st.tick;
+        }
       }
       // international-cup drinks break: once we pass the midpoint of a regulation
       // half, arm a hydration break to be taken at the next dead-ball / neutral moment
@@ -1206,11 +1224,12 @@ export class MatchSim {
         this.awaitingHydration = true;
       }
     }
-    // the drinks break is taken at the first neutral moment after the midpoint — a
-    // dead ball or the ball in the centre circle — never mid-attack. It clears all
-    // momentum built up to that point and signals the presentation layer.
+    // the drinks break is taken at the first time the ball goes OUT OF PLAY after the
+    // midpoint — a throw-in, free kick, goal kick, corner or kick-off — so play actually
+    // stops there and restarts there, never mid-move. It clears all momentum built up to
+    // that point and signals the presentation layer.
     if (this.awaitingHydration && !this.awaitingHalfEnd
-      && (this.ballInCentreCircle() || this.isRestartPhase(st.phase))) {
+      && this.isRestartPhase(st.phase)) {
       this.awaitingHydration = false;
       this.hydrationBreakHalves.add(st.half);
       st.momentum[0] = 0;
@@ -1222,9 +1241,12 @@ export class MatchSim {
     // ball in the centre circle, or any dead-ball / restart — so full time can
     // never be blown while a team is mid-attack. A hard cap stops endless play.
     if (this.awaitingHalfEnd) {
-      const hardCap = st.clock >= halfLen + this.addedTimeSec + 45;
+      // backstop in REAL ticks (not the now-crawling clock): if no dead ball comes within a
+      // short window, blow it anyway so a half can't run on forever.
+      const hardCap = this.halfEndArmTick >= 0 && st.tick - this.halfEndArmTick > Math.round(14 / DT);
       if (hardCap || this.ballInCentreCircle() || this.isRestartPhase(st.phase)) {
         this.awaitingHalfEnd = false;
+        this.halfEndArmTick = -1;
         this.addedTimeSec = -1;
         st.addedTime = 0;
         this.endOfHalf();
@@ -1399,6 +1421,19 @@ export class MatchSim {
     }
   }
 
+  /** Hand the human control to the man a cross/through-ball is played to, so the stick
+   * runs HIM onto the end of it instead of curling the ball. Held briefly against the
+   * auto-switch so it doesn't immediately snatch control back. */
+  private handControlToReceiver(team: 0 | 1, idx: number) {
+    if (idx < 0 || this.cfg.teams[team].controller === 'ai') return;
+    const st = this.state;
+    st.controlledIdx[team] = idx;
+    for (const p of st.players) if (p.team === team) p.control = p.idx === idx;
+    const h = this.humans[team];
+    h.manualSwitchUntil = st.tick + Math.round(0.6 / DT);
+    h.autoSwitchAt = st.tick + Math.round(0.18 / DT);
+  }
+
   private autoControlCandidate(team: 0 | 1): SimPlayer | null {
     let best: SimPlayer | null = null;
     let bestScore = Infinity;
@@ -1458,8 +1493,10 @@ export class MatchSim {
         p.anim = 'fall';
         p.slideTimer = 0;
         p.diving = false;
-        p.vel.x *= 1 - 7 * DT;
-        p.vel.y *= 1 - 7 * DT;
+        // bleed the launch/skid off gradually so he slides along the turf rather than
+        // stopping dead the instant he lands
+        p.vel.x *= 1 - 4 * DT;
+        p.vel.y *= 1 - 4 * DT;
         p.pos.x += p.vel.x * DT;
         p.pos.y += p.vel.y * DT;
         this.clampToField(p);
@@ -1602,6 +1639,13 @@ export class MatchSim {
       const accel = this.acceleration(p, sprint) * this.wfx.accel;
       p.vel.x += clamp(tx - p.vel.x, -accel * DT, accel * DT);
       p.vel.y += clamp(ty - p.vel.y, -accel * DT, accel * DT);
+      // a standing tackle PLANTS the feet — he can't keep running through it. Kill his
+      // momentum for the duration of the lunge so he stabs at the ball in place, then
+      // resumes running (to catch up) once the action window ends.
+      if (p.anim === 'tackle' && p.actionTimer && p.actionTimer > 0) {
+        p.vel.x *= 0.55;
+        p.vel.y *= 0.55;
+      }
       p.pos.x += p.vel.x * DT;
       p.pos.y += p.vel.y * DT;
       const v = len(p.vel.x, p.vel.y);
@@ -1613,7 +1657,10 @@ export class MatchSim {
         p.facing = Math.atan2(p.vel.y, p.vel.x);
       }
 
-      // Goalkeeper override: always face the ball (unless celebrating)
+      // Goalkeeper override: always face the ball (unless celebrating). The dive/save
+      // logic sets his facing to the shot direction when he commits, so this must NOT
+      // rate-limit it — a capped turn here lagged the dive orientation and sent him the
+      // wrong way across goal.
       if (p.isGK && !celebrating) {
         const toBallX = st.ball.pos.x - p.pos.x;
         const toBallY = st.ball.pos.y - p.pos.y;
@@ -1980,6 +2027,10 @@ export class MatchSim {
     const ownGoalDir = this.ownGoalDir(p.team);
     const press = this.pressAssignments(p.team, owner);
     if (press.primary?.idx === p.idx) {
+      // cut the angle to a reachable point on his path to goal so we get ACROSS the
+      // run, instead of trailing the tail of a carrier moving at pace
+      const cutoff = this.goalCutoffTarget(p, owner);
+      if (cutoff) return cutoff;
       // approach goal-side of the carrier so he can't just knock it past the press
       return { x: owner.pos.x + ownGoalDir * 0.9, y: owner.pos.y + clamp(-owner.pos.y * 0.05, -0.9, 0.9) };
     }
@@ -2004,7 +2055,18 @@ export class MatchSim {
     if ((p.attrs.pos === 'DF' || p.attrs.pos === 'MF')
       && dist(p.pos, owner.pos) < 18
       && this.isLastLineDefender(p, owner)) {
+      // the last man cuts across the run to block the path to goal rather than
+      // backpedalling on the carrier's current spot
+      const cutoff = this.goalCutoffTarget(p, owner);
+      if (cutoff) return cutoff;
       return { x: owner.pos.x + ownGoalDir * 1.4, y: owner.pos.y + clamp(-owner.pos.y * 0.04, -1.4, 1.4) };
+    }
+    // A carrier driving centrally at our goal: the single nearest defender peels
+    // into the lane and cuts off the path, instead of retreating to his wide slot
+    // and leaving the middle open. Only the nearest goes; the rest hold shape.
+    if (p.attrs.pos === 'DF' && Math.abs(owner.pos.y) < 14 && this.isNearestCentralBlocker(p, owner)) {
+      const block = this.goalCutoffTarget(p, owner);
+      if (block) return block;
     }
     const centralCutbackScreen = this.centralCutbackScreenTarget(p, owner, [
       press.primary?.idx ?? -1,
@@ -2109,6 +2171,20 @@ export class MatchSim {
     for (const q of this.state.players) {
       if (q.team !== p.team || q.isGK || q.sentOff || q === carrier) continue;
       if ((q.pos.x - carrier.pos.x) * ownGoalDir > 0.5 && ++goalSide > 1) return false;
+    }
+    return true;
+  }
+
+  /** true when `p` is the single closest own defender to a carrier driving at our
+   * goal — so exactly ONE man peels into the central lane to block the run, rather
+   * than the whole back line retreating to its slots and leaving the middle open
+   * (the "they back off and let him run between them" complaint). */
+  private isNearestCentralBlocker(p: SimPlayer, carrier: SimPlayer): boolean {
+    const myD = dist(p.pos, carrier.pos);
+    if (myD > 26) return false;
+    for (const q of this.state.players) {
+      if (q.team !== p.team || q.isGK || q.sentOff || q === p || q.attrs.pos !== 'DF') continue;
+      if (dist(q.pos, carrier.pos) < myD - 0.3) return false;
     }
     return true;
   }
@@ -2573,6 +2649,59 @@ export class MatchSim {
     };
   }
 
+  /** Interception point on the carrier's line to OUR goal that this defender can
+   * still reach in time — so he cuts the angle and gets his body ACROSS the run,
+   * rather than chasing the carrier's present position (which a carrier moving at
+   * pace always leaves behind: the "runs straight between two defenders" goal we
+   * keep conceding). We solve the classic pursuit: the earliest time `t` where the
+   * defender (sprinting) and the carrier (driving along his line to goal) meet at
+   * the same point, then aim there. Returns null when the carrier isn't driving at
+   * goal, or the line is genuinely uncatchable — caller falls back to a tight
+   * engage. */
+  private goalCutoffTarget(p: SimPlayer, carrier: SimPlayer): Vec2 | null {
+    const ownGoalDir = this.ownGoalDir(p.team);
+    const goalX = ownGoalDir * HALF_LEN;
+    // only cut the angle when the carrier is a real goal threat — within ~33m of
+    // our goal. Further out this is a midfield press, where committing a man to a
+    // straight-line interception just pulls him out of shape (a dribbler who jinks
+    // leaves him stranded); leave that to the existing contain logic.
+    if (Math.abs(goalX - carrier.pos.x) > 33) return null;
+    // unit vector along the carrier's path to the centre of our goal
+    let ux = goalX - carrier.pos.x;
+    let uy = -carrier.pos.y;
+    const ul = Math.hypot(ux, uy);
+    if (ul < 1) return null;
+    ux /= ul; uy /= ul;
+    // only cut the angle off a carrier genuinely driving AT our goal — a slow or
+    // sideways carrier is left to the existing contain logic
+    const projVel = carrier.vel.x * ux + carrier.vel.y * uy;
+    if (projVel < 2.2) return null;
+    const cs = clamp(projVel, 4.5, 11); // carrier speed along the path
+    const ds = this.maxSpeed(p, true); // defender at a full recovery sprint
+    const ax = carrier.pos.x - p.pos.x;
+    const ay = carrier.pos.y - p.pos.y;
+    // |a + u*cs*t| = ds*t  ->  (cs^2 - ds^2) t^2 + 2(a.u)cs t + |a|^2 = 0
+    const A = cs * cs - ds * ds;
+    const B = 2 * (ax * ux + ay * uy) * cs;
+    const C = ax * ax + ay * ay;
+    let t: number;
+    if (Math.abs(A) < 1e-3) {
+      if (Math.abs(B) < 1e-6) return null;
+      t = -C / B;
+    } else {
+      const disc = B * B - 4 * A * C;
+      if (disc < 0) return null; // can't reach the line before he's gone
+      const sq = Math.sqrt(disc);
+      t = Math.min(...[(-B + sq) / (2 * A), (-B - sq) / (2 * A)].filter((v) => v > 0.02));
+    }
+    if (!isFinite(t) || t <= 0) return null;
+    const lead = clamp(cs * t, 0, ul); // never aim past the goal itself
+    return {
+      x: clamp(carrier.pos.x + ux * lead, -HALF_LEN + 3, HALF_LEN - 3),
+      y: clamp(carrier.pos.y + uy * lead, -HALF_WID + 2, HALF_WID - 2),
+    };
+  }
+
   private nonPressingDefensiveTarget(p: SimPlayer, carrier: SimPlayer, target: Vec2): Vec2 {
     if (p.attrs.pos !== 'MF') return target;
     const dirToOwnGoal = this.ownGoalDir(p.team);
@@ -3021,9 +3150,18 @@ export class MatchSim {
     }
     const t = { x: goal.x, y: goal.y + (p.pos.y > 0 ? -4 : 4) };
     if (nearest && nd < 4) {
-      const away = Math.atan2(p.pos.y - nearest.pos.y, p.pos.x - nearest.pos.x);
+      let ax = p.pos.x - nearest.pos.x;
+      let ay = p.pos.y - nearest.pos.y;
+      // hard against a touchline, veering "away" from an infield defender just runs him
+      // straight out for a throw-in (and he stalls against the line while he's bundled
+      // over it). When he's near the line and the escape points further out, flip the
+      // lateral component so he cuts back INFIELD and keeps driving forward instead.
+      if (HALF_WID - Math.abs(p.pos.y) < 5 && Math.sign(ay || 0) === Math.sign(p.pos.y || 1)) {
+        ay = -Math.sign(p.pos.y || 1) * Math.abs(ay);
+      }
+      const away = Math.atan2(ay, ax);
       t.x = p.pos.x + Math.cos(away) * 4 + myDir * 7;
-      t.y = p.pos.y + Math.sin(away) * 4;
+      t.y = clamp(p.pos.y + Math.sin(away) * 4, -HALF_WID + 4, HALF_WID - 4);
     }
     return t;
   }
@@ -4192,8 +4330,11 @@ export class MatchSim {
           ball.lastKicker = p.idx;
           this.pendingOffside = null;
           // slid through and dispossessed — even a clean slide knocks the carrier off
-          // his feet for a beat (a quick stumble, shorter than a foul)
-          if (o) this.knockDown(o, p, 0.5);
+          // his feet for a beat (a quick stumble; a from-behind one bundles him over harder)
+          if (o) {
+            const fb = this.isFromBehindTackle(p, o);
+            this.knockDown(o, p, fb ? 1.25 : 1.05, fb ? 0.55 : 0.38);
+          }
           this.emit({ type: 'tackle', team: p.team });
         }
       }
@@ -4250,8 +4391,28 @@ export class MatchSim {
     }
     const a = Math.atan2(ball.pos.y - tackler.pos.y, ball.pos.x - tackler.pos.x);
     const tackleAttr = this.effectiveAttr(tackler, 'tackle');
-    ball.vel.x = cleanControl ? tackler.vel.x * 0.45 : Math.cos(a) * (5.8 + tackleAttr * 0.035) + tackler.vel.x * 0.18;
-    ball.vel.y = cleanControl ? tackler.vel.y * 0.45 : Math.sin(a) * (5.8 + tackleAttr * 0.035) + tackler.vel.y * 0.18;
+    if (cleanControl) {
+      ball.vel.x = tackler.vel.x * 0.45;
+      ball.vel.y = tackler.vel.y * 0.45;
+    } else {
+      // poked loose (no clean control): it runs on as a LOOSE ball — carried the way the
+      // carrier was driving but knocked off his line by the challenge, so it escapes
+      // rather than being shovelled straight back to his feet. It only comes back to him
+      // if it physically rebounds off a body (the ball–player collision handles that).
+      const carry = len(owner.vel.x, owner.vel.y);
+      const fx = carry > 0.8 ? owner.vel.x / carry : Math.cos(owner.facing);
+      const fy = carry > 0.8 ? owner.vel.y / carry : Math.sin(owner.facing);
+      // veer off his running line, to the open side away from where the tackler came in
+      const perpX = -fy;
+      const perpY = fx;
+      const sideSign = ((tackler.pos.x - owner.pos.x) * perpX + (tackler.pos.y - owner.pos.y) * perpY) >= 0 ? -1 : 1;
+      let dx = fx + perpX * sideSign * 0.55;
+      let dy = fy + perpY * sideSign * 0.55;
+      const dl = len(dx, dy) || 1;
+      const pokeSpeed = 5.8 + tackleAttr * 0.035;
+      ball.vel.x = (dx / dl) * pokeSpeed + tackler.vel.x * 0.15;
+      ball.vel.y = (dy / dl) * pokeSpeed + tackler.vel.y * 0.15;
+    }
     ball.vz = 0;
     ball.z = 0;
     ball.spin = 0;
@@ -4362,7 +4523,9 @@ export class MatchSim {
       ball.pos.y = clamp(owner.pos.y, -HALF_WID + 0.3, HALF_WID - 0.3);
       ball.vel.x = owner.vel.x;
       ball.vel.y = owner.vel.y;
-      const handZ = owner.diving ? 0.55 : 1.05;
+      // hands cradle the ball at chest height standing (~1.3m on a ~1.9m keeper),
+      // low and tucked when he's still sprawled from a dive.
+      const handZ = owner.diving ? 0.6 : 1.3;
       ball.z += (handZ - ball.z) * 0.2;
       ball.vz = 0;
       ball.spin = 0;
@@ -4639,6 +4802,37 @@ export class MatchSim {
   }
 
   /**
+   * A SPILLED save — the keeper got something to the ball but couldn't hold it. The rebound
+   * is contextual to the body part it struck, read from the contact height:
+   *  - low (legs/feet): blocked straight back OUT, low and quick.
+   *  - mid (chest/body): parried DOWN and short, drops in front for a goalmouth scramble.
+   *  - high (hands): tipped UP and away, over/around.
+   * `outSign` points away from the keeper's goal; `lateral` is the side it spills toward.
+   */
+  private spillRebound(gk: SimPlayer, outSign: number, contactZ: number, lateral: number) {
+    const ball = this.state.ball;
+    const z = Math.max(0, contactZ);
+    const side = Math.sign(lateral) || 1;
+    if (z < 0.6) {
+      ball.vel.x = outSign * this.rng.range(4.2, 6.8);
+      ball.vel.y = side * this.rng.range(0, 1.4);
+      ball.vz = this.rng.range(0.05, 0.25);
+    } else if (z < 1.4) {
+      ball.vel.x = outSign * this.rng.range(1.2, 2.8);
+      ball.vel.y = side * this.rng.range(1.4, 3.2);
+      ball.vz = this.rng.range(0.1, 0.35);
+    } else {
+      ball.vel.x = outSign * this.rng.range(2.0, 3.8);
+      ball.vel.y = side * this.rng.range(2.0, 4.0);
+      ball.vz = this.rng.range(0.5, 1.3);
+    }
+    ball.z = clamp(z, 0, 0.9);
+    ball.spin = 0;
+    ball.lastTouchTeam = gk.team;
+    ball.lastKicker = gk.idx;
+  }
+
+  /**
    * The keeper has the ball safely in his hands. He holds it for a beat
    * before distributing; on a human team that window is longer so the player
    * can call the release: pass button = short throw, shoot button = long punt.
@@ -4890,6 +5084,29 @@ export class MatchSim {
   }
 
   private gkPosition(p: SimPlayer): Vec2 {
+    const raw = this.gkPositionRaw(p);
+    // The "go for the ball / stay on the line, over and over" twitch: as a man comes through,
+    // one read says rush out (track the attacker) and another says hold the line (track the
+    // ball, which a dribbler knocks ahead) — and they alternate every few ticks, strobing him
+    // in and out. Fix is ASYMMETRIC on his depth off the line: he steps OUT fast (a decisive
+    // rush is never blunted) but drifts BACK slowly, so once he commits ground toward the
+    // attacker he holds it instead of snapping to his line the instant the read flips. Lateral
+    // tracking is lightly smoothed. A live shot/dive must be instant, so it bypasses entirely.
+    if (this.shotLive || this.state.phase !== 'play') {
+      this.gkTargetMemo.set(p.idx, { x: raw.x, y: raw.y });
+      return raw;
+    }
+    const prev = this.gkTargetMemo.get(p.idx);
+    if (!prev) { this.gkTargetMemo.set(p.idx, { x: raw.x, y: raw.y }); return raw; }
+    const ownGoalX = -this.attackSign(p.team) * HALF_LEN;
+    const advancing = Math.abs(raw.x - ownGoalX) >= Math.abs(prev.x - ownGoalX);
+    const ax = advancing ? 0.85 : 0.1; // out fast, back slow
+    const next = { x: prev.x + (raw.x - prev.x) * ax, y: prev.y + (raw.y - prev.y) * 0.45 };
+    this.gkTargetMemo.set(p.idx, next);
+    return next;
+  }
+
+  private gkPositionRaw(p: SimPlayer): Vec2 {
     const st = this.state;
     const dir = this.attackSign(p.team);
     const goalX = -dir * (HALF_LEN - 0.9);
@@ -4948,20 +5165,35 @@ export class MatchSim {
         };
       }
     }
-    if (owner && owner.team !== p.team && !owner.isGK && ball.z < 0.9) {
+    // The keeper's threat read follows the man in possession. But a dribbler knocks the
+    // ball a couple of metres ahead between touches, and for those few ticks the ball is
+    // un-owned (ownerIdx === -1) until he runs onto it again. The whole rush branch was
+    // gated on a live owner, so it dropped out every touch and the keeper snapped back to
+    // his line — the "jitter back and forth as if stuck between two rules". While a rush
+    // commit is live, keep treating the committed attacker as the threat across that gap,
+    // as long as he's still right on top of the (low) ball.
+    let att: SimPlayer | null = owner && owner.team !== p.team && !owner.isGK ? owner : null;
+    if (!att) {
+      const c = this.gkRushCommit.get(p.idx);
+      const a = c && c.until > st.tick ? st.players[c.ownerIdx] : null;
+      if (a && !a.sentOff && a.team !== p.team && !a.isGK && dist(a.pos, ball.pos) < 3.0) att = a;
+    }
+    if (att && ball.z < 0.9) {
       const ownGoalX = -dir * HALF_LEN;
-      const threatDepth = Math.abs(owner.pos.x - ownGoalX);
-      const threatWide = Math.abs(owner.pos.y);
-      const ballAtFeet = dist(owner.pos, ball.pos) < 1.45;
-      const ownerSpeed = len(owner.vel.x, owner.vel.y);
-      const closingGoal = (owner.vel.x * (ownGoalX - owner.pos.x)) > 0.45;
+      const threatDepth = Math.abs(att.pos.x - ownGoalX);
+      const threatWide = Math.abs(att.pos.y);
+      // "ball at his feet" for the keeper's threat read is generous: a man dribbling at
+      // pace pushes the ball a couple of metres ahead between touches, and a tight 1.45m
+      // test flicked on/off every touch — that toggled roundingLane and snapped the rush
+      // target between the aggressive charge and the measured rush. At ~3m it reads as
+      // "he's carrying it" steadily.
+      const ballAtFeet = dist(att.pos, ball.pos) < 3.0;
+      const attSpeed = len(att.vel.x, att.vel.y);
+      const closingGoal = (att.vel.x * (ownGoalX - att.pos.x)) > 0.45;
       const committed = this.gkRushCommit.get(p.idx);
-      const stillDangerous = ballAtFeet
-        && threatDepth < 22 + keeping * 4.2
-        && threatWide < GOAL_HALF_WIDTH + 8.5 + keeping * 2.2;
       let rushTarget: Vec2 | null = null;
       const roundingLane = ballAtFeet
-        && ownerSpeed > 1.1
+        && attSpeed > 1.1
         && closingGoal
         && threatDepth < 17 + keeping * 3
         && threatWide < GOAL_HALF_WIDTH + 5.8 + keeping * 2.2;
@@ -4971,8 +5203,8 @@ export class MatchSim {
         const nearLine = ownGoalX + dir * 1.2;
         const farCharge = ownGoalX + dir * (9.6 + keeping * 3.6);
         rushTarget = {
-          x: clamp(owner.pos.x + dir * stepOut, Math.min(nearLine, farCharge), Math.max(nearLine, farCharge)),
-          y: clamp(owner.pos.y + owner.vel.y * 0.12, -lateralLimit, lateralLimit),
+          x: clamp(att.pos.x + dir * stepOut, Math.min(nearLine, farCharge), Math.max(nearLine, farCharge)),
+          y: clamp(att.pos.y + att.vel.y * 0.12, -lateralLimit, lateralLimit),
         };
       }
       const depthScore = clamp((16 + keeping * 4.2 - threatDepth) / 5.5, 0, 1);
@@ -4983,7 +5215,7 @@ export class MatchSim {
         // only rush out to narrow the angle on a CENTRAL threat. For a wide attacker
         // the angle is already tight from the post, so coming out just abandons the
         // goal — hold near the line and let him shoot across an empty net instead.
-        const centralFactor = clamp(1 - Math.abs(owner.pos.y) / 12, 0.18, 1);
+        const centralFactor = clamp(1 - Math.abs(att.pos.y) / 12, 0.18, 1);
         const farLimit = ownGoalX + dir * (3 + (5.5 + keeping * 3.4) * centralFactor);
         const lo = Math.min(nearPost, farLimit);
         const hi = Math.max(nearPost, farLimit);
@@ -4993,28 +5225,28 @@ export class MatchSim {
         const angleClamp = GOAL_HALF_WIDTH * 0.97;
         const advance = 0.6 + keeping * 1.45;
         const lineX = goalX + dir * (1.2 + keeping * 0.85);
-        const ownerSide = Math.sign(owner.pos.y || 0) as -1 | 0 | 1;
-        const nearPostPreShot = ownerSide !== 0
+        const attSide = Math.sign(att.pos.y || 0) as -1 | 0 | 1;
+        const nearPostPreShot = attSide !== 0
           && ballAtFeet
           && threatDepth < 18 + keeping * 2.5
           && threatWide > GOAL_HALF_WIDTH * 0.72
           && threatWide < PENALTY_BOX_HALF_WIDTH + 2;
         const nearPostSetY = nearPostPreShot
-          ? ownerSide * GOAL_HALF_WIDTH * (0.84 + keeping * 0.18)
+          ? attSide * GOAL_HALF_WIDTH * (0.84 + keeping * 0.18)
           : 0;
-        const lineYRaw = owner.pos.y * 0.46;
+        const lineYRaw = att.pos.y * 0.46;
         const lineY = clamp(
           nearPostPreShot
-            ? ownerSide * Math.max(Math.abs(lineYRaw), Math.abs(nearPostSetY))
+            ? attSide * Math.max(Math.abs(lineYRaw), Math.abs(nearPostSetY))
             : lineYRaw,
           -angleClamp,
           angleClamp,
         );
-        const rushX = clamp(owner.pos.x + dir * advance, lo, hi);
-        const rushYRaw = owner.pos.y * (0.62 + keeping * 0.1);
+        const rushX = clamp(att.pos.x + dir * advance, lo, hi);
+        const rushYRaw = att.pos.y * (0.62 + keeping * 0.1);
         const rushY = clamp(
           nearPostPreShot
-            ? ownerSide * Math.max(Math.abs(rushYRaw), Math.abs(nearPostSetY))
+            ? attSide * Math.max(Math.abs(rushYRaw), Math.abs(nearPostSetY))
             : rushYRaw,
           -angleClamp,
           angleClamp,
@@ -5024,7 +5256,11 @@ export class MatchSim {
           y: lineY + (rushY - lineY) * threatScore,
         };
       }
-      if (committed && committed.ownerIdx === owner.idx && committed.until > st.tick && stillDangerous) {
+      // Once committed to a charge at THIS attacker, hold it for the full commit window
+      // (~0.55s) regardless of a momentary dip in the threat read — only the window
+      // expiring or the owner changing (a pass) ends it. This, with the generous
+      // ballAtFeet above, stops the keeper snapping between his charge and his line.
+      if (committed && committed.ownerIdx === att.idx && committed.until > st.tick) {
         if (!rushTarget) return committed.target;
         const committedDepth = Math.abs(committed.target.x - ownGoalX);
         const nextDepth = Math.abs(rushTarget.x - ownGoalX);
@@ -5034,7 +5270,7 @@ export class MatchSim {
           y: committed.target.y + (rushTarget.y - committed.target.y) * 0.42,
         };
         this.gkRushCommit.set(p.idx, {
-          ownerIdx: owner.idx,
+          ownerIdx: att.idx,
           target: followTarget,
           until: st.tick + Math.round(0.55 / DT),
         });
@@ -5043,7 +5279,7 @@ export class MatchSim {
       if (committed) this.gkRushCommit.delete(p.idx);
       if (rushTarget) {
         this.gkRushCommit.set(p.idx, {
-          ownerIdx: owner.idx,
+          ownerIdx: att.idx,
           target: rushTarget,
           until: st.tick + Math.round(0.55 / DT),
         });
@@ -5059,11 +5295,16 @@ export class MatchSim {
     if (!this.owner() && ballInBox && dBall < 9 && len(ball.vel.x, ball.vel.y) < 9) {
       return { ...ball.pos };
     }
-    const t = clamp((ball.pos.x * -dir + HALF_LEN) / PITCH_FACT, 0, 1);
+    // Position off the THREAT, not the loose ball: a dribbler knocks the ball a couple of
+    // metres ahead between touches, so reading the ball's live spot jittered the keeper's
+    // line. When an opponent is carrying it (att, smooth), shade off him; otherwise off the
+    // ball (a real loose ball / shot to read).
+    const ref = att ? att.pos : ball.pos;
+    const t = clamp((ref.x * -dir + HALF_LEN) / PITCH_FACT, 0, 1);
     // sit on the near-post line, not the centre of the goal: shifting further
     // toward the ball's side narrows the near-post angle (the easy chance) and
     // makes goals feel earned. Wider/closer attackers pull the keeper across more.
-    const y = clamp(ball.pos.y * (0.42 + 0.12 * (1 - t)), -GOAL_HALF_WIDTH * 0.84, GOAL_HALF_WIDTH * 0.84);
+    const y = clamp(ref.y * (0.42 + 0.12 * (1 - t)), -GOAL_HALF_WIDTH * 0.84, GOAL_HALF_WIDTH * 0.84);
     const advance = (1 - t) * (2.4 + keeping * 1.4);
     return { x: goalX + dir * advance, y };
   }
@@ -5333,61 +5574,62 @@ export class MatchSim {
         // keeper had to dive, his keeping stat and a greasy ball in the rain.
         const ballDistNow = dist(gk.pos, ball.pos);
         const bodyBehindBall = gap < reach * 0.42 && ballDistNow < 1.15;
-        const hardHoldFactor = 1 - hard * (bodyBehindBall ? 0.48 : 0.82);
+        // power makes a shot harder to hold — but good HANDLING grips it. The penalty for
+        // pace scales DOWN with keeping quality, so an elite keeper holds a firm shot he's
+        // set behind while a poor keeper parries it back into danger.
+        const hardHoldFactor = 1 - hard * (bodyBehindBall ? 0.48 : 0.82) * (1 - keepingQuality * 0.6);
         const stretchHoldFactor = clamp(1.08 - stretch * 0.82, 0.08, 1.08);
         const holdProb = clamp(
-          // handling: great keepers grip everything, poor keepers spill fierce
-          // shots back into danger for a rebound. Soft, comfortable shots are
-          // gathered cleanly far more often so play settles rather than pinging out.
-          (0.26 + keepingQuality * 0.58)
+          // Handling, driven by the keeper's rating: a great keeper grips nearly everything
+          // catchable, a poor keeper spills fierce/stretched shots back into danger. The shot
+          // difficulty is already in hardHoldFactor/stretchHoldFactor, so an EASY shot lands
+          // near the rating-only top end (a 96 keeper ~0.97) while a screamer at full stretch
+          // drops near the floor regardless of who's in goal.
+          (0.30 + keepingQuality * 0.68)
             * this.wfx.gkCatch
             * hardHoldFactor
             * stretchHoldFactor,
-          0.07, 0.94,
+          0.05, 0.97,
         );
-        const pointBlankBodyGather = ballDistNow < 1.15 && Math.abs(ball.pos.y - gk.pos.y) < 0.45;
-        const cleanCatch = !nearPostThreat
-          && Math.max(0, zAtLine) < 1.65
-          && ((bodyBehindBall && stretch < 0.38 && ballDistNow < 1.25) || pointBlankBodyGather);
-        if (looseGather || (cleanCatch && this.rng.next() < holdProb)) {
+        // Anything he can actually get hold of (not over his head, not a near-post fingertip)
+        // is decided by holdProb above — NOT gated on being perfectly body-behind-the-ball,
+        // which made even good keepers spill routine saves they were a hair off-line for.
+        const catchable = !nearPostThreat && Math.max(0, zAtLine) < 1.7;
+        if (looseGather || (catchable && this.rng.next() < holdProb)) {
           // catch: keeper gathers it, faces upfield, ball held safely in hand
           const up = this.attackSign(gk.team);
           ball.ownerIdx = gk.idx;
           gk.facing = up > 0 ? 0 : Math.PI;
+          // gather the ball INTO his hands (at his own y), not wherever it crossed — a ball
+          // caught at full stretch must end up with him, never sitting off to one side.
           ball.pos.x = clamp(gk.pos.x + up * 0.5, -HALF_LEN + 0.4, HALF_LEN - 0.4);
-          ball.pos.y = clamp(ball.pos.y, -HALF_WID + 0.5, HALF_WID - 0.5);
+          ball.pos.y = clamp(gk.pos.y, -HALF_WID + 0.5, HALF_WID - 0.5);
           ball.vel = { x: 0, y: 0 };
           ball.vz = 0; ball.z = 0; ball.spin = 0;
           ball.lastTouchTeam = gk.team;
           this.beginGkHold(gk);
-        } else if (stretch > 0.54 && Math.abs(yAtLine) > GOAL_HALF_WIDTH - 2.5) {
-          // a full-stretch fingertip save on a corner-bound shot — tipped round the
-          // post for a CORNER (sustained pressure), not patted back into play
+        } else if (stretch > 0.42 && Math.abs(yAtLine) > GOAL_HALF_WIDTH - 2.6) {
+          // a stretching fingertip save on a corner-bound shot — tipped round the post. Start
+          // it at his reach, just OUTSIDE the post (so it can never sneak in for a goal), and
+          // give it real pace so it visibly ROLLS over the line for a corner rather than just
+          // teleporting behind the goal.
           const postSide = Math.sign(yAtLine || 1);
           ball.ownerIdx = -1;
-          ball.pos.x = sideSign * (HALF_LEN + 0.5);
-          ball.pos.y = postSide * (GOAL_HALF_WIDTH + 0.8);
-          ball.z = 0.6;
-          ball.vel.x = sideSign * 1.2;
-          ball.vel.y = postSide * 0.8;
-          ball.vz = 0;
+          ball.pos.x = sideSign * (HALF_LEN - 0.4);
+          ball.pos.y = postSide * (GOAL_HALF_WIDTH + 0.2);
+          ball.z = clamp(Math.max(zAtLine, 0.15), 0.15, 1.2);
+          ball.vel.x = sideSign * this.rng.range(2.2, 3.8); // carry it over the line
+          ball.vel.y = postSide * this.rng.range(1.6, 3.2); // drifting further wide
+          ball.vz = this.rng.range(0.3, 0.8);
           ball.spin = 0;
           ball.lastTouchTeam = gk.team;
           ball.lastKicker = gk.idx;
         } else {
-          // parry OUT into the danger area — not at his own feet (he'd just re-gather
-          // it) and not upfield (a counter): the ball sits up in the six-yard box for
-          // an attacker to pounce on. A real goalmouth scramble.
+          // parried out — the rebound depends on where it struck him (height at the line):
+          // off his legs it's blocked back out, off his chest it drops in front, off his
+          // hands it's tipped up and away.
           gk.pos.y = clamp(yAtLine, -GOAL_HALF_WIDTH - 1, GOAL_HALF_WIDTH + 1);
-          ball.vel.x = -sideSign * this.rng.range(1.6, 3.2);
-          ball.vel.y = Math.sign(yAtLine || 1) * this.rng.range(2.4, 4.4);
-          ball.vz = this.rng.range(0.1, 0.4); // stays low so it rolls dead in the box, doesn't skip out
-          // bring the ball down to the keeper's save height so it doesn't float
-          // in mid-air while the keeper is on the turf
-          ball.z = clamp(ball.z, 0, 0.8);
-          ball.spin = 0;
-          ball.lastTouchTeam = gk.team;
-          ball.lastKicker = gk.idx;
+          this.spillRebound(gk, -sideSign, zAtLine, yAtLine || 1);
         }
         this.registerSave(gk);
       } else if (Math.abs(yAtLine) > GOAL_HALF_WIDTH || zAtLine > GOAL_HEIGHT) {
@@ -5441,7 +5683,9 @@ export class MatchSim {
     const spreadSpeed = 6.2 + keepingAttr * 0.038;
     gk.slideTimer = Math.max(gk.slideTimer, 0.68);
     gk.diving = true;
-    gk.diveKind = 'line';
+    // a rushed-out spread, not a lateral line dive — the renderer slides him out at the
+    // attacker (legs trailing) instead of laying him on his side with a running cycle
+    gk.diveKind = 'spread';
     gk.diveSide = (Math.sign(-sideSign * (closest.y - gk.pos.y)) || 1) as -1 | 1;
     gk.anim = 'dive';
     gk.facing = Math.atan2(ball.pos.y - gk.pos.y, ball.pos.x - gk.pos.x);
@@ -5465,16 +5709,29 @@ export class MatchSim {
 
     const upfield = this.attackSign(gk.team);
     const wide = Math.sign(yAtLine || ball.pos.y || this.rng.range(-1, 1) || 1);
-    ball.ownerIdx = -1;
-    ball.pos.x = clamp(gk.pos.x + upfield * (PLAYER_RADIUS + BALL_RADIUS + 0.35), -HALF_LEN + 0.4, HALF_LEN - 0.4);
-    ball.pos.y = clamp(gk.pos.y + wide * 0.48, -HALF_WID + 0.4, HALF_WID - 0.4);
-    ball.vel.x = upfield * this.rng.range(1.8, 3.4);
-    ball.vel.y = wide * this.rng.range(2.2, 4.2);
-    ball.vz = this.rng.range(0.1, 0.4);
-    ball.z = clamp(Math.max(ball.z, 0.1), 0, 0.65);
-    ball.spin = 0;
-    ball.lastTouchTeam = gk.team;
-    ball.lastKicker = gk.idx;
+    if (bodyBlock) {
+      // he got his BODY to it — collapse on the ball and GATHER it at his chest, rather
+      // than letting it squirt several metres into the box ("the ball miles away from him").
+      ball.ownerIdx = gk.idx;
+      ball.pos.x = clamp(gk.pos.x + upfield * 0.4, -HALF_LEN + 0.4, HALF_LEN - 0.4);
+      ball.pos.y = clamp(gk.pos.y, -HALF_WID + 0.4, HALF_WID - 0.4);
+      ball.vel.x = 0;
+      ball.vel.y = 0;
+      ball.vz = 0;
+      ball.z = 0;
+      ball.spin = 0;
+      ball.lastTouchTeam = gk.team;
+      ball.lastKicker = gk.idx;
+      this.beginGkHold(gk);
+    } else {
+      // a fingertip/leg block at full stretch spills loose — the rebound is contextual to
+      // where it struck him (the ball's height at the keeper): legs block it back out, body
+      // drops it in front, hands tip it up and away.
+      ball.ownerIdx = -1;
+      ball.pos.x = clamp(gk.pos.x + upfield * (PLAYER_RADIUS + BALL_RADIUS + 0.35), -HALF_LEN + 0.4, HALF_LEN - 0.4);
+      ball.pos.y = clamp(gk.pos.y + wide * 0.48, -HALF_WID + 0.4, HALF_WID - 0.4);
+      this.spillRebound(gk, upfield, zAtKeeper, wide);
+    }
     this.livePassTargetIdx = -1;
     this.livePassTargetUntil = -1;
     this.registerSave(gk);
@@ -5536,21 +5793,24 @@ export class MatchSim {
     gk.vel.x = (toOwnerX / toOwnerD) * smotherSpeed;
     gk.vel.y = (toOwnerY / toOwnerD) * smotherSpeed;
 
-    st.ball.ownerIdx = -1;
-    st.ball.pos.x = clamp(gk.pos.x + upfield * 0.75, -HALF_LEN + 0.4, HALF_LEN - 0.4);
-    st.ball.pos.y = clamp(gk.pos.y + wide * 0.45, -HALF_WID + 0.4, HALF_WID - 0.4);
-    // smother off the attacker's feet and shovel it to safety — clear of the box
-    // but kept short and LOW so it never carries to the halfway line / the other keeper
-    st.ball.vel.x = upfield * this.rng.range(2.6, 4.4);
-    st.ball.vel.y = wide * this.rng.range(2.0, 3.8);
-    st.ball.vz = this.rng.range(0.1, 0.4);
-    st.ball.z = Math.min(st.ball.z, 0.35);
+    // he COLLAPSES on the ball and gathers it — a smother off the attacker's feet ends with
+    // the keeper holding it at his body, not the ball squirting away into space (which read
+    // as "the ball stops away from him"). Held, so integrateBall keeps it pinned to him.
+    void wide;
+    st.ball.ownerIdx = gk.idx;
+    st.ball.pos.x = clamp(gk.pos.x + upfield * 0.4, -HALF_LEN + 0.4, HALF_LEN - 0.4);
+    st.ball.pos.y = clamp(gk.pos.y, -HALF_WID + 0.4, HALF_WID - 0.4);
+    st.ball.vel.x = 0;
+    st.ball.vel.y = 0;
+    st.ball.vz = 0;
+    st.ball.z = 0;
     st.ball.spin = 0;
     st.ball.lastTouchTeam = gk.team;
     st.ball.lastKicker = gk.idx;
     owner.kickCooldown = Math.max(owner.kickCooldown, 0.28);
     this.livePassTargetIdx = -1;
     this.livePassTargetUntil = -1;
+    this.beginGkHold(gk);
     this.registerSave(gk);
     return true;
   }
@@ -5629,6 +5889,11 @@ export class MatchSim {
           continue;
         }
         if (p === taker) continue;
+        // a just-fouled player lies where he fell — don't drag him out of the box
+        // while he's on the ground (he clears out himself once he's back up). Without
+        // this the victim teleports to the box edge mid-fall, so the foul never reads
+        // as "he went down here" and a downed body slides across to the line.
+        if (p.downTimer && p.downTimer > 0) continue;
         if (p.pos.x * atkDir > clearProg) {
           p.pos.x = atkDir * clearProg;
           p.vel.x = 0;
@@ -5783,6 +6048,10 @@ export class MatchSim {
   private maybeTakeRestart(inputs: [PadInput, PadInput]) {
     const st = this.state;
     if (st.restartTimer > 0) return;
+    // a kick won by a foul waits for the felled player to pick himself up — you can't
+    // take the free kick or penalty while he's still on the floor mid-get-up
+    if ((st.phase === 'freeKick' || st.phase === 'penaltyKick')
+      && st.players.some((p) => p.downTimer && p.downTimer > 0)) return;
     const team = st.restartTeam;
     const taker = this.findTaker(team);
     if (!taker) return;
@@ -6244,7 +6513,11 @@ export class MatchSim {
               : clamp(21 + dCross * 0.18, 22, 26);
             this.kickBall(ctl, aimCross, crossSpeed, crossLoft, boxMate?.idx ?? -1);
             h.passTargetIdx = boxMate?.idx ?? -1;
-            h.aftertouchUntil = st.tick + Math.round(0.32 / DT);
+            // a cross is run onto, not curled — no aftertouch (steering it to meet the
+            // ball would otherwise bend the cross away), and hand control to the man in
+            // the box so the stick runs HIM onto it
+            h.aftertouchUntil = -1;
+            if (boxMate) this.handControlToReceiver(t, boxMate.idx);
             this.triggerBoxRuns(t, ctl.idx, ctl.pos.y);
             this.emitPass(ctl, boxMate?.idx ?? -1, 0.6);
             this.emit({ type: 'kick', team: t, power: 0.65 });
@@ -6269,7 +6542,12 @@ export class MatchSim {
             targetIdx,
           );
           h.passTargetIdx = targetIdx;
-          h.aftertouchUntil = aerial ? st.tick + Math.round(0.28 / DT) : -1;
+          // a forward through-ball (lofted or driven into space ahead) is run onto, not
+          // curled — kill the aftertouch so steering a man onto it doesn't bend it away.
+          // A square/back lofted pass keeps the brief aftertouch; ground passes never had it.
+          const throughBall = targetIdx >= 0 && (aim.x - ctl.pos.x) * dir > 4;
+          h.aftertouchUntil = aerial && !throughBall ? st.tick + Math.round(0.28 / DT) : -1;
+          if (throughBall) this.handControlToReceiver(t, targetIdx);
           this.emitPass(ctl, targetIdx, 0.5);
           this.emit({ type: 'kick', team: t, power: 0.5 });
         }
@@ -6532,6 +6810,37 @@ export class MatchSim {
     return true;
   }
 
+  /** The CPU manager makes substitutions: in the second half it pulls off its most tired
+   * outfielder for a fresh, like-for-like player off the bench, paced out and capped by the
+   * era's sub limit. Subs are only legal in a stoppage, so this runs during breaks. */
+  private aiConsiderSubstitutions() {
+    const st = this.state;
+    if (!isBreakPhase(st.phase) || st.half < 2) return;
+    for (const team of [0, 1] as const) {
+      if (this.cfg.teams[team].controller !== 'ai') continue;
+      if (st.substitutionsUsed[team] >= this.maxSubstitutions()) continue;
+      if (st.tick - this.aiLastSubTick[team] < Math.round(22 / DT)) continue; // pace them out
+      const onField = st.players.filter((p) => p.team === team && !p.isGK && !p.sentOff);
+      if (onField.length < 6) continue; // don't thin out an already short-handed side
+      const tired = onField.reduce((a, b) => (b.stamina < a.stamina ? b : a));
+      if (tired.stamina > 0.68) continue; // wait until someone is genuinely flagging
+      const squad = this.cfg.teams[team].data.players;
+      const onSquad = new Set(st.players.filter((p) => p.team === team).map((p) => p.squadIdx));
+      const bench = squad
+        .map((_, i) => i)
+        .filter((i) => squad[i].pos !== 'GK'
+          && !onSquad.has(i)
+          && !st.subbedOff[team].includes(i)
+          && !st.subbedOn[team].includes(i));
+      if (!bench.length) continue;
+      const overall = (i: number) => squad[i].pace + squad[i].pass + squad[i].shoot + squad[i].tackle;
+      const samePos = bench.filter((i) => squad[i].pos === tired.attrs.pos);
+      const pool = samePos.length ? samePos : bench;
+      const on = pool.reduce((a, b) => (overall(b) > overall(a) ? b : a));
+      if (this.substitute(team, tired.idx, on)) this.aiLastSubTick[team] = st.tick;
+    }
+  }
+
   /** AI attacks loose airborne balls: defensive headers, attacking headers, volleys */
   private aiAerialPlay() {
     const st = this.state;
@@ -6590,6 +6899,14 @@ export class MatchSim {
       // frame — a brief settle window stops possession ping-ponging tick to tick
       if (justSettled && p.team !== this.lastTurnover.team) continue;
       const d = dist(p.pos, owner.pos);
+      // In his OWN box a defender stays on his feet and shepherds the carrier instead of
+      // diving in — a mistimed challenge here is a penalty. Only a tackle right on the ball
+      // (very close, low foul risk) is worth it; otherwise he contains and trusts the keeper
+      // and cover. This is what stops the CPU conceding a hatful of soft box penalties.
+      const ownGoalX = this.ownGoalDir(p.team) * HALF_LEN;
+      const inOwnBox = Math.abs(owner.pos.x - ownGoalX) < PENALTY_BOX_DEPTH
+        && Math.abs(owner.pos.y) < PENALTY_BOX_HALF_WIDTH;
+      if (inOwnBox && d > 0.7) continue;
       if (d > 1.25) {
         // out of standing-tackle range but close: a carrier bursting past
         // gets a slide thrown at the ball rather than a jog in his wake
@@ -6737,14 +7054,22 @@ export class MatchSim {
   /** Put a player on the ground after contact — he topples away from the challenge
    * and lies there (anim 'fall') for `duration` seconds before getting up. Used so
    * a foul or a hard tackle reads clearly: someone visibly goes down. */
-  private knockDown(p: SimPlayer, by: SimPlayer, duration: number) {
+  private knockDown(p: SimPlayer, by: SimPlayer, duration: number, power = 0.5) {
     if (p.isGK || p.sentOff) return;
     const dx = p.pos.x - by.pos.x;
     const dy = p.pos.y - by.pos.y;
     const d = Math.hypot(dx, dy) || 1;
-    p.vel.x = (dx / d) * 2.4; // a shove away from the man who caught him
-    p.vel.y = (dy / d) * 2.4;
+    // flung away from the challenge — harder the bigger the hit — carrying a little of
+    // his own momentum so he's launched in the direction he was already moving + the
+    // shove, then skids out (the down block bleeds it off slowly so he slides).
+    const push = 1.6 + clamp(power, 0, 1) * 4;
+    // does the shove go WITH the way he's facing (clipped from behind → pitches onto his
+    // front) or INTO it (a tackle he ran into → toppled backward)?
+    p.fallForward = (dx / d) * Math.cos(p.facing) + (dy / d) * Math.sin(p.facing) > 0;
+    p.vel.x = p.vel.x * 0.35 + (dx / d) * push;
+    p.vel.y = p.vel.y * 0.35 + (dy / d) * push;
     p.downTimer = duration;
+    p.fallPower = clamp(power, 0, 1);
     p.anim = 'fall';
     p.slideTimer = 0;
     p.diving = false;
@@ -6761,8 +7086,10 @@ export class MatchSim {
     st.ball.z = 0;
     const fouledTeam = victim.team;
     offender.foulsCommitted++;
-    // the fouled player goes down — a clear, readable signal that a foul happened
-    this.knockDown(victim, offender, 1.0);
+    // the fouled player goes down — a clear, readable signal that a foul happened, the
+    // fall scaled to how heavy the challenge was. Down ~2s: the mocap fall lays him
+    // out, he holds it a beat, then the get-up clip lifts him (play is stopped anyway).
+    this.knockDown(victim, offender, 2.0, clamp((severity - 0.15) / 0.7, 0.3, 1));
     this.emit({ type: 'foul', team: offender.team, player: offender.idx });
     // a genuine decision the fouled side's way settles any grievance they've built
     // up (with sarcastic applause if it had been festering); a phantom call is the

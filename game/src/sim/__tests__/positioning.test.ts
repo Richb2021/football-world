@@ -40,7 +40,7 @@ describe('off-ball positioning', () => {
     let atkFrames = 0, defProgSum = 0, deepDefFrames = 0; // back-line depth when attacking
     let playTicks = 0, clusterPairSum = 0;
 
-    for (let seed = 1; seed <= 10; seed++) {
+    for (let seed = 1; seed <= 20; seed++) {
       const sim = new MatchSim(cfg(seed));
       const inp: PadInput = { moveX: 0, moveY: 0, pass: false, shoot: false, sprint: false, switchPlayer: false };
       let guard = 0;

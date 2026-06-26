@@ -363,6 +363,33 @@ describe('match sim', () => {
     expect(sim.state.controlledIdx[0]).toBe(manualIdx);
   });
 
+  it('hands control to the receiver of a forward through-ball so the human can run onto it', () => {
+    const sim = new MatchSim(makeHumanCfg({ halfLengthSec: 600 }));
+    sim.state.phase = 'play';
+    const team0 = sim.state.players.filter((p) => p.team === 0 && !p.isGK);
+    const team1 = sim.state.players.filter((p) => p.team === 1);
+    const carrier = team0[0];
+    carrier.pos = { x: 0, y: 0 };
+    carrier.facing = 0; // facing +x, the way team 0 attacks
+    const runner = team0[1];
+    runner.pos = { x: 14, y: 0 }; // a man ahead, in the lane, to run onto
+    // clear the other attackers out of the lane so the assisted pass picks the runner
+    for (const p of team0) if (p !== carrier && p !== runner) p.pos = { x: -34, y: p.idx % 2 ? 30 : -30 };
+    for (const p of team1) p.pos = { x: 45, y: (p.idx % 5 - 2) * 6 }; // defenders deep → runner is onside
+    sim.state.ball.pos = { x: 0, y: 0 };
+    sim.state.ball.vel = { x: 0, y: 0 };
+    sim.state.ball.z = 0;
+    sim.state.ball.ownerIdx = carrier.idx;
+    sim.state.controlledIdx[0] = carrier.idx;
+    carrier.control = true;
+    // pass fires on release: press, then release → a forward through-ball into space ahead
+    sim.step([{ ...NULL_INPUT, pass: true }, { ...NULL_INPUT }]);
+    sim.step([{ ...NULL_INPUT, pass: false }, { ...NULL_INPUT }]);
+    const controlled = sim.state.controlledIdx[0];
+    expect(controlled).not.toBe(carrier.idx); // control left the passer...
+    expect(sim.state.players[controlled].pos.x).toBeGreaterThan(2); // ...onto a man ahead, to run on
+  });
+
   it('hands the human control of his own keeper while he holds a caught ball', () => {
     const sim = new MatchSim(makeHumanCfg()); // team 0 = human
     sim.state.phase = 'play';
@@ -2891,10 +2918,10 @@ describe('match sim', () => {
     const startPos = { ...victim.pos };
     stepMany(sim, Math.round(0.5 / DT), idle);
     expect(victim.anim).toBe('fall');
-    expect(dist2(victim.pos, startPos)).toBeLessThan(2);
+    expect(dist2(victim.pos, startPos)).toBeLessThan(3);
 
-    // and he's back on his feet within ~1.1s
-    stepMany(sim, Math.round(0.7 / DT), idle);
+    // and he's back on his feet once the fall + get-up have played out (~2s)
+    stepMany(sim, Math.round(1.8 / DT), idle);
     expect(victim.downTimer ?? 0).toBeLessThanOrEqual(0);
     expect(victim.anim).not.toBe('fall');
   });
@@ -3595,7 +3622,9 @@ describe('match sim', () => {
     (sim as unknown as { shotLive: boolean }).shotLive = true;
     (sim as unknown as { rng: { next: () => number; range: (a: number, b: number) => number } }).rng = {
       next: (() => {
-        const seq = [0, 0.12];
+        // first next() passes the save roll; second FORCES a spill (above the hold prob) so
+        // we exercise the spill-handling path even for a competent keeper
+        const seq = [0, 0.99];
         return () => seq.shift() ?? 0.5;
       })(),
       range: (a: number, b: number) => (a + b) / 2,
@@ -3791,7 +3820,8 @@ describe('match sim', () => {
 
     expect(gk.anim).toBe('dive');
     expect(gk.diving).toBe(true);
-    expect((gk as unknown as { diveKind?: string | null }).diveKind).toBe('line');
+    // a rushed-out close-down spread (rendered as a forward slide), not a lateral line dive
+    expect((gk as unknown as { diveKind?: string | null }).diveKind).toBe('spread');
     expect(sim.events.some((e) => e.type === 'save' && e.team === 1)).toBe(true);
     expect((sim as unknown as { shotLive: boolean }).shotLive).toBe(false);
   });
@@ -3938,6 +3968,8 @@ describe('match sim', () => {
 
       return {
         ownerIdx: sim.state.ball.ownerIdx,
+        gkIdx: gk.idx,
+        held: sim.state.ball.held,
         lastTouchTeam: sim.state.ball.lastTouchTeam,
         anim: gk.anim,
         save: sim.events.some((e) => e.type === 'save'),
@@ -3948,10 +3980,55 @@ describe('match sim', () => {
     const strong = run(92);
 
     expect(weak.ownerIdx).not.toBe(-1);
-    expect(strong.ownerIdx).toBe(-1);
+    // the strong keeper commits to the smother and now GATHERS the ball (collapses on it)
+    // rather than shovelling it loose, so it ends up held by him, not squirting away
+    expect(strong.ownerIdx).toBe(strong.gkIdx);
+    expect(strong.held).toBe(true);
     expect(strong.lastTouchTeam).toBe(1);
     expect(strong.anim).toBe('smother');
     expect(strong.save).toBe(true);
+  });
+
+  it('holds routine saves far more reliably for a better keeper (rare spills for the elite)', () => {
+    // Fresh sim per seed so the elite and the poor keeper face the SAME shot and the SAME
+    // RNG — the only difference is the keeping rating, so this isolates handling.
+    function holdRate(keeping: number) {
+      let held = 0, saves = 0;
+      for (let seed = 1; seed <= 50; seed++) {
+        const sim = new MatchSim(makeCfg({ seed: seed * 131 }));
+        const st = sim.state;
+        st.phase = 'play';
+        const gk = st.players.find((p) => p.team === 1 && p.isGK)!;
+        gk.attrs = { ...gk.attrs, keeping };
+        const dir = st.attackDir[0]; // team 0 attacks this goal; team 1's keeper defends it
+        const goalX = dir * HALF_LEN;
+        gk.pos = { x: goalX - dir * 0.9, y: 0 }; gk.vel = { x: 0, y: 0 };
+        for (const p of st.players) {
+          if (p === gk) continue;
+          p.pos = { x: -dir * (HALF_LEN - 6), y: p.idx % 2 ? 22 : -22 };
+          p.vel = { x: 0, y: 0 };
+        }
+        // a firm but routine shot, slight spread so he has to set behind it (a real save)
+        st.ball.pos = { x: goalX - dir * 9, y: 0 };
+        st.ball.vel = { x: dir * 18, y: ((seed % 7) - 3) * 0.7 };
+        st.ball.z = 0.4; st.ball.vz = 0; st.ball.ownerIdx = -1;
+        (sim as unknown as { shotLive: boolean }).shotLive = true;
+        let res = 'miss';
+        for (let i = 0; i < 35; i++) {
+          sim.step(idle);
+          const b = st.ball;
+          if (b.held && b.ownerIdx === gk.idx) { res = 'held'; break; }
+          if (st.score[0] > 0) { res = 'goal'; break; }
+          if (b.lastKicker === gk.idx && b.ownerIdx === -1 && Math.sign(b.vel.x) === -Math.sign(dir)) { res = 'spill'; break; }
+        }
+        if (res === 'held') { held++; saves++; } else if (res === 'spill') { saves++; }
+      }
+      return saves > 0 ? held / saves : 0;
+    }
+    const elite = holdRate(96);
+    const poor = holdRate(40);
+    expect(elite).toBeGreaterThan(0.7); // an elite keeper clings on to the vast majority
+    expect(elite).toBeGreaterThan(poor + 0.2); // and spills markedly less than a poor one
   });
 
   it('lets an advanced goalkeeper stop a central one-on-one before the attacker runs through him', () => {

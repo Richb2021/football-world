@@ -206,6 +206,31 @@ export function lineupSlotFits(player: { pos: Pos }, formation: FormationId, slo
   return roleFitScore(player.pos, slotRole(formation, slotIdx)) >= 80;
 }
 
+/**
+ * The player data only carries a coarse position (GK/DF/MF/FW), so roleFitScore can't tell a
+ * centre-back from a full-back or a winger from a central midfielder. This breaks the tie on
+ * ATTRIBUTES: pace for the wide/overlapping roles, tackling for the central/holding ones,
+ * passing for the playmakers. It is a secondary signal — small next to roleFitScore's
+ * position weighting — so a defender still fills a defensive slot, but the FAST defender
+ * goes to full-back and the strong one to centre-back, the quick midfielder to the wing and
+ * the passer to the middle.
+ */
+type SlotPlayerAttrs = { pace: number; pass: number; shoot: number; tackle: number; keeping: number };
+function roleAttrBonus(p: SlotPlayerAttrs, role: SlotRole): number {
+  switch (role) {
+    case 'GK': return p.keeping * 0.5;
+    case 'CB': return p.tackle * 0.5 - p.pace * 0.2; // strong, central, not pace-reliant
+    case 'FB': return p.pace * 0.42 + p.tackle * 0.14; // fast, gets up the wing
+    case 'WB': return p.pace * 0.5 + p.tackle * 0.1;
+    case 'DM': return p.tackle * 0.38 + p.pass * 0.18;
+    case 'CM': return p.pass * 0.44 + p.tackle * 0.1;
+    case 'AM': return p.pass * 0.34 + p.shoot * 0.26;
+    case 'W': return p.pace * 0.46 + p.shoot * 0.12; // wide, quick
+    case 'WF': return p.pace * 0.34 + p.shoot * 0.36;
+    case 'ST': return p.shoot * 0.5 + p.pace * 0.1;
+  }
+}
+
 export function formationDefaultTactics(formation: FormationId): TeamTactics {
   const shape = FORMATION_NEEDS[formation] ?? FORMATION_NEEDS['4-4-2'];
   const defenders = shape.filter((p) => p === 'DF').length;
@@ -282,14 +307,16 @@ export function normalizeLineupForFormation(
         idx,
         p,
         fit: roleFitScore(p.pos, role),
+        attrFit: roleAttrBonus(p, role),
         rating: overallRating(p),
         preferred: preferredOrder.has(idx),
         order: preferredOrder.get(idx) ?? Number.MAX_SAFE_INTEGER,
       }))
       .filter((entry) => !used.has(entry.idx))
       .sort((a, b) => (
-        (b.fit - a.fit)
-        || (Number(b.preferred) - Number(a.preferred))
+        (b.fit - a.fit)                                 // right position category first
+        || (Number(b.preferred) - Number(a.preferred)) // a saved/user lineup wins
+        || (b.attrFit - a.attrFit)                      // then attributes pick CB vs FB, W vs CM
         || (b.rating - a.rating)
         || (a.order - b.order)
         || (a.idx - b.idx)

@@ -86,6 +86,59 @@ describe('behaviour stability', () => {
     expect(perMin).toBeLessThan(21);
   });
 
+  // Guards the "keeper jitters back and forth as a man comes through on goal" fix. A
+  // dribbler knocks the ball ahead between touches, and for those ticks the ball is
+  // un-owned (ownerIdx === -1); the keeper's rush branch was gated on a live owner, so it
+  // dropped out every touch and snapped from his committed rush target back to his line —
+  // his steering target flip-flopped ("two rules"), which flipped his heading and twitched
+  // his body. A live rush commit now bridges those loose gaps. Staged as an uncontested
+  // through-on-goal run (the trigger the bug needs) coming in slightly off-centre, where
+  // the rush target and the fall-back line target genuinely diverge.
+  it('keeps the keeper steady as a lone attacker dribbles through on goal', () => {
+    const sim = new MatchSim(cfg(7));
+    const st = sim.state;
+    sim.step(idle); // let kickoff resolve
+    st.phase = 'play';
+    const dir = st.attackDir[0];
+    const goalX = dir * HALF_LEN; // team 1's goal — team 0 attacks it
+    const atk = st.players.find((p) => p.team === 0 && !p.isGK)!;
+    atk.pos = { x: goalX - dir * 28, y: 7 }; // slightly off-centre
+    atk.vel = { x: dir * 5, y: -0.6 };
+    st.ball.pos = { x: atk.pos.x + dir * 0.4, y: 7 };
+    st.ball.vel = { x: 0, y: 0 };
+    st.ball.z = 0; st.ball.vz = 0;
+    st.ball.ownerIdx = atk.idx;
+    const gk = st.players.find((p) => p.team === 1 && p.isGK)!;
+    // clear everyone else to the far end so it's an uncontested run at the keeper
+    for (const p of st.players) {
+      if (p === atk || p === gk) continue;
+      p.pos = { x: -dir * (HALF_LEN - 6), y: p.idx % 2 ? 22 : -22 };
+      p.vel = { x: 0, y: 0 };
+    }
+    const ownGoalX = goalX; // the keeper (team 1) defends the goal team 0 attacks
+    let looseTicks = 0, maxRushDepth = 0, maxStep = 0;
+    let prevPos = { x: gk.pos.x, y: gk.pos.y };
+    for (let t = 0; t < 130; t++) {
+      sim.step(idle);
+      if (st.phase !== 'play') break; // a goal/save/whistle ends the run
+      const ball = st.ball;
+      if (ball.ownerIdx === -1 && d(atk.pos, ball.pos) < 4 && Math.abs(ball.pos.x - ownGoalX) < 30) looseTicks++;
+      maxRushDepth = Math.max(maxRushDepth, Math.abs(gk.pos.x - ownGoalX));
+      // a downed/diving keeper is allowed to travel fast; only judge smoothness while he is
+      // upright and positioning (the state that used to jitter)
+      if (!gk.diving && gk.slideTimer <= 0) maxStep = Math.max(maxStep, d(gk.pos, prevPos));
+      prevPos = { x: gk.pos.x, y: gk.pos.y };
+    }
+    // the ball really does go loose between touches (the mechanism the fix targets)…
+    expect(looseTicks).toBeGreaterThan(3);
+    // …the keeper commits to coming out to meet the man (the bridge keeps the rush alive
+    // across the loose gaps instead of snapping him back to his line)…
+    expect(maxRushDepth).toBeGreaterThan(4);
+    // …and his upright positioning is smooth — never a per-tick teleport-jitter. His max
+    // ground speed is ~6 m/s ≈ 0.1 m/tick, so any step above ~0.3m is a snap, not movement.
+    expect(maxStep).toBeLessThan(0.3);
+  });
+
   it('penalty: the defending keeper holds his line, never standing in front of the ball', () => {
     const sim = new MatchSim(cfg(1));
     const st = sim.state;
@@ -172,6 +225,23 @@ describe('tactical identity', () => {
     // team 0 attacks toward +x and defends toward -x, so a higher line sits
     // further UP the pitch (greater x). The aggressive side must hold higher.
     expect(lineOf(aggressive)).toBeGreaterThan(lineOf(cautious) + 4);
+  });
+});
+
+describe('CPU management', () => {
+  it('makes substitutions in the second half (tired players come off for fresh legs)', () => {
+    let subs = 0;
+    for (const seed of [1, 7, 42]) {
+      const sim = new MatchSim(cfg(seed));
+      let guard = 0;
+      while (sim.state.phase !== 'finished' && guard++ < 90 * 60 * 3) sim.step(idle);
+      subs += sim.state.substitutionsUsed[0] + sim.state.substitutionsUsed[1];
+      // never exceeds the cap
+      expect(sim.state.substitutionsUsed[0]).toBeLessThanOrEqual(5);
+      expect(sim.state.substitutionsUsed[1]).toBeLessThanOrEqual(5);
+    }
+    // both AI sides should have used some subs across these matches (was always 0)
+    expect(subs).toBeGreaterThan(3);
   });
 });
 

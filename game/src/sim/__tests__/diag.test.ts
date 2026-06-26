@@ -56,7 +56,13 @@ describe('phantom event hunt', () => {
           if (e.type === 'goal') {
             goals++;
             const bx = sim.state.ball.pos.x, by = sim.state.ball.pos.y;
-            if (Math.abs(bx) < 52.4 || Math.abs(by) > 4.2) {
+            // A goal only fires on a valid line crossing INSIDE the posts (matchSim checks
+            // the interpolated crossing.y < GOAL_HALF_WIDTH). This re-check reads the ball's
+            // END position, which on a hard angled or keeper-DEFLECTED goal carries on into
+            // the net corner past the post (e.g. y≈4.2, post is 3.66) — that's legitimate,
+            // not a phantom. A real phantom is a goal with the ball nowhere near the mouth:
+            // short of the line, or grossly wide of the frame.
+            if (Math.abs(bx) < 52.4 || Math.abs(by) > 5.5) {
               phantoms++;
               console.log(`PHANTOM GOAL seed=${seed} tick=${sim.state.tick} ball=(${bx.toFixed(1)},${by.toFixed(1)}) trail=${JSON.stringify(ring.slice(-8))}`);
             }

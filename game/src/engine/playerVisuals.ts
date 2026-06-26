@@ -8,6 +8,10 @@ import { tintKitTexture } from './kitTint';
 
 const TARGET_HEIGHT = 1.92;
 const GOALKEEPER_RECOVERY_DURATION = 0.72;
+// flat-on-the-ground orientation for the selection ring, plus reusable scratch
+const RING_FLAT_Q = new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0));
+const _ringQ = new THREE.Quaternion();
+const _ringV = new THREE.Vector3();
 
 export interface PlayerCreateOptions {
   kit: KitColors;
@@ -34,6 +38,10 @@ export interface PlayerActions {
   kick?: THREE.AnimationAction;
   slide?: THREE.AnimationAction;
   tackle?: THREE.AnimationAction;
+  fall?: THREE.AnimationAction;
+  fallForward?: THREE.AnimationAction;
+  getup?: THREE.AnimationAction;
+  getupFront?: THREE.AnimationAction;
   celebrate?: THREE.AnimationAction[];
 }
 
@@ -58,9 +66,20 @@ export interface PlayerVisual {
   diveYaw?: number;
   /** seconds left of getting back to his feet */
   recoverTime?: number;
-  /** elapsed seconds inside a procedural 'fall' (foul / hard tackle), and the side he topples */
+  /** elapsed seconds inside a procedural 'fall' (foul / hard tackle), the side he
+   * topples, and how hard the hit was (captured at fall start, drives the size) */
   fallTime?: number;
   fallSide?: number;
+  fallPower?: number;
+  /** which mocap clip is playing during a fall: the knock-down or the get-up */
+  fallStage?: 'down' | 'up';
+  /** latched idle<->run state, with hysteresis, so a player hovering at the speed
+   * threshold doesn't flicker between standing and running every frame */
+  locoMoving?: boolean;
+  /** whether the current/last keeper save was a forward rush-out (smother/spread) vs a
+   * lateral line dive — latched at dive start so the held-ball renderer stays correct even
+   * after the sim clears diveKind mid-hold */
+  diveRunOut?: boolean;
   /** arm bones for the procedural throw-in pose, resolved lazily */
   armBones?: { upper: THREE.Object3D; lower: THREE.Object3D; hand: THREE.Object3D | null; side: 1 | -1 }[] | null;
 }
@@ -269,6 +288,10 @@ export class PlayerFactory {
         else if (name === 'kickball') actions.kick = action;
         else if (name === 'slidetackle') actions.slide = action;
         else if (name === 'standtackle') actions.tackle = action;
+        else if (name === 'fall') actions.fall = action;
+        else if (name === 'fallforward') actions.fallForward = action;
+        else if (name === 'getup') actions.getup = action;
+        else if (name === 'getupfront') actions.getupFront = action;
         else if (name.startsWith('celebrate')) (actions.celebrate ??= []).push(action);
         else if (name === 'idlestand') actions.idle = action;
         else if (name === 'idletired') actions.tired = action;
@@ -307,6 +330,17 @@ export class PlayerFactory {
   update(v: PlayerVisual, p: SimPlayer, dt: number, replay = false) {
     v.group.visible = !p.sentOff;
     if (p.sentOff) return;
+    // Keep the selection ring flat on the pitch at a fixed ground height, no matter how the
+    // body tilts or drops during a dive/tackle. It's a child of the body group, so without
+    // this it rotates with the body and sinks through the turf. Counter the group's world
+    // rotation and vertical offset. (Uses the previous frame's body transform — a flat ring
+    // is rotationally symmetric, so the sub-degree lag is invisible.)
+    if (v.ring.visible) {
+      const inv = _ringQ.copy(v.group.quaternion).invert();
+      v.ring.quaternion.copy(inv).multiply(RING_FLAT_Q);
+      _ringV.set(0, 0.05 - v.group.position.y, 0).applyQuaternion(inv);
+      v.ring.position.copy(_ringV);
+    }
     v.group.position.set(p.pos.x, 0, p.pos.y);
     const speed = Math.hypot(p.vel.x, p.vel.y);
     const a = v.actions;
@@ -335,7 +369,10 @@ export class PlayerFactory {
     // sim plane (x, y) maps to three (x, z); facing 0 = +x. A clip-driven dive
     // keeps its pre-dive orientation: the keeper falls sideways, he doesn't
     // pirouette to face the direction of travel first.
-    const freezeYaw = p.anim === 'dive' || p.anim === 'smother'
+    // a fall also holds its yaw at the body's facing (not the shove direction) so the
+    // forward/backward knock-down clip topples the right way in the world — otherwise
+    // the yaw chases the push and every fall reads as a backward topple.
+    const freezeYaw = p.anim === 'dive' || p.anim === 'smother' || p.anim === 'fall'
       || ((v.recoverTime ?? 0) > 0 && (v.current === 'dive' || v.current === 'smother' || v.current === 'recover'));
     if (!freezeYaw) {
       v.diveYaw = undefined;
@@ -344,9 +381,20 @@ export class PlayerFactory {
       // his yaw doesn't flick back and forth every time he adjusts left or right.
       const visualFacing = p.isGK ? p.facing : (speed > 0.28 ? Math.atan2(p.vel.y, p.vel.x) : p.facing);
       const targetRotY = yawForSimFacing(visualFacing, v.baseRotY);
-      v.visualRotY = nextVisualYawForFacing(v.visualRotY, targetRotY, dt, speed, replay);
+      // a keeper faces the ball (not his run direction), and that facing is set by a few
+      // different rules across the keeper logic; rotating his body at full sprint-rate
+      // toward it makes any frame-to-frame disagreement read as a fast body twitch on a
+      // 1-on-1. Cap his turn rate so the body always swings smoothly, never snaps.
+      const yawSpeed = p.isGK ? Math.min(speed, 1.0) : speed;
+      v.visualRotY = nextVisualYawForFacing(v.visualRotY, targetRotY, dt, yawSpeed, replay);
     } else {
-      if ((p.anim === 'dive' || p.anim === 'smother') && v.current !== p.anim) v.diveYaw = v.visualRotY;
+      // capture the yaw to hold through the save. Use the SIM facing the keeper logic set
+      // at dive commit (it points at the shot), NOT the damped visual yaw — visualRotY lags
+      // behind p.facing, so capturing it laid the dive toward where he WAS looking and sent
+      // him the wrong way across goal ("diving backwards").
+      if ((p.anim === 'dive' || p.anim === 'smother') && v.current !== p.anim) {
+        v.diveYaw = yawForSimFacing(p.facing, v.baseRotY);
+      }
       v.visualRotY = v.diveYaw ?? yawForSimFacing(p.facing, v.baseRotY);
     }
     v.group.rotation.y = v.visualRotY;
@@ -410,8 +458,17 @@ export class PlayerFactory {
       return;
     }
 
-    // leaving a clip-driven special state: hand back to locomotion
-    if (v.special && v.current !== 'throw') {
+    // leaving a clip-driven special state: hand back to locomotion. Several states OWN
+    // their special across many frames and drive it themselves: 'throw' holds an overhead
+    // pose; 'fall' plays the knock-down then the get-up; and the keeper's 'dive'/'smother'
+    // play the leap/slide clip while he lays out, then 'recover' plays the get-up. This
+    // generic teardown must skip ALL of them — otherwise it stops the clip the very next
+    // frame, leaving only the bind pose (the stiff "T-pose" dive and get-up).
+    if (
+      v.special
+      && v.current !== 'throw' && v.current !== 'fall'
+      && v.current !== 'dive' && v.current !== 'smother' && v.current !== 'recover'
+    ) {
       v.special.stop();
       v.special = null;
       (run ?? walk)?.play();
@@ -434,12 +491,57 @@ export class PlayerFactory {
       // resuming after a throw: restart locomotion clips
       (run ?? walk)?.play();
     }
+    if (p.anim === 'fall' && a.fall) {
+      // Real mocap fall: the knock-down clip drops him to the turf (its vertical root
+      // motion + bone rotations lay the body out), it clamps on the lying pose, then
+      // the get-up clip lifts him back to his feet over the last stretch of downTimer.
+      // The clips carry the whole motion, so no procedural body pose is applied.
+      const down = p.downTimer ?? 0;
+      const GETUP = 0.8; // play the get-up over the last ~0.8s of being down
+      // forward-only: once the get-up has started it must never revert to the
+      // knock-down, or the boundary frame where downTimer ticks to ~0 (while anim is
+      // still 'fall') would restart the fall clip from standing — a pop just before he
+      // rises. So 'up' latches once entered, and only a fresh fall resets it to 'down'.
+      const stage: 'down' | 'up' = (a.getup && (v.fallStage === 'up' || (down > 0 && down < GETUP)))
+        ? 'up' : 'down';
+      if (v.current !== 'fall' || v.fallStage !== stage) {
+        run?.stop();
+        walk?.stop();
+        a.idle?.stop();
+        a.tired?.stop();
+        const prev = v.special;
+        // pitched onto his front when the shove went with his facing (clipped from
+        // behind); toppled backward otherwise. The get-up matches: a prone push-up off
+        // the front, or the sit-up-and-rise from the back.
+        const forward = !!(p.fallForward && a.fallForward);
+        const downClip = forward ? a.fallForward! : a.fall;
+        const upClip = (p.fallForward && a.getupFront) ? a.getupFront : a.getup!;
+        const act = stage === 'up' ? upClip : downClip;
+        act.reset();
+        act.setLoop(THREE.LoopOnce, 1);
+        act.clampWhenFinished = true;
+        const dur = act.getClip().duration || 1;
+        // the library clips run long (knock-down ~2.5s, stand-up ~8s); pace them into
+        // the game's beat so the fall is snappy and the get-up isn't a slow grind
+        const target = stage === 'up' ? GETUP : 0.9;
+        act.timeScale = Math.min(14, Math.max(0.5, dur / target));
+        act.setEffectiveWeight(1);
+        act.play();
+        if (prev && prev !== act) prev.crossFadeTo(act, 0.12, false);
+        v.special = act;
+        v.fallStage = stage;
+      }
+      v.group.rotation.x = 0;
+      v.group.rotation.z = 0;
+      v.group.position.y = 0;
+      v.mixer.update(dt);
+      v.current = 'fall';
+      return;
+    }
     if (p.anim === 'fall') {
-      // brought down by a foul or a hard tackle: topple sideways onto the turf,
+      // no mocap clip loaded — procedural fallback: topple sideways onto the turf,
       // lie there, then push back up to his feet. The tip-over runs on its own
-      // accumulator; the getup is driven off the sim's downTimer so however long
-      // he's down (a foul lies longer than a clean-slide stumble) he rises to meet
-      // it. No clip — the body rotates over a held idle pose.
+      // accumulator; the getup is driven off the sim's downTimer.
       if (v.current !== 'fall') {
         run?.stop();
         walk?.stop();
@@ -448,26 +550,42 @@ export class PlayerFactory {
         v.special = undefined;
         v.fallTime = 0;
         v.fallSide = p.idx % 2 === 0 ? 1 : -1;
+        v.fallPower = clamp01(p.fallPower ?? 0.5);
         a.idle?.reset();
         a.idle?.play();
       }
       v.fallTime = (v.fallTime ?? 0) + dt;
-      const TIP = 0.2;   // time to go from upright to flat
-      const GETUP = 0.34; // last stretch of downTimer spent rising
-      const down = p.downTimer ?? 0;
-      const tip = clamp01((v.fallTime ?? 0) / TIP);
-      const rise = down < GETUP ? smoothstep(clamp01(1 - down / GETUP)) : 0;
-      const amt = tip * (1 - rise); // 0 upright .. 1 flat on the turf
+      const t = v.fallTime ?? 0;
+      const power = v.fallPower ?? 0.5;       // 0 = clean-tackle stumble .. 1 = heavy foul
       const side = v.fallSide ?? 1;
-      v.group.rotation.z = side * amt * 1.4; // topple sideways
-      v.group.rotation.x = -amt * 0.2;       // a touch forward as he goes
-      v.group.position.y = amt * 0.08;       // settle to ground level
+      const GETUP = 0.34;                     // last stretch of downTimer spent rising
+      const down = p.downTimer ?? 0;
+      const rise = down < GETUP ? smoothstep(clamp01(1 - down / GETUP)) : 0;
+      // airborne arc: the challenge takes his legs and he's off the ground for a beat,
+      // higher and longer the harder the hit, before he comes down and skids.
+      const airDur = 0.16 + power * 0.22;
+      const airT = clamp01(t / airDur);
+      const flight = Math.sin(airT * Math.PI);            // 0 → 1 → 0 across the flight
+      // how laid out he is (0 upright .. 1 flat); eases in fast, unwinds on the getup
+      const amt = smoothstep(clamp01(t / 0.12)) * (1 - rise);
+      // tip onto the turf, with an extra spin mid-flight so he rolls as he lands
+      // (capped short of a full flip — from a top-down view he reads as a tumble)
+      v.group.rotation.z = side * (amt * 1.4 + flight * power * 0.95 * (1 - rise));
+      // pitch forward — face/chest first on a heavy challenge
+      v.group.rotation.x = -(amt * 0.18 + flight * power * 0.6 * (1 - rise));
+      // height: the airborne arc, then settle to ground level
+      v.group.position.y = flight * (0.14 + power * 0.6) * (1 - rise) + amt * 0.05;
+      // throw an arm out to break the fall, biggest at the moment of impact
+      applyFallArm(v, amt * (0.55 + power * 0.45), side);
       v.mixer.update(dt);
       v.current = 'fall';
       return;
     }
     if (v.current === 'fall') {
-      // back on his feet: clear the laid-out pose and restart locomotion
+      // back on his feet: drop the fall clip, clear any laid-out pose, restart locomotion
+      if (v.special) { v.special.stop(); v.special = undefined; }
+      v.fallStage = undefined;
+      v.group.rotation.x = 0;
       v.group.rotation.z = 0;
       v.group.position.y = 0;
       (run ?? walk)?.play();
@@ -478,16 +596,21 @@ export class PlayerFactory {
       // place) WHILE the whole body lays from upright to a full horizontal stretch.
       // The old version skipped the mixer, so the skeleton stayed in a standing
       // pose and the body just tipped over rigidly — which read as a flick.
+      // A rushed-out save (smother at feet, or a spread charge at an attacker) slides
+      // him out FORWARD with the slide clip — legs trailing, not a sideways lay with a
+      // running cycle. A lateral line save still dives to his side.
+      const runOut = p.anim === 'smother' || p.diveKind === 'spread';
       if (v.current !== p.anim) {
+        v.diveRunOut = runOut; // latch for the held-ball renderer (sim clears diveKind later)
         run?.stop();
         walk?.stop();
         a.idle?.stop();
         a.tired?.stop();
         v.special?.stop();
         v.diveTime = 0;
-        v.diveSide = p.anim === 'smother' ? 0 : resolvePlayerDiveSide(p);
-        const clip = p.anim === 'smother'
-          ? (a.smother ?? a.gkDiveR)
+        v.diveSide = runOut ? 0 : resolvePlayerDiveSide(p);
+        const clip = runOut
+          ? (a.slide ?? a.smother ?? a.gkDiveR)
           : ((v.diveSide ?? 1) < 0 ? (a.gkDiveL ?? a.gkDiveR) : a.gkDiveR);
         if (clip) {
           clip.reset();
@@ -495,7 +618,11 @@ export class PlayerFactory {
           clip.clampWhenFinished = true;
           const dur = clip.getClip().duration || 1;
           clip.time = dur * 0.05;            // skip a touch of the wind-up
-          clip.timeScale = Math.max(0.7, (dur * 0.95) / 0.7); // pace the reach into ~0.7s
+          // The slide clip loops stand→slide-low→stand. For a run-out we drive its time
+          // by hand (below) so he settles into the low slide and HOLDS, instead of the
+          // clip standing his legs back up while he's flat on the turf ("running on the
+          // ground"). The lateral leap clip plays through normally.
+          clip.timeScale = runOut ? 0 : Math.max(0.7, (dur * 0.95) / 0.7);
           clip.play();
           v.special = clip;
         } else {
@@ -508,11 +635,16 @@ export class PlayerFactory {
       v.diveTime = (v.diveTime ?? 0) + dt;
       const t = v.diveTime;
       const side = v.diveSide ?? 1;
-      if (p.anim === 'smother') {
-        const k = Math.min(1, t / 0.34);
-        v.group.rotation.x = -(0.28 + k * 0.55);
+      if (runOut) {
+        // slide out at the attacker: pitch forward and low onto the turf (the slide clip
+        // trails the legs). He's already facing the attacker, so this carries him in.
+        const k = Math.min(1, t / 0.22);
         v.group.rotation.z = 0;
-        v.group.position.y = k < 1 ? Math.sin(k * Math.PI) * 0.28 : 0.12;
+        v.group.rotation.x = -1.05 * (k * k);
+        v.group.position.y = -0.13 * k;
+        // drive the slide clip into its low-slide pose (~40% through) in step with the
+        // body going down, then hold it there — never play on to the standing tail.
+        if (v.special) v.special.time = k * 0.4 * (v.special.getClip().duration || 1);
       } else {
         // ease the body from upright to flat on the turf while the clip animates
         // the reach — no rigid snap, no static standing pose
@@ -537,13 +669,63 @@ export class PlayerFactory {
       v.divePitch = v.group.rotation.x;
       v.recoverTime = GOALKEEPER_RECOVERY_DURATION;
       v.mixer.update(dt); // <-- drive the limbs through the dive clip
+      // a lateral shot-stop has no real mocap (the library has none), so reach his arms
+      // out at the ball over the leap clip's stiff T-pose. The run-out saves already
+      // slide in with the proper slide-clip arms, so leave those.
+      if (!runOut) applyDiveArm(v);
       v.current = p.anim;
       return;
     }
-    // back to his feet after a save: push up off the turf and unwind the roll
-    // over a beat instead of teleporting upright
+    // back to his feet after a save. He ROLLS onto his FRONT, then pushes up — two phases:
+    //   1. roll: unwind the sideways lay to flat while the prone push-up clip is HELD on its
+    //      first (face-down) frame, so he turns from on-his-side to lying face-DOWN, his arms
+    //      planted under him — not sitting up from his back with his arms out (the T-pose).
+    //   2. push up: flat on his front, the clip plays through and lifts him to standing.
+    // We drive the clip's time ourselves (timeScale 0) so it stays prone through the roll.
     if (v.recoverTime && v.recoverTime > 0) {
       v.recoverTime -= dt;
+      const elapsed = clamp01(1 - v.recoverTime / GOALKEEPER_RECOVERY_DURATION);
+      const recoverClip = a.getupFront ?? a.getup;
+      if (recoverClip) {
+        if (v.current === 'dive' || v.current === 'smother') {
+          run?.stop();
+          walk?.stop();
+          a.idle?.stop();
+          a.tired?.stop();
+          const prev = v.special;
+          const act = recoverClip;
+          act.reset();
+          act.setLoop(THREE.LoopOnce, 1);
+          act.clampWhenFinished = true;
+          act.timeScale = 0;            // we set .time manually so it can hold prone
+          act.setEffectiveWeight(1);
+          act.play();
+          // hard cut to the prone pose: a crossfade would blend the dive-leap arms back in
+          if (prev && prev !== act) prev.stop();
+          v.special = act;
+          v.current = 'recover';
+        }
+        const ROLL = 0.32; // fraction of the recovery spent rolling onto his front
+        const dur = recoverClip.getClip().duration || 1;
+        // the get-up clip runs one-way prone→standing (it ENDS on his feet), so the roll
+        // holds it on its prone first frame, then the push-up plays it through to the end.
+        if (elapsed < ROLL) {
+          // phase 1 — roll flat onto his front, clip held on its prone first frame
+          const k = smoothstep(clamp01(elapsed / ROLL));
+          v.group.rotation.z = (v.diveRoll ?? 0) * (1 - k);
+          v.group.rotation.x = (v.divePitch ?? 0) * (1 - k);
+          recoverClip.time = 0;
+        } else {
+          // phase 2 — push up from prone to standing; the clip drives the rise
+          v.group.rotation.z = 0;
+          v.group.rotation.x = 0;
+          recoverClip.time = clamp01((elapsed - ROLL) / (1 - ROLL)) * dur;
+        }
+        v.group.position.y = 0;
+        v.mixer.update(dt);
+        return;
+      }
+      // procedural fallback (no get-up clip loaded): unwind the roll and push up
       const recovery = goalkeeperRecoveryPose(
         Math.max(0, v.recoverTime),
         v.diveRoll ?? 0,
@@ -552,8 +734,6 @@ export class PlayerFactory {
       v.group.rotation.z = recovery.roll;
       v.group.rotation.x = recovery.pitch;
       v.group.position.y = recovery.height;
-      // Get the clamped dive pose out of the blend quickly. Keeping it weighted
-      // through the whole rise made the keeper look like he was rewinding the save.
       const stand = a.idle ?? walk ?? run;
       if (v.current === 'dive' || v.current === 'smother') {
         if (stand && !stand.isRunning()) {
@@ -597,7 +777,10 @@ export class PlayerFactory {
       if (p.anim === 'celebrate') {
         v.group.position.y = Math.abs(Math.sin(performance.now() * 0.008)) * 0.4;
         if (run) run.timeScale = 1.4;
-      } else if (speed < 0.4) {
+      } else if (!(v.locoMoving = v.locoMoving ? speed > 0.28 : speed > 0.6)) {
+        // hysteresis: enter "running" at 0.6, drop back to idle only below 0.28. A hard
+        // single threshold made a near-stationary player (a keeper holding his ground)
+        // strobe between the idle and run clips as his speed wobbled across the line.
         const idleAct = (p.stamina < 0.3 ? a.tired : null) ?? a.idle;
         if (idleAct) {
           // a real standing idle (catching breath when leggy)
@@ -631,6 +814,19 @@ export class PlayerFactory {
         }
       }
     }
+    // Safety net against the bind-pose "T-pose": a rare state handoff (notably just after a
+    // keeper's get-up) can leave every clip stopped or zero-weight for a frame. Guarantee at
+    // least one locomotion clip is actually driving the skeleton.
+    const driving = [run, walk, a.idle, a.tired].some(
+      (act) => act && act.isRunning() && act.getEffectiveWeight() > 0.01,
+    );
+    if (!driving) {
+      const fb = a.idle ?? run ?? walk;
+      if (fb) {
+        if (!fb.isRunning()) { fb.reset(); fb.setLoop(THREE.LoopRepeat, Infinity); fb.play(); }
+        fb.setEffectiveWeight(1);
+      }
+    }
     v.mixer.update(dt);
     v.current = p.anim;
   }
@@ -641,20 +837,82 @@ export class PlayerFactory {
  * overrides whatever the locomotion clips put on the arm bones this frame.
  * Works in world space, so it holds for any rig orientation.
  */
-function applyThrowPose(v: PlayerVisual) {
-  if (v.armBones === undefined) {
-    const find = (name: string) => v.group.getObjectByName(name) ?? null;
-    const pairs: PlayerVisual['armBones'] = [];
-    const left = find('LeftArm');
-    const leftLower = find('LeftForeArm');
-    const leftHand = find('LeftHand');
-    const right = find('RightArm');
-    const rightLower = find('RightForeArm');
-    const rightHand = find('RightHand');
-    if (left && leftLower) pairs.push({ upper: left, lower: leftLower, hand: leftHand, side: -1 });
-    if (right && rightLower) pairs.push({ upper: right, lower: rightLower, hand: rightHand, side: 1 });
-    v.armBones = pairs.length ? pairs : null;
+function resolveArmBones(v: PlayerVisual) {
+  if (v.armBones !== undefined) return;
+  const find = (name: string) => v.group.getObjectByName(name) ?? null;
+  const pairs: PlayerVisual['armBones'] = [];
+  const left = find('LeftArm');
+  const leftLower = find('LeftForeArm');
+  const leftHand = find('LeftHand');
+  const right = find('RightArm');
+  const rightLower = find('RightForeArm');
+  const rightHand = find('RightHand');
+  if (left && leftLower) pairs.push({ upper: left, lower: leftLower, hand: leftHand, side: -1 });
+  if (right && rightLower) pairs.push({ upper: right, lower: rightLower, hand: rightHand, side: 1 });
+  v.armBones = pairs.length ? pairs : null;
+}
+
+/** Fling the arms out as he goes down: the arm on the side he's toppling toward
+ * braces out and toward the turf, the other flails up and across — eased in by
+ * `reach` (0 = arms by his sides, 1 = full flail). Runs after the mixer. */
+function applyFallArm(v: PlayerVisual, reach: number, side: number) {
+  resolveArmBones(v);
+  if (!v.armBones) return;
+  const r = clamp01(reach);
+  if (r < 0.02) return;
+  const groupQuat = new THREE.Quaternion();
+  v.group.getWorldQuaternion(groupQuat);
+  const lateral = new THREE.Vector3(1, 0, 0).applyQuaternion(groupQuat);
+  const groupPos = new THREE.Vector3();
+  v.group.getWorldPosition(groupPos);
+  const shoulderPos = new THREE.Vector3();
+  for (const { upper, lower, hand } of v.armBones) {
+    upper.updateWorldMatrix(true, false);
+    shoulderPos.setFromMatrixPosition(upper.matrixWorld).sub(groupPos);
+    const armSide = Math.sign(shoulderPos.dot(lateral)) || 1;
+    const bracing = armSide === (side >= 0 ? 1 : -1);
+    const rest = new THREE.Vector3(0, -1, 0).addScaledVector(lateral, armSide * 0.18).normalize();
+    const fling = new THREE.Vector3(0, bracing ? -0.35 : 0.55, 0)
+      .addScaledVector(lateral, armSide * (bracing ? 1 : 0.75))
+      .normalize();
+    const target = rest.lerp(fling, r).normalize();
+    rotateBoneTowards(upper, lower, target);
+    if (hand) rotateBoneTowards(lower, hand, target);
   }
+}
+
+/** Stretch the keeper's arms out at the ball as he dives, over the library leap clip's
+ * stiff arms-out (T-pose) pose. Both arms reach TOGETHER toward the way he's going (once
+ * he's laid over, his "overhead" points at the corner he's diving for) — converging like
+ * a real save, not spread out to the sides. Modelled on the throw-in pose (which works).
+ * Runs after the mixer so it overrides the clip's arm bones. */
+function applyDiveArm(v: PlayerVisual) {
+  resolveArmBones(v);
+  if (!v.armBones) return;
+  const groupQuat = new THREE.Quaternion();
+  v.group.getWorldQuaternion(groupQuat);
+  const reachDir = new THREE.Vector3(0, 1, 0).applyQuaternion(groupQuat); // his "overhead" = the dive line
+  const lateral = new THREE.Vector3(1, 0, 0).applyQuaternion(groupQuat);
+  const groupPos = new THREE.Vector3();
+  v.group.getWorldPosition(groupPos);
+  const shoulderPos = new THREE.Vector3();
+  for (const { upper, lower, hand } of v.armBones) {
+    upper.updateWorldMatrix(true, false);
+    shoulderPos.setFromMatrixPosition(upper.matrixWorld).sub(groupPos);
+    const side = Math.sign(shoulderPos.dot(lateral)) || 1; // physical side, never trust bone names
+    // both arms stretch along the dive line; a slight outward lean keeps the hands a
+    // shoulder-width apart (extended at the ball) rather than crossed or fanned wide
+    const upperTarget = new THREE.Vector3().copy(reachDir).addScaledVector(lateral, side * 0.16).normalize();
+    rotateBoneTowards(upper, lower, upperTarget);
+    if (hand) {
+      const lowerTarget = new THREE.Vector3().copy(reachDir).addScaledVector(lateral, side * 0.05).normalize();
+      rotateBoneTowards(lower, hand, lowerTarget);
+    }
+  }
+}
+
+function applyThrowPose(v: PlayerVisual) {
+  resolveArmBones(v);
   if (!v.armBones) return;
   const groupQuat = new THREE.Quaternion();
   v.group.getWorldQuaternion(groupQuat);
