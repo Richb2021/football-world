@@ -203,6 +203,56 @@ describe('match momentum', () => {
     expect(sim.state.momentum[1]).toBeLessThan(2);
   });
 
+  it('a late goal that gets a team back into the match surges momentum', () => {
+    const sim = new MatchSim(makeCfg());
+    sim.state.phase = 'play';
+    sim.state.half = 2;
+    sim.state.clock = 50; // ~80' with a 60s half (45 + 50/60*45)
+    sim.state.score = [0, 1];          // home 1 down
+    sim.state.momentum = [0, 0];
+    const before = sim.state.momentum[0];
+    // emit a goal for the home side directly through the private emitter
+    (sim as unknown as { scoreGoal(t: 0 | 1): void }).scoreGoal(0);
+    expect(sim.state.score[0]).toBe(1);              // now level
+    expect(sim.state.momentum[0] - before).toBeGreaterThan(6); // big surge
+    expect(sim.state.momentum[1]).toBeLessThan(0);   // opponent dragged down
+  });
+
+  it('decays momentum toward neutral over time when nothing feeds it', () => {
+    const sim = new MatchSim(makeCfg());
+    sim.state.phase = 'play';
+    sim.state.momentum = [10, -10];
+    stepMany(sim, Math.round(20 / DT)); // ~20 sim-seconds of idle play
+    expect(Math.abs(sim.state.momentum[0])).toBeLessThan(10);
+    expect(Math.abs(sim.state.momentum[1])).toBeLessThan(10);
+  });
+
+  it('drips momentum to a clear underdog that keeps the score level, and stops once behind', () => {
+    // Build two identical sims: one stays level (drip ON), one already behind (drip OFF).
+    // The drip adds ~1.1+ momentum over 8 sim-seconds; the gap between the two sims
+    // must be substantial (> 0.5) to confirm the drip is the driver, not just event noise.
+    function buildSim(score: [number, number]) {
+      const cfg = makeCfg();
+      cfg.teams[0] = { ...cfg.teams[0], data: { ...cfg.teams[0].data, strength: 70 } };
+      cfg.teams[1] = { ...cfg.teams[1], data: { ...cfg.teams[1].data, strength: 90 } };
+      const sim = new MatchSim(cfg);
+      sim.state.phase = 'play';
+      sim.state.half = 2;
+      sim.state.clock = 30;
+      sim.state.momentum = [0, 0];
+      sim.state.score = score;
+      return sim;
+    }
+    const level   = buildSim([0, 0]);   // drip ON
+    const behind  = buildSim([0, 1]);   // drip OFF
+    const steps = Math.round(8 / DT);
+    stepMany(level,  steps);
+    stepMany(behind, steps);
+    // The drip must lift level sim's momentum substantially above the trailing sim.
+    expect(level.state.momentum[0]).toBeGreaterThan(0);
+    expect(level.state.momentum[0] - behind.state.momentum[0]).toBeGreaterThan(0.5);
+  });
+
   it('uses momentum as a small pass-quality boost or drag', () => {
     type PassHarness = { applyPassSkillToAim(kicker: SimPlayer, aim: Vec2, aerial: boolean): Vec2 };
     const boosted = new MatchSim(makeCfg({ seed: 99, initialMomentum: [12, 0] }));
@@ -217,6 +267,148 @@ describe('match momentum', () => {
     const drainedAim = (drained as unknown as PassHarness).applyPassSkillToAim(drainedKicker, aim, false);
 
     expect(Math.abs(boostedAim.y)).toBeLessThan(Math.abs(drainedAim.y));
+  });
+
+  it('bleeds momentum from a team that piles up chances without scoring', () => {
+    // Two sims with identical seed and initial state.
+    // highPressure has momentumPressure[0] forced to 12 (via private cast) before stepping;
+    // baseline leaves it at 0. Crucially we set momentum identically on both, so the
+    // frustration drip is the only systematic difference.
+    // Injecting pressure directly (rather than via emit) avoids the applyEventMomentum
+    // side-effects (which would also move momentum independently of the feature under test).
+    type PressureHarness = { momentumPressure: [number, number] };
+    function buildSim() {
+      const sim = new MatchSim(makeCfg({ seed: 42 }));
+      sim.state.phase = 'play';
+      sim.state.half = 2;
+      sim.state.clock = 20;
+      sim.state.momentum = [0, 0];
+      sim.state.score = [0, 0];
+      return sim;
+    }
+    const highPressure = buildSim();
+    const baseline     = buildSim();
+    // Force momentumPressure[0] = 12 on the high-pressure sim only.
+    // Pressure > 4 while score[0] <= score[1] → frustration fires each minute tick.
+    (highPressure as unknown as PressureHarness).momentumPressure[0] = 12;
+    const steps = Math.round(6 / DT);
+    stepMany(highPressure, steps);
+    stepMany(baseline,     steps);
+    // frustration must have depressed high-pressure team-0 momentum relative to baseline
+    expect(highPressure.state.momentum[0]).toBeLessThan(baseline.state.momentum[0]);
+    // resilient defenders lifted — team 1 benefits
+    expect(highPressure.state.momentum[1]).toBeGreaterThan(baseline.state.momentum[1]);
+  });
+
+  it('subbing off the best outfielder drops momentum more than a squad player', () => {
+    const run = (offRank: 'best' | 'worst') => {
+      const sim = new MatchSim(makeCfg());
+      sim.state.phase = 'halfTime'; // a break phase so substitute() is allowed
+      sim.state.momentum = [0, 0];
+      const overall = (p: SimPlayer) => p.attrs.pace + p.attrs.pass + p.attrs.shoot + p.attrs.tackle;
+      const outfield = sim.state.players.filter((p) => p.team === 0 && !p.isGK);
+      outfield.sort((a, b) => overall(b) - overall(a));
+      const off = offRank === 'best' ? outfield[0] : outfield[outfield.length - 1];
+      // find a bench player (squad index not currently on the pitch) of the same broad type
+      const onIdx = new Set(sim.state.players.filter((p) => p.team === 0).map((p) => p.squadIdx));
+      const benchIdx = (sim as unknown as { cfg: MatchConfig }).cfg.teams[0].data.players.findIndex(
+        (pl, i) => !onIdx.has(i) && (pl.pos === 'GK') === false,
+      );
+      sim.substitute(0, off.idx, benchIdx);
+      return sim.state.momentum[0];
+    };
+    expect(run('best')).toBeLessThan(run('worst'));
+  });
+
+  it('rewards a team that survives 10 minutes a man down without conceding', () => {
+    // Two sims identical in every way. Only "withCard" has a red-card event emitted and
+    // sentOff set, so only it can earn the survival reward. Compare the two after advancing
+    // the clock past a 10-minute block — the man-down sim must have meaningfully more
+    // momentum than the baseline, isolating the reward from plain decay.
+    type SurvivalHarness = { emit(e: { type: string; team?: 0 | 1; player?: number }): void };
+    function buildSim() {
+      const sim = new MatchSim(makeCfg({ seed: 77 }));
+      sim.state.phase = 'play';
+      sim.state.half = 2;
+      sim.state.clock = 6;   // ~50'
+      sim.state.momentum = [0, 0];
+      return sim;
+    }
+    const withCard = buildSim();
+    const baseline = buildSim();
+    // send a team-0 outfielder off and register the red card minute via the emitter
+    const victim = withCard.state.players.find((p) => p.team === 0 && !p.isGK)!;
+    victim.sentOff = true;
+    (withCard as unknown as SurvivalHarness)
+      .emit({ type: 'redCard', team: 0, player: victim.idx });
+    // advance clock so blocks = floor((60 - 50) / 10) = 1 ≥ 0 → reward fires
+    withCard.state.clock = 20;
+    baseline.state.clock  = 20;
+    stepMany(withCard, 2);
+    stepMany(baseline, 2);
+    // The man-down sim must have higher momentum — the reward (+3) overcomes event noise
+    expect(withCard.state.momentum[0]).toBeGreaterThan(baseline.state.momentum[0]);
+  });
+
+  it('two quick goals burst-surge a team more than two spaced goals', () => {
+    const build = () => {
+      const sim = new MatchSim(makeCfg());
+      sim.state.phase = 'play';
+      sim.state.half = 2;
+      sim.state.clock = 10;            // ~53'
+      sim.state.momentum = [0, 0];
+      sim.state.score = [0, 0];
+      (sim as unknown as { scoreGoal(t: 0 | 1): void }).scoreGoal(0); // 1-0
+      return sim;
+    };
+    const quick = build();
+    quick.state.clock = 13;            // ~55', within 5' of the first → burst
+    (quick as unknown as { scoreGoal(t: 0 | 1): void }).scoreGoal(0);
+    const spaced = build();
+    spaced.state.clock = 28;           // ~66', >5' after the first → no burst
+    (spaced as unknown as { scoreGoal(t: 0 | 1): void }).scoreGoal(0);
+    expect(quick.state.momentum[0]).toBeGreaterThan(spaced.state.momentum[0]);
+  });
+
+  it('a spurned one-on-one swings momentum to the defenders (save and off-target)', () => {
+    for (const ev of ['save', 'out'] as const) {
+      const sim = new MatchSim(makeCfg());
+      sim.state.phase = 'play';
+      sim.state.momentum = [0, 0];
+      const h = sim as unknown as {
+        liveShotBigChance: boolean; liveShotTeam: number;
+        emit(e: { type: string; team?: 0 | 1 }): void;
+      };
+      h.liveShotBigChance = true;
+      h.liveShotTeam = 0;                                   // team 0 spurned it
+      h.emit({ type: ev, team: ev === 'save' ? 1 : undefined });
+      expect(sim.state.momentum[0]).toBeLessThan(0);        // shooter's team dips
+      expect(sim.state.momentum[1]).toBeGreaterThan(0);     // defenders lift
+      expect(h.liveShotBigChance).toBe(false);              // flag consumed once
+    }
+  });
+
+  it('latches a genuine one-on-one at the moment the shot goes live', () => {
+    const sim = new MatchSim(makeCfg());
+    const st = sim.state;
+    const h = sim as unknown as {
+      attackSign(t: 0 | 1): number; shotLive: boolean; shotLivePrev: boolean;
+      goalkeeperLogic(): void; liveShotBigChance: boolean; liveShotTeam: number;
+    };
+    st.phase = 'play';
+    const dir = h.attackSign(0);
+    const goalX = dir * HALF_LEN;
+    const shooter = st.players.find((p) => p.team === 0 && !p.isGK)!;
+    const keeper = st.players.find((p) => p.team === 1 && p.isGK)!;
+    shooter.pos = { x: goalX - dir * 12, y: 0 };          // 12m out, central
+    st.ball.pos = { ...shooter.pos };
+    st.ball.lastKicker = shooter.idx;
+    keeper.pos = { x: goalX - dir * 6, y: 0 };            // keeper 6m off his line (gap > 1.5)
+    for (const p of st.players) if (p.team === 1 && !p.isGK) p.pos = { x: 0, y: 25 }; // defenders off the line
+    h.shotLive = true; h.shotLivePrev = false;            // drive the strike transition
+    h.goalkeeperLogic();
+    expect(h.liveShotBigChance).toBe(true);
+    expect(h.liveShotTeam).toBe(0);
   });
 });
 
@@ -249,9 +441,9 @@ describe('match sim', () => {
         break;
       }
     }
-    // it happens around the middle of the 60s half
+    // it happens around the middle of the 60s half (may fall in stoppage time)
     expect(breakClock).toBeGreaterThan(25);
-    expect(breakClock).toBeLessThan(58);
+    expect(breakClock).toBeLessThan(62);
     // and it wipes out the momentum that had built up to that point
     expect(momentumAtBreak).toEqual([0, 0]);
   });
@@ -2256,18 +2448,49 @@ describe('match sim', () => {
       (sim as unknown as { playerRole: (player: SimPlayer) => string }).playerRole(p)
     );
     const fullBack = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'DF' && Math.abs(p.slot.y) > 0.55)!;
-    fullBack.attrs = { ...fullBack.attrs, pace: 88, pass: 76, tackle: 54 };
+    fullBack.attrs = { ...fullBack.attrs, position: 'FB', pace: 88, pass: 76, tackle: 54 };
     const centreBack = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'DF' && Math.abs(p.slot.y) < 0.35)!;
-    centreBack.attrs = { ...centreBack.attrs, pace: 84, tackle: 64 };
+    centreBack.attrs = { ...centreBack.attrs, position: 'CB', pace: 84, tackle: 64 };
     const holder = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'MF' && Math.abs(p.slot.y) < 0.35)!;
-    holder.attrs = { ...holder.attrs, tackle: 86, pass: 60, shoot: 44 };
+    holder.attrs = { ...holder.attrs, position: 'DM', tackle: 86, pass: 60, shoot: 44 };
     const playmaker = sim.state.players.find((p) => p.team === 1 && p.attrs.pos === 'MF' && Math.abs(p.slot.y) < 0.35)!;
-    playmaker.attrs = { ...playmaker.attrs, pass: 90, tackle: 54, shoot: 58 };
+    playmaker.attrs = { ...playmaker.attrs, position: 'AM', pass: 90, tackle: 54, shoot: 58 };
+    // a wing-back always overlaps; a getting-forward full-back does too, a reserved one sits
+    const wingBack = sim.state.players.find((p) => p.team === 1 && p.attrs.pos === 'DF' && Math.abs(p.slot.y) > 0.55)!;
+    wingBack.attrs = { ...wingBack.attrs, position: 'WB' };
 
     expect(role(fullBack)).toBe('overlapFullBack');
+    expect(role(wingBack)).toBe('overlapFullBack');
     expect(role(centreBack)).toBe('coverCentreBack');
     expect(role(holder)).toBe('holdingMidfielder');
     expect(role(playmaker)).toBe('playmaker');
+  });
+
+  it('penalises a player fielded out of his natural position (skills, not pace)', () => {
+    const sim = new MatchSim(makeCfg());
+    const S = sim as unknown as {
+      effectiveAttr: (p: SimPlayer, k: string) => number;
+      positionFamiliarity: (p: SimPlayer) => number;
+      famCache: Map<number, unknown>;
+    };
+    const slots = FORMATIONS['4-4-2'];
+    const cbSlot = slots[2]; // a central defensive slot -> CB role
+    const p = sim.state.players.find((x) => x.team === 0 && !x.isGK)!;
+    p.attrs = { ...p.attrs, position: 'ST', tackle: 60, pace: 88 };
+    // in his own (striker) slot: no penalty
+    p.slot = { x: slots[9].x, y: slots[9].y }; S.famCache.clear();
+    expect(S.positionFamiliarity(p)).toBe(1);
+    expect(S.effectiveAttr(p, 'tackle')).toBeCloseTo(60, 0);
+    // a striker dropped to centre-back: skills slashed, raw pace untouched
+    p.slot = { x: cbSlot.x, y: cbSlot.y }; S.famCache.clear();
+    expect(S.positionFamiliarity(p)).toBeLessThan(0.7);
+    expect(S.effectiveAttr(p, 'tackle')).toBeLessThan(45);
+    expect(S.effectiveAttr(p, 'pace')).toBeCloseTo(88, 0);
+    // a natural interchange (winger as wide forward / vice-versa) is NOT penalised
+    const w = sim.state.players.find((x) => x.team === 1 && !x.isGK)!;
+    w.attrs = { ...w.attrs, position: 'WF' };
+    w.slot = { x: slots[5].x, y: slots[5].y }; S.famCache.clear(); // a wide-mid (W) slot
+    expect(S.positionFamiliarity(w)).toBe(1);
   });
 
   it('uses roles to create different attacking support movements', () => {
@@ -2278,9 +2501,9 @@ describe('match sim', () => {
     sim.state.ball.ownerIdx = owner.idx;
     sim.state.ball.pos = { ...owner.pos };
     const holder = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'MF' && Math.abs(p.slot.y) < 0.35 && p !== owner)!;
-    holder.attrs = { ...holder.attrs, tackle: 90, pass: 58, shoot: 42 };
+    holder.attrs = { ...holder.attrs, position: 'DM', tackle: 90, pass: 58, shoot: 42 };
     const fullBack = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'DF' && Math.abs(p.slot.y) > 0.55)!;
-    fullBack.attrs = { ...fullBack.attrs, pace: 90, pass: 82, tackle: 55 };
+    fullBack.attrs = { ...fullBack.attrs, position: 'FB', pace: 90, pass: 82, tackle: 55 };
 
     const supportTarget = (p: SimPlayer) => (
       (sim as unknown as { supportTarget: (player: SimPlayer, owner: SimPlayer) => { x: number; y: number } }).supportTarget(p, owner)
@@ -2338,15 +2561,15 @@ describe('match sim', () => {
       }).playerDecisionProfile(p)
     );
     const playmaker = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'MF' && Math.abs(p.slot.y) < 0.35)!;
-    playmaker.attrs = { ...playmaker.attrs, pass: 92, tackle: 50, shoot: 54 };
+    playmaker.attrs = { ...playmaker.attrs, position: 'AM', pass: 92, tackle: 50, shoot: 54 };
     const wideForward = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'FW')!;
     wideForward.slot = { ...wideForward.slot, y: 0.75 };
-    wideForward.attrs = { ...wideForward.attrs, pace: 88, pass: 76, shoot: 66 };
+    wideForward.attrs = { ...wideForward.attrs, position: 'WF', pace: 88, pass: 76, shoot: 66 };
     const poacher = sim.state.players.find((p) => p.team === 1 && p.attrs.pos === 'FW')!;
     poacher.slot = { ...poacher.slot, y: 0.05 };
-    poacher.attrs = { ...poacher.attrs, shoot: 93, pace: 67, pass: 48 };
+    poacher.attrs = { ...poacher.attrs, position: 'ST', shoot: 93, pace: 67, pass: 48 };
     const holder = sim.state.players.find((p) => p.team === 1 && p.attrs.pos === 'MF' && Math.abs(p.slot.y) < 0.35)!;
-    holder.attrs = { ...holder.attrs, tackle: 90, pass: 58, shoot: 40 };
+    holder.attrs = { ...holder.attrs, position: 'DM', tackle: 90, pass: 58, shoot: 40 };
 
     expect(profile(playmaker).passUrgency).toBeGreaterThan(profile(playmaker).carryBias);
     expect(profile(wideForward).wideCarry).toBeGreaterThan(0.75);
@@ -2375,7 +2598,7 @@ describe('match sim', () => {
     sim.state.phase = 'play';
     const poacher = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'FW')!;
     poacher.slot = { ...poacher.slot, y: 0.04 };
-    poacher.attrs = { ...poacher.attrs, shoot: 94, pass: 42, pace: 68 };
+    poacher.attrs = { ...poacher.attrs, position: 'ST', shoot: 94, pass: 42, pace: 68 };
     poacher.pos = { x: HALF_LEN - 25, y: 4 };
     poacher.vel = { x: 0, y: 0 };
     poacher.kickCooldown = 0;
@@ -2403,7 +2626,7 @@ describe('match sim', () => {
     sim.state.ball.ownerIdx = carrier.idx;
     sim.state.ball.pos = { ...carrier.pos };
     const holder = sim.state.players.find((p) => p.team === 1 && p.attrs.pos === 'MF' && Math.abs(p.slot.y) < 0.35)!;
-    holder.attrs = { ...holder.attrs, tackle: 92, pass: 58, shoot: 42 };
+    holder.attrs = { ...holder.attrs, position: 'DM', tackle: 92, pass: 58, shoot: 42 };
     holder.pos = { x: 22, y: 1 };
     const wideDefaultTarget = { x: carrier.pos.x + 3, y: carrier.pos.y - 2 };
 
@@ -2501,8 +2724,12 @@ describe('match sim', () => {
     }
     const wideOwner = wideSim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'MF')!;
     const pairOwner = pairSim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'MF')!;
-    const winger = wideSim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'FW' && Math.abs(p.slot.y) > 0.5)!;
-    const frontPair = pairSim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'FW')!;
+    // widest 4-3-3 forward vs the most CENTRAL 4-4-2 striker (the "front pair" sit
+    // centrally; the 4-4-2 also has a wide-ish forward slot we must not pick here)
+    const winger = wideSim.state.players.filter((p) => p.team === 0 && p.attrs.pos === 'FW')
+      .sort((a, b) => Math.abs(b.slot.y) - Math.abs(a.slot.y))[0];
+    const frontPair = pairSim.state.players.filter((p) => p.team === 0 && p.attrs.pos === 'FW')
+      .sort((a, b) => Math.abs(a.slot.y) - Math.abs(b.slot.y))[0];
 
     const wideTarget = (wideSim as unknown as { supportTarget: (p: SimPlayer, owner: SimPlayer) => { x: number; y: number } })
       .supportTarget(winger, wideOwner);
@@ -2698,6 +2925,8 @@ describe('match sim', () => {
     sim.state.phase = 'play';
     const owner = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'FW')!;
     const lateMid = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'MF' && Math.abs(p.slot.y) < 0.25)!;
+    // an attacking mid makes the late box run; a holding DM correctly stays back
+    lateMid.attrs = { ...lateMid.attrs, position: 'AM' };
     owner.pos = { x: HALF_LEN - 8, y: 10 };
     lateMid.pos = { x: HALF_LEN - 25, y: 0 };
     sim.state.ball.ownerIdx = owner.idx;
@@ -3964,29 +4193,36 @@ describe('match sim', () => {
       sim.state.ball.pos = { ...attacker.pos };
       sim.state.ball.z = 0;
 
+      const ballBefore = { ...sim.state.ball.pos };
       (sim as unknown as { goalkeeperLogic: () => void }).goalkeeperLogic();
-
-      return {
-        ownerIdx: sim.state.ball.ownerIdx,
-        gkIdx: gk.idx,
-        held: sim.state.ball.held,
-        lastTouchTeam: sim.state.ball.lastTouchTeam,
-        anim: gk.anim,
-        save: sim.events.some((e) => e.type === 'save'),
-      };
+      const committed = gk.anim === 'smother';
+      const save = sim.events.some((e) => e.type === 'save');
+      // the smother must NOT teleport the ball onto the keeper on the commit tick — it
+      // rolls/travels to him instead (the bug was the ball jumping to him before he arrived)
+      const jumpOnCommit = Math.hypot(
+        sim.state.ball.pos.x - ballBefore.x,
+        sim.state.ball.pos.y - ballBefore.y,
+      );
+      // let the lunge play out: a committed keeper sprawls in and gathers the ball
+      let gathered = sim.state.ball.ownerIdx === gk.idx;
+      for (let i = 0; i < Math.round(0.9 / DT) && !gathered; i++) {
+        sim.step([{ ...NULL_INPUT }, { ...NULL_INPUT }]);
+        if (sim.state.ball.ownerIdx === gk.idx) gathered = true;
+      }
+      return { committed, save, gathered, jumpOnCommit, lastTouchTeam: sim.state.ball.lastTouchTeam };
     };
 
     const weak = run(35);
     const strong = run(92);
 
-    expect(weak.ownerIdx).not.toBe(-1);
-    // the strong keeper commits to the smother and now GATHERS the ball (collapses on it)
-    // rather than shovelling it loose, so it ends up held by him, not squirting away
-    expect(strong.ownerIdx).toBe(strong.gkIdx);
-    expect(strong.held).toBe(true);
-    expect(strong.lastTouchTeam).toBe(1);
-    expect(strong.anim).toBe('smother');
+    // the weak keeper doesn't commit to the feet-first smother from this range
+    expect(weak.committed).toBe(false);
+    // the strong keeper commits, registers the save, and gathers the ball as he sprawls
+    // in — WITHOUT the ball teleporting to him (it travels to him first)
+    expect(strong.committed).toBe(true);
     expect(strong.save).toBe(true);
+    expect(strong.jumpOnCommit).toBeLessThan(0.6);
+    expect(strong.gathered).toBe(true);
   });
 
   it('holds routine saves far more reliably for a better keeper (rare spills for the elite)', () => {
@@ -4894,5 +5130,104 @@ describe('penalty scoring', () => {
     }
     // keeper guesses a corner: a healthy majority should go in
     expect(scored).toBeGreaterThanOrEqual(4);
+  });
+});
+
+describe('injuries', () => {
+  it('a knock applies a temporary skill dip but the player stays on', () => {
+    const sim = new MatchSim(makeCfg());
+    const p = sim.state.players.find((pl) => pl.team === 0 && !pl.isGK)!;
+    const h = sim as unknown as { applyInjury(pl: SimPlayer, tier: string): void; effectiveAttr(pl: SimPlayer, k: string): number };
+    const beforePass = h.effectiveAttr(p, 'pass');
+    const beforePace = h.effectiveAttr(p, 'pace');
+    h.applyInjury(p, 'knock');
+    expect(p.injuredOff).toBeFalsy();                          // plays on
+    expect(h.effectiveAttr(p, 'pass')).toBeLessThan(beforePass); // non-pace skill dips
+    expect(h.effectiveAttr(p, 'pace')).toBe(beforePace);        // pace truly unaffected
+  });
+
+  it('a forced-off injury marks the player off and records a layoff', () => {
+    const sim = new MatchSim(makeCfg());
+    const p = sim.state.players.find((pl) => pl.team === 0 && !pl.isGK)!;
+    (sim as unknown as { applyInjury(pl: SimPlayer, tier: string): void }).applyInjury(p, 'forcedOff');
+    expect(p.injuredOff).toBe(true);
+    expect(sim.state.injuries.some((i) => i.team === 0 && i.name === p.attrs.name && i.matchesOut === 1)).toBe(true);
+  });
+
+  it('an injured outfielder is auto-replaced by the AI at a break when a bench player exists', () => {
+    const sim = new MatchSim(makeCfg()); // both teams AI
+    const p = sim.state.players.find((pl) => pl.team === 0 && !pl.isGK)!;
+    const offSquadIdx = p.squadIdx;
+    sim.state.phase = 'freeKick'; // a break phase
+    (sim as unknown as { applyInjury(pl: SimPlayer, t: string): void; resolveInjuredOff(): void }).applyInjury(p, 'forcedOff');
+    (sim as unknown as { resolveInjuredOff(): void }).resolveInjuredOff();
+    // the injured squad index is gone from the pitch, a fresh player took the slot
+    expect(sim.state.players.some((pl) => pl.team === 0 && pl.squadIdx === offSquadIdx)).toBe(false);
+    expect(sim.state.subbedOff[0]).toContain(offSquadIdx);
+  });
+
+  it('with subs spent, an injured player leaves and the team is a man down', () => {
+    const sim = new MatchSim(makeCfg());
+    sim.state.substitutionsUsed = [sim.maxSubstitutions(), sim.maxSubstitutions()];
+    const p = sim.state.players.find((pl) => pl.team === 0 && !pl.isGK)!;
+    sim.state.phase = 'freeKick';
+    (sim as unknown as { applyInjury(pl: SimPlayer, t: string): void; resolveInjuredOff(): void }).applyInjury(p, 'forcedOff');
+    (sim as unknown as { resolveInjuredOff(): void }).resolveInjuredOff();
+    expect(p.sentOff).toBe(true); // off the pitch, man down
+    expect(sim.state.players.filter((pl) => pl.team === 0 && pl.sentOff).length).toBe(1);
+  });
+
+  it('an injured keeper with no GK sub is replaced in goal by an outfielder', () => {
+    const sim = new MatchSim(makeCfg());
+    sim.state.substitutionsUsed = [sim.maxSubstitutions(), sim.maxSubstitutions()]; // no subs → no bench GK usable
+    const gk = sim.state.players.find((pl) => pl.team === 0 && pl.isGK)!;
+    sim.state.phase = 'freeKick';
+    (sim as unknown as { applyInjury(pl: SimPlayer, t: string): void; resolveInjuredOff(): void }).applyInjury(gk, 'forcedOff');
+    (sim as unknown as { resolveInjuredOff(): void }).resolveInjuredOff();
+    expect(gk.sentOff).toBe(true);
+    const keepers = sim.state.players.filter((pl) => pl.team === 0 && pl.isGK && !pl.sentOff);
+    expect(keepers.length).toBe(1);            // exactly one (makeshift) keeper now
+    expect(keepers[0].squadIdx).not.toBe(gk.squadIdx); // a different (outfield) player
+    expect(sim.state.players.filter((pl) => pl.team === 0 && pl.isGK).length).toBe(1); // no two-keeper bug
+  });
+
+  it('an injury man-down arms the backs-to-the-wall survival clock', () => {
+    const sim = new MatchSim(makeCfg());
+    sim.state.substitutionsUsed = [sim.maxSubstitutions(), sim.maxSubstitutions()];
+    sim.state.phase = 'freeKick';
+    sim.state.half = 2; sim.state.clock = 6; // ~50'
+    const p = sim.state.players.find((pl) => pl.team === 0 && !pl.isGK)!;
+    (sim as unknown as { applyInjury(pl: SimPlayer, t: string): void; resolveInjuredOff(): void }).applyInjury(p, 'forcedOff');
+    (sim as unknown as { resolveInjuredOff(): void }).resolveInjuredOff();
+    expect((sim as unknown as { redCardMinute: [number, number] }).redCardMinute[0]).toBeGreaterThanOrEqual(0);
+  });
+
+  it('a tired player late in the game can pick up a non-contact injury (rng-forced)', () => {
+    const sim = new MatchSim(makeCfg());
+    sim.state.phase = 'play';
+    sim.state.half = 2;
+    sim.state.clock = 50; // ~80'
+    const p = sim.state.players.find((pl) => pl.team === 0 && !pl.isGK)!;
+    p.stamina = 0.2; // exhausted
+    // force the rng so the non-contact roll fires a forcedOff
+    (sim as unknown as { rng: { next(): number } }).rng.next = () => 0; // chance roll passes, tier→knock... see note
+    (sim as unknown as { checkNonContactInjuries(): void }).checkNonContactInjuries();
+    expect((p.knockTimer ?? 0) > 0 || p.injuredOff).toBeTruthy();
+  });
+
+  it('a non-contact forced-off injury stops play so a sub is legal', () => {
+    const sim = new MatchSim(makeCfg());
+    sim.state.phase = 'play';
+    sim.state.half = 2;
+    sim.state.clock = 50; // ~83'
+    const p = sim.state.players.find((pl) => pl.team === 0 && !pl.isGK)!;
+    for (const pl of sim.state.players) if (pl !== p) pl.stamina = 1; // only p is eligible
+    p.stamina = 0.2;
+    // rng sequence: chance roll passes (0 < 0.0015), tier roll → forcedOff (0.8 ∈ [0.70,0.94))
+    const vals = [0, 0.8]; let i = 0;
+    (sim as unknown as { rng: { next(): number } }).rng.next = () => (i < vals.length ? vals[i++] : 0.5);
+    (sim as unknown as { checkNonContactInjuries(): void }).checkNonContactInjuries();
+    expect(p.injuredOff).toBe(true);
+    expect(sim.state.phase).not.toBe('play'); // play was stopped (a break) so a sub is legal
   });
 });

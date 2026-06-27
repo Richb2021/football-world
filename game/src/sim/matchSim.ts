@@ -5,11 +5,16 @@ import {
   PLAYER_RADIUS, TOUCH_COOLDOWN,
   PENALTY_BOX_DEPTH, PENALTY_BOX_HALF_WIDTH,
 } from './constants';
-import { FORMATIONS, autoLineup, normalizeTactics } from './formations';
+import { FORMATIONS, autoLineup, normalizeTactics, slotRole, positionFit } from './formations';
+import {
+  MATCH_MOMENTUM_MIN, MATCH_MOMENTUM_MAX, MATCH_MOMENTUM_ATTR_SCALE, BURST_WINDOW_MIN,
+  clampMomentum, underdogFactor, eventMomentumDelta, substitutionMomentumLoss, type MomentumEventCtx,
+} from './momentum';
+import { rollInjury, injuryMatchesOut, INJURY_KNOCK_DIP, INJURY_KNOCK_SECONDS, type InjuryTier } from './injury';
 import { isBreakPhase } from './phase';
 import { Rng } from './rng';
 import type {
-  FormationId, MatchConfig, MatchState, PadInput, PenaltyState, SimBall, SimEvent, SimPhase, SimPlayer, TeamTactics, Vec2,
+  FormationId, MatchConfig, MatchState, PadInput, PenaltyState, PlayerPosition, SimBall, SimEvent, SimPhase, SimPlayer, TeamTactics, Vec2,
 } from './types';
 import { NULL_INPUT } from './types';
 
@@ -177,9 +182,7 @@ const DIFFICULTY = [
 const len = (x: number, y: number) => Math.hypot(x, y);
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 const dist = (a: Vec2, b: Vec2) => Math.hypot(a.x - b.x, a.y - b.y);
-const MATCH_MOMENTUM_MIN = -12;
-const MATCH_MOMENTUM_MAX = 12;
-const MATCH_MOMENTUM_ATTR_SCALE = 0.2;
+
 /** how much better-placed an auto-switch candidate must be before control hands
  * over — stops the controlled player flickering during quick passing moves */
 const SWITCH_BIAS = 1.6;
@@ -274,6 +277,24 @@ export class MatchSim {
    * them). When it's high and a decision finally goes their way, the crowd lets
    * out a wave of ironic, sarcastic applause. Reset once they get one. */
   private teamGrievance: [number, number] = [0, 0];
+  /** per-team decaying "chance pressure" — drives the dominate-without-scoring frustration */
+  private momentumPressure: [number, number] = [0, 0];
+  /** a genuine one-on-one shot is in flight (latched at strike) and the team that struck it,
+   * consumed once when the shot resolves to a non-goal (save/post/nearMiss/out). */
+  private liveShotBigChance = false;
+  private liveShotTeam: 0 | 1 | -1 = -1;
+  /** match-minute of each team's most recent goal, for the two-quick-goals burst */
+  private lastGoalMinute: [number, number] = [-99, -99];
+  /** set in scoreGoal just before the goal event is emitted; read by momentumCtx */
+  private pendingBurstGoal = false;
+  /** match-minute of each team's most recent own red card (−1 = none); and how many
+   * 10-minute "held firm" survival rewards have been paid since. */
+  private redCardMinute: [number, number] = [-1, -1];
+  private redCardRewardBlock: [number, number] = [0, 0];
+  /** last match-minute the per-minute momentum context ran (so it fires once a minute) */
+  private lastMomentumMinute = 0;
+  /** last match-minute the non-contact injury check ran (monotonic gate like lastMomentumMinute) */
+  private lastInjuryMinute = 0;
   /** off-ball runs in progress: playerIdx -> run target and expiry tick */
   private forwardRuns = new Map<number, { until: number; target: Vec2 }>();
   /** sticky marking assignments so defenders track a runner instead of flickering */
@@ -413,6 +434,7 @@ export class MatchSim {
       penaltyAim: 0,
       excitement: 0.3,
       momentum: initialMomentum,
+      injuries: [],
       winner: -1,
     };
     this.placeForKickoff(0);
@@ -470,34 +492,187 @@ export class MatchSim {
   }
 
   private momentumAttributeDelta(team: 0 | 1): number {
-    return clamp(this.state.momentum?.[team] ?? 0, MATCH_MOMENTUM_MIN, MATCH_MOMENTUM_MAX) * MATCH_MOMENTUM_ATTR_SCALE;
+    return clampMomentum(this.state.momentum?.[team] ?? 0) * MATCH_MOMENTUM_ATTR_SCALE;
   }
 
   private effectiveAttr(p: SimPlayer, key: 'pace' | 'pass' | 'shoot' | 'tackle' | 'keeping'): number {
-    return clamp(p.attrs[key] + this.momentumAttributeDelta(p.team), 1, 100);
+    // a player fielded out of his natural position executes his SKILLS worse — passing,
+    // finishing, tackling, keeping — but his raw PACE is unaffected (a striker is still
+    // quick at the back). In his own role the factor is exactly 1, so a normal lineup is
+    // untouched; it only bites when you deliberately sub a man into the wrong slot.
+    const knock = key !== 'pace' && p.knockTimer && p.knockTimer > 0 ? INJURY_KNOCK_DIP : 1;
+    const fam = key === 'pace' ? 1 : this.positionFamiliarity(p);
+    return clamp(p.attrs[key] * fam * knock + this.momentumAttributeDelta(p.team), 1, 100);
   }
 
-  private shiftMomentum(team: 0 | 1, delta: number, opponentDrag = 0.52): void {
+  private famCache = new Map<number, { key: string; fam: number }>();
+
+  /** How well a player's natural position suits the SLOT he is in: 1.0 in his own role,
+   * down to ~0.6 when played somewhere alien (a striker at centre-back). Drives the
+   * out-of-position skill penalty above. Cached until his slot/formation changes. */
+  private positionFamiliarity(p: SimPlayer): number {
+    const natural = p.attrs.position;
+    if (!natural || p.isGK) return 1;
+    const formation = this.cfg.teams[p.team].lineup.formation;
+    const cacheKey = `${formation}:${p.slot.x},${p.slot.y}`;
+    const cached = this.famCache.get(p.idx);
+    if (cached && cached.key === cacheKey) return cached.fam;
+    const role = this.slotRoleOf(p, formation);
+    // a NATURAL interchange (full-back↔wing-back, winger↔wide-forward, central↔holding
+    // mid — high positionFit) is treated as in-role, so ordinary lineups are untouched.
+    // Only a genuine positional shift bites: a centre-back at full-back ~0.89, and a
+    // truly alien slot (a striker at centre-back, fit ~0) bottoms out at ~0.62.
+    const fit = positionFit(natural, role);
+    const fam = natural === role || fit >= 70
+      ? 1
+      : clamp(0.62 + 0.38 * (fit / 70), 0.62, 1);
+    this.famCache.set(p.idx, { key: cacheKey, fam });
+    return fam;
+  }
+
+  /** The specific tactical role of the slot a player currently occupies (his home slot
+   * is always one of the formation's slots, so match it back by position). */
+  private slotRoleOf(p: SimPlayer, formation: FormationId): PlayerPosition {
+    const slots = FORMATIONS[formation];
+    let bestIdx = 0;
+    let bestD = Infinity;
+    for (let i = 0; i < slots.length; i++) {
+      const d = (slots[i].x - p.slot.x) ** 2 + (slots[i].y - p.slot.y) ** 2;
+      if (d < bestD) { bestD = d; bestIdx = i; }
+    }
+    return slotRole(formation, bestIdx);
+  }
+
+  private applyMomentum(team: 0 | 1, swing: { self: number; opp: number }): void {
     const opp = (1 - team) as 0 | 1;
-    this.state.momentum[team] = clamp(this.state.momentum[team] + delta, MATCH_MOMENTUM_MIN, MATCH_MOMENTUM_MAX);
-    this.state.momentum[opp] = clamp(this.state.momentum[opp] - delta * opponentDrag, MATCH_MOMENTUM_MIN, MATCH_MOMENTUM_MAX);
+    this.state.momentum[team] = clampMomentum(this.state.momentum[team] + swing.self);
+    this.state.momentum[opp] = clampMomentum(this.state.momentum[opp] + swing.opp);
+  }
+
+  /** Apply a rolled injury to a player: a knock dips his skills briefly (plays on); a
+   * forced-off/serious takes him out of the game and records the career layoff. */
+  private applyInjury(p: SimPlayer, tier: InjuryTier): void {
+    if (tier === 'none' || p.injuredOff || p.sentOff) return;
+    if (tier === 'knock') {
+      p.knockTimer = Math.max(p.knockTimer ?? 0, INJURY_KNOCK_SECONDS);
+      return;
+    }
+    p.injuredOff = true;
+    const matchesOut = injuryMatchesOut(tier, () => this.rng.next());
+    this.state.injuries.push({ team: p.team, name: p.attrs.name, matchesOut });
+    this.emit({ type: 'injury', team: p.team, player: p.idx });
   }
 
   private applyEventMomentum(e: SimEvent): void {
-    if (e.team === undefined) return;
-    if (e.type === 'goal') {
-      const team = e.team;
-      const opp = (1 - team) as 0 | 1;
-      const againstRun = this.state.momentum[team] < this.state.momentum[opp] - 1.5 ? 1.4 : 0;
-      const scorePressure = this.state.score[team] <= this.state.score[opp] ? 0.35 : 0;
-      this.shiftMomentum(team, 3.9 + againstRun + scorePressure, 0.68);
-    } else if (e.type === 'shot' || e.type === 'header') {
-      this.shiftMomentum(e.team, 0.24 + (e.power ?? 0) * 0.16, 0.18);
-    } else if (e.type === 'save') {
-      this.shiftMomentum(e.team, 0.62, 0.22);
-    } else if (e.type === 'tackle') {
-      this.shiftMomentum(e.team, e.danger ? 0.68 : 0.16, e.danger ? 0.24 : 0.1);
+    // A spurned genuine one-on-one (latched at strike) resolving to a non-goal swings
+    // momentum to the defenders — explicit and immediate, on top of the slow pressure drip.
+    if ((e.type === 'save' || e.type === 'post' || e.type === 'nearMiss' || e.type === 'out')
+        && this.liveShotBigChance && this.liveShotTeam >= 0) {
+      this.applyMomentum(this.liveShotTeam as 0 | 1, { self: -2.0, opp: 1.5 });
+      this.liveShotBigChance = false;
+      this.liveShotTeam = -1;
     }
+    // 'post' carries no team; credit the last touch (the team that hit the woodwork).
+    if (e.type === 'post') {
+      const attacker = this.state.ball.lastTouchTeam;
+      if (attacker === 0 || attacker === 1) {
+        this.momentumPressure[attacker] += 1.0;
+        this.applyMomentum(attacker, eventMomentumDelta('post', this.momentumCtx(attacker)));
+      }
+      return;
+    }
+    if (e.team === undefined) return;
+    const team = e.team;
+    const opp = (1 - team) as 0 | 1;
+    // chance-pressure bookkeeping (drives frustration in updateMomentumContext).
+    // NB a 'save' event's team is the DEFENDING side, so the chance belongs to opp.
+    if (e.type === 'shot' || e.type === 'header') this.momentumPressure[team] += 0.6;
+    else if (e.type === 'save') this.momentumPressure[opp] += 1.0;
+    else if (e.type === 'goal') this.momentumPressure[team] = 0; // scorer is relieved
+    if (e.type === 'redCard') {
+      this.redCardMinute[team] = this.matchMinute();   // start/reset the survival clock
+      this.redCardRewardBlock[team] = 0;
+    } else if (e.type === 'goal' && this.redCardMinute[opp] >= 0) {
+      // a man-down team that concedes restarts its survival clock
+      this.redCardMinute[opp] = this.matchMinute();
+      this.redCardRewardBlock[opp] = 0;
+    }
+    const ctx = this.momentumCtx(team);
+    ctx.power = e.power ?? 0;
+    ctx.danger = !!e.danger;
+    this.applyMomentum(team, eventMomentumDelta(e.type, ctx));
+  }
+
+  /** Per-tick momentum context: decay toward neutral, plus the per-minute contextual
+   * triggers. Cheap; the per-minute work is gated so it runs once each match-minute. */
+  private updateMomentumContext(): void {
+    const st = this.state;
+    if (st.phase !== 'play') return;
+    const minute = this.matchMinute();
+    if (minute <= this.lastMomentumMinute) return;
+    this.lastMomentumMinute = minute;
+    for (const t of [0, 1] as const) {
+      // decay toward 0 — half-life ≈ 5 match-minutes (0.87^5 ≈ 0.50)
+      st.momentum[t] = clampMomentum(st.momentum[t] * 0.87);
+      // pressure relaxes too
+      this.momentumPressure[t] *= 0.78;
+      const opp = (1 - t) as 0 | 1;
+      const u = underdogFactor(this.cfg.teams[t].data.strength, this.cfg.teams[opp].data.strength);
+      // a clear underdog that is not losing gains belief the longer it holds — bigger gap
+      // and later in the game drip faster. Decay bounds the steady-state (~+1.5..2).
+      if (u >= 0.3 && st.score[t] >= st.score[opp]) {
+        st.momentum[t] = clampMomentum(st.momentum[t] + 0.12 * u * (1 + minute / 90));
+      }
+      // dominating but not scoring: high un-converted chance-pressure while level-or-behind
+      // bleeds belief from the dominant side and lifts the side weathering it.
+      if (this.momentumPressure[t] > 4 && st.score[t] <= st.score[opp]) {
+        const frustration = Math.min(0.5, (this.momentumPressure[t] - 4) * 0.1);
+        st.momentum[t] = clampMomentum(st.momentum[t] - frustration);
+        st.momentum[opp] = clampMomentum(st.momentum[opp] + frustration * 0.5);
+      }
+      // backs to the wall: still a man down and held firm for another 10 minutes
+      const menDown = st.players.filter((p) => p.team === t && p.sentOff).length;
+      if (menDown > 0 && this.redCardMinute[t] >= 0) {
+        const blocks = Math.floor((minute - this.redCardMinute[t]) / 10);
+        if (blocks > this.redCardRewardBlock[t]) {
+          this.redCardRewardBlock[t] = blocks;
+          st.momentum[t] = clampMomentum(st.momentum[t] + 3 * Math.pow(0.7, blocks - 1));
+        }
+      }
+    }
+  }
+
+  /** Once per match-minute: a tired outfielder late in the game can pull up with a
+   * non-contact injury. Very rare. A forced-off one stops play so a sub is legal. */
+  private checkNonContactInjuries(): void {
+    const st = this.state;
+    if (st.phase !== 'play') return;
+    const minute = this.matchMinute();
+    if (minute <= this.lastInjuryMinute || minute <= 60) return;
+    this.lastInjuryMinute = minute;
+    for (const p of st.players) {
+      if (p.isGK || p.sentOff || p.injuredOff || p.stamina >= 0.35) continue;
+      const tier = rollInjury({ contactSeverity: 0, fromBehind: false, nonContact: true, rng: () => this.rng.next() });
+      if (tier === 'none') continue;
+      if (tier === 'knock') { this.applyInjury(p, tier); continue; }
+      this.applyInjury(p, tier);                 // forcedOff/serious → stop play so a sub is legal
+      this.awardFreeKick(p.team, st.ball.pos, 'foul'); // drop-ball-style stoppage to the injured side
+      break;                                     // at most one per minute
+    }
+  }
+
+  /** Build the pure-function context for the event's team. */
+  private momentumCtx(team: 0 | 1): MomentumEventCtx {
+    const opp = (1 - team) as 0 | 1;
+    return {
+      minute: this.matchMinute(),
+      scoreDiffAfter: this.state.score[team] - this.state.score[opp],
+      momentumGap: this.state.momentum[team] - this.state.momentum[opp],
+      underdog: underdogFactor(this.cfg.teams[team].data.strength, this.cfg.teams[opp].data.strength),
+      power: 0,
+      danger: false,
+      burstGoal: this.pendingBurstGoal,
+    };
   }
 
   changeFormation(team: 0 | 1, formation: FormationId): boolean {
@@ -554,7 +729,7 @@ export class MatchSim {
   changeTactics(team: 0 | 1, tactics: TeamTactics): boolean {
     if (!this.cfg.teams[team]) return false;
     this.cfg.teams[team].lineup.tactics = normalizeTactics(tactics, this.cfg.teams[team].lineup.formation);
-    this.state.momentum[team] = clamp(this.state.momentum[team] * 0.55, MATCH_MOMENTUM_MIN, MATCH_MOMENTUM_MAX);
+    this.state.momentum[team] = clampMomentum(this.state.momentum[team] * 0.55);
     this.aiAim.clear();
     this.tacticalStateMemo[team] = null;
     return true;
@@ -741,23 +916,41 @@ export class MatchSim {
 
   private playerRole(p: SimPlayer): PlayerRole {
     if (p.isGK || p.attrs.pos === 'GK') return 'keeper';
-    const wideSlot = Math.abs(p.slot.y);
-    if (p.attrs.pos === 'DF') {
-      if (wideSlot > 0.52) {
-        return p.attrs.pace + p.attrs.pass > p.attrs.tackle + 70 ? 'overlapFullBack' : 'defensiveFullBack';
-      }
-      return p.attrs.pace >= Math.max(80, p.attrs.tackle + 12) ? 'coverCentreBack' : 'stopperCentreBack';
+    const a = p.attrs;
+    // the player's SPECIFIC position drives his playing role (so he acts like a
+    // wing-back / holding mid / inside-forward etc.). The two-flavour roles still
+    // split on attributes (a quick CB covers, a slow one stops; a getting-forward FB
+    // overlaps). Falls back to the legacy slot+attribute inference for any player
+    // without a position (older/custom squads).
+    switch (a.position) {
+      case 'GK': return 'keeper';
+      case 'CB': return a.pace >= Math.max(80, a.tackle + 12) ? 'coverCentreBack' : 'stopperCentreBack';
+      case 'FB': return a.pace + a.pass > a.tackle + 70 ? 'overlapFullBack' : 'defensiveFullBack';
+      case 'WB': return 'overlapFullBack';
+      case 'DM': return 'holdingMidfielder';
+      case 'CM': return 'boxToBoxMidfielder';
+      case 'AM': return 'playmaker';
+      case 'W': return 'wideMidfielder';
+      case 'WF': return 'wideForward';
+      case 'ST': return a.shoot >= a.pace + 6 ? 'poacher' : 'targetForward';
     }
-    if (p.attrs.pos === 'MF') {
+    const wideSlot = Math.abs(p.slot.y);
+    if (a.pos === 'DF') {
+      if (wideSlot > 0.52) {
+        return a.pace + a.pass > a.tackle + 70 ? 'overlapFullBack' : 'defensiveFullBack';
+      }
+      return a.pace >= Math.max(80, a.tackle + 12) ? 'coverCentreBack' : 'stopperCentreBack';
+    }
+    if (a.pos === 'MF') {
       if (wideSlot > 0.52) return 'wideMidfielder';
-      if (p.attrs.tackle >= p.attrs.pass + 12 || (p.slot.x < -0.28 && p.attrs.tackle >= p.attrs.shoot + 18)) {
+      if (a.tackle >= a.pass + 12 || (p.slot.x < -0.28 && a.tackle >= a.shoot + 18)) {
         return 'holdingMidfielder';
       }
-      if (p.attrs.pass >= Math.max(p.attrs.tackle, p.attrs.shoot) + 14) return 'playmaker';
+      if (a.pass >= Math.max(a.tackle, a.shoot) + 14) return 'playmaker';
       return 'boxToBoxMidfielder';
     }
     if (wideSlot > 0.48) return 'wideForward';
-    return p.attrs.shoot >= p.attrs.pace + 6 ? 'poacher' : 'targetForward';
+    return a.shoot >= a.pace + 6 ? 'poacher' : 'targetForward';
   }
 
   private playerDecisionProfile(p: SimPlayer): PlayerDecisionProfile {
@@ -977,7 +1170,7 @@ export class MatchSim {
   private owner(): SimPlayer | null {
     const o = this.state.ball.ownerIdx;
     const p = o >= 0 ? this.state.players[o] : null;
-    return p && !p.sentOff ? p : null;
+    return p && !p.sentOff && !p.injuredOff ? p : null;
   }
 
   // ------------------------------------------------------------------- setup
@@ -1126,6 +1319,7 @@ export class MatchSim {
         this.awaitingHalfEnd = false;
         st.attackDir = [st.attackDir[0] * -1, st.attackDir[1] * -1] as [number, number];
         this.halfTimeRecovery();
+        this.resolveInjuredOff();
         this.placeForKickoff(st.half === 2 ? 1 : st.half === 3 ? 0 : 1);
         this.emit({ type: 'whistle' });
       }
@@ -1177,6 +1371,7 @@ export class MatchSim {
     this.integratePlayers(inputs, false);
 
     if (isRestart) {
+      this.resolveInjuredOff();
       this.aiConsiderSubstitutions();
       this.applyRestartTakerPose();
       this.maybeTakeRestart(inputs);
@@ -1253,6 +1448,8 @@ export class MatchSim {
       }
     }
 
+    this.updateMomentumContext();
+    this.checkNonContactInjuries();
     this.decayExcitement();
     this.prevInputs = [{ ...inputs[0] }, { ...inputs[1] }];
   }
@@ -1385,7 +1582,7 @@ export class MatchSim {
           best = this.findTaker(t)?.idx ?? best;
         } else {
           const auto = this.autoControlCandidate(t);
-          const validCurrent = !!current && current.team === t && !current.isGK && !current.sentOff;
+          const validCurrent = !!current && current.team === t && !current.isGK && !current.sentOff && !current.injuredOff;
           if (switchEdge) {
             // manual switch: pick the next-best man, then BLIND the auto-switch
             // for a window so the engine can't immediately grab control back
@@ -1439,7 +1636,7 @@ export class MatchSim {
     let bestScore = Infinity;
     for (const p of this.state.players) {
       if (p.team !== team || p.isGK) continue;
-      if (p.sentOff) continue;
+      if (p.sentOff || p.injuredOff) continue;
       let score = this.controlScore(p, true);
       if (p.idx === this.state.controlledIdx[team]) score -= 1.2;
       if (this.humans[team].passTargetIdx === p.idx) score -= 3;
@@ -1451,7 +1648,7 @@ export class MatchSim {
   private manualSwitchCandidate(team: 0 | 1, currentIdx: number, autoIdx: number): SimPlayer | null {
     const ranked = this.state.players
       .filter((p) => p.team === team && !p.isGK)
-      .filter((p) => !p.sentOff)
+      .filter((p) => !p.sentOff && !p.injuredOff)
       .sort((a, b) => this.controlScore(a, false) - this.controlScore(b, false));
     if (!ranked.length) return null;
     if (ranked[0].idx === currentIdx || ranked[0].idx === autoIdx) return ranked[1] ?? ranked[0];
@@ -1482,8 +1679,16 @@ export class MatchSim {
         p.anim = 'idle';
         continue;
       }
+      if (p.injuredOff) {
+        // stays on the pitch (rendered as down) until the next break resolves him
+        p.control = false;
+        p.vel = { x: 0, y: 0 };
+        p.anim = 'fall';
+        continue;
+      }
       p.kickCooldown = Math.max(0, p.kickCooldown - DT);
       if (p.actionTimer && p.actionTimer > 0) p.actionTimer = Math.max(0, p.actionTimer - DT);
+      if (p.knockTimer && p.knockTimer > 0) p.knockTimer = Math.max(0, p.knockTimer - DT);
       if (p.downTimer && p.downTimer > 0) {
         // down after a foul or a hard tackle: he topples and lies on the turf, the
         // little momentum from the contact bleeding off, until he gets to his feet.
@@ -1964,7 +2169,7 @@ export class MatchSim {
     // (attack stats up front, defence stats at the back) read a loose ball
     // sooner and so claim the chase from slower-witted teammates
     const ranked = st.players
-      .filter((q) => q.team === p.team && !q.isGK && !q.sentOff)
+      .filter((q) => q.team === p.team && !q.isGK && !q.sentOff && !q.injuredOff)
       .map((q) => ({
         q,
         eta: dist(q.pos, ball.pos) / this.maxSpeed(q, true) - (this.anticipation(q) / 100) * 0.4,
@@ -3433,7 +3638,7 @@ export class MatchSim {
     let short: { aim: Vec2; targetIdx: number } | null = null;
     let bestScore = 2.4;
     for (const q of st.players) {
-      if (q.team !== owner.team || q === owner || q.isGK || q.sentOff) continue;
+      if (q.team !== owner.team || q === owner || q.isGK || q.sentOff || q.injuredOff) continue;
       if (q.attrs.pos !== 'DF' && q.attrs.pos !== 'MF') continue;
       const d = dist(owner.pos, q.pos);
       if (d < 6 || d > 26) continue;
@@ -3481,7 +3686,7 @@ export class MatchSim {
     let best: SimPlayer | null = null;
     let bestScore = -Infinity;
     for (const q of this.state.players) {
-      if (q.team !== owner.team || q === owner || q.isGK || q.sentOff) continue;
+      if (q.team !== owner.team || q === owner || q.isGK || q.sentOff || q.injuredOff) continue;
       const forward = (q.pos.x - owner.pos.x) * myDir;
       if (forward < minForward || forward > MAX_LONG_KICK_RANGE + 4) continue;
       const d = dist(owner.pos, q.pos);
@@ -3627,7 +3832,7 @@ export class MatchSim {
     let best: SimPlayer | null = null;
     let bestScore = -Infinity;
     for (const q of this.state.players) {
-      if (q.team !== owner.team || q === owner || q.isGK || q.sentOff) continue;
+      if (q.team !== owner.team || q === owner || q.isGK || q.sentOff || q.injuredOff) continue;
       const qProgress = q.pos.x * dir;
       const cutbackDepth = ownerProgress - qProgress;
       if (cutbackDepth < 2 || cutbackDepth > 20) continue;
@@ -3664,7 +3869,7 @@ export class MatchSim {
     const skill = clamp(owner.attrs.pass / 100, 0, 1);
     let best: { target: SimPlayer; aim: Vec2; score: number } | null = null;
     for (const q of this.state.players) {
-      if (q.team !== owner.team || q === owner || q.isGK || q.sentOff) continue;
+      if (q.team !== owner.team || q === owner || q.isGK || q.sentOff || q.injuredOff) continue;
       if (this.isOffsideTarget(owner, q)) continue;
       if (q.attrs.pos !== 'FW' && q.attrs.pos !== 'MF') continue;
       if (q.attrs.pace < 58) continue;
@@ -3791,7 +3996,7 @@ export class MatchSim {
     let best: { aim: Vec2; score: number; targetIdx: number; through?: boolean } | null = null;
 
     for (const q of st.players) {
-      if (q.team !== owner.team || q === owner || q.isGK || q.sentOff) continue;
+      if (q.team !== owner.team || q === owner || q.isGK || q.sentOff || q.injuredOff) continue;
       const d = dist(owner.pos, q.pos);
       if (this.isOffsideTarget(owner, q)) continue;
       const forward = (q.pos.x - owner.pos.x) * myDir;
@@ -3939,7 +4144,7 @@ export class MatchSim {
     const faceY = Math.sin(owner.facing);
     let best: { aim: Vec2; score: number; targetIdx: number } | null = null;
     for (const q of this.state.players) {
-      if (q.team !== owner.team || q === owner || q.isGK || q.sentOff) continue;
+      if (q.team !== owner.team || q === owner || q.isGK || q.sentOff || q.injuredOff) continue;
       if (this.isOffsideTarget(owner, q)) continue;
       const d = dist(owner.pos, q.pos);
       if (d < 3.2 || d > 23) continue;
@@ -3972,7 +4177,7 @@ export class MatchSim {
     let best: { aim: Vec2; score: number; targetIdx: number; through?: boolean } | null = null;
 
     for (const q of st.players) {
-      if (q.team !== owner.team || q === owner || q.isGK || q.sentOff) continue;
+      if (q.team !== owner.team || q === owner || q.isGK || q.sentOff || q.injuredOff) continue;
       if (this.isOffsideTarget(owner, q)) continue;
       const d = dist(owner.pos, q.pos);
       if (d < 4 || d > 38) continue;
@@ -4246,7 +4451,7 @@ export class MatchSim {
       const settleTicks = Math.round(0.22 / DT);
       const justSettled = st.tick - this.lastTurnover.tick < settleTicks;
       for (const p of st.players) {
-        if (p.sentOff) continue;
+        if (p.sentOff || p.injuredOff) continue;
         if (livePenalty && !p.isGK) continue;
         if (p.kickCooldown > 0.2 && p.idx === ball.lastKicker) continue;
         // the just-dispossessed side can't immediately re-collect the loose ball
@@ -4641,7 +4846,7 @@ export class MatchSim {
     let hitD = Infinity;
     const contactRadius = PLAYER_RADIUS + BALL_RADIUS + 0.18;
     for (const p of st.players) {
-      if (p.sentOff) continue;
+      if (p.sentOff || p.injuredOff) continue;
       // a keeper beaten on his dive doesn't touch the ball — it flies past him
       if (p.isGK && p.diveBeaten) continue;
       if (livePenalty && !p.isGK) continue;
@@ -4960,7 +5165,12 @@ export class MatchSim {
     const goalSide = this.attackSign(team);
     const ballSpeed = len(st.ball.vel.x, st.ball.vel.y);
     st.score[team]++;
+    this.pendingBurstGoal = this.lastGoalMinute[team] >= 0
+      && (this.matchMinute() - this.lastGoalMinute[team]) <= BURST_WINDOW_MIN;
+    this.lastGoalMinute[team] = this.matchMinute();
     this.shotLive = false;
+    this.liveShotBigChance = false;
+    this.liveShotTeam = -1;
     this.penaltyDiveGuess = null;
     const scorer = st.players[st.ball.lastKicker];
     const ownGoal = !!scorer && scorer.team !== team;
@@ -4987,6 +5197,7 @@ export class MatchSim {
     this.shotLive = false;
     st.excitement = 1;
     this.emit({ type: 'goal', team, player: scorer?.idx });
+    this.pendingBurstGoal = false;
   }
 
   private settleBallInGoalNet() {
@@ -5373,10 +5584,23 @@ export class MatchSim {
         // long-range efforts are kept out more often (but not impossible)
         const distPenalty = Math.max(0, this.shotStruckDist - 18) * 0.017;
         this.shotOpenness = clamp(0.22 + clamp(press / 5.5, 0, 1) * 0.45 + skill * 0.34 - distPenalty, 0.15, 1);
+        const goalCenter = { x: goalX, y: 0 };
+        const oppKeeper = st.players.find((p) => p.team !== shooter.team && p.isGK && !p.sentOff);
+        const keeperGap = oppKeeper ? Math.abs(oppKeeper.pos.x - goalCenter.x) : 99;
+        // genuine clean-through one-on-one — mirrors aiShoot's oneOnOne test
+        this.liveShotBigChance = this.isClearScoringChance(shooter, goalCenter)
+          && this.shotStruckDist < 22 && keeperGap > 1.5;
+        this.liveShotTeam = this.liveShotBigChance ? (shooter.team as 0 | 1) : -1;
       } else {
         this.shotOpenness = 0.7;
         this.shotStruckDist = 14;
+        this.liveShotBigChance = false;
+        this.liveShotTeam = -1;
       }
+    }
+    if (!this.shotLive && this.shotLivePrev && this.liveShotBigChance) {
+      this.liveShotBigChance = false;
+      this.liveShotTeam = -1;
     }
     this.shotLivePrev = this.shotLive;
     if (!this.shotLive && this.penaltyDiveGuess !== null) this.penaltyDiveGuess = null;
@@ -5779,38 +6003,57 @@ export class MatchSim {
     if (!keeperGoalSide || !keeperBallSide) return false;
 
     const upfield = dir;
-    const wide = Math.sign(owner.pos.y || gk.pos.y || this.rng.range(-1, 1) || 1);
-    const toOwnerX = owner.pos.x - gk.pos.x;
-    const toOwnerY = owner.pos.y - gk.pos.y;
-    const toOwnerD = len(toOwnerX, toOwnerY) || 1;
-    const smotherSpeed = 5.4 + keepingAttr * 0.042;
-    gk.slideTimer = Math.max(gk.slideTimer, 0.6);
+    // lunge at the BALL itself (not at the man) at a pace that actually covers the
+    // gap within the slide window — so he arrives ON it instead of the ball being
+    // teleported to him.
+    const toBallX = st.ball.pos.x - gk.pos.x;
+    const toBallY = st.ball.pos.y - gk.pos.y;
+    const toBallD = len(toBallX, toBallY) || 1;
+    const smotherSpeed = clamp(toBallD / 0.42, 5.4 + keepingAttr * 0.042, 12.5);
+    gk.slideTimer = Math.max(gk.slideTimer, 0.55);
     gk.diving = true;
     gk.diveSide = 0;
     gk.diveKind = 'smother';
     gk.anim = 'smother';
-    gk.facing = Math.atan2(owner.pos.y - gk.pos.y, owner.pos.x - gk.pos.x);
-    gk.vel.x = (toOwnerX / toOwnerD) * smotherSpeed;
-    gk.vel.y = (toOwnerY / toOwnerD) * smotherSpeed;
-
-    // he COLLAPSES on the ball and gathers it — a smother off the attacker's feet ends with
-    // the keeper holding it at his body, not the ball squirting away into space (which read
-    // as "the ball stops away from him"). Held, so integrateBall keeps it pinned to him.
-    void wide;
-    st.ball.ownerIdx = gk.idx;
-    st.ball.pos.x = clamp(gk.pos.x + upfield * 0.4, -HALF_LEN + 0.4, HALF_LEN - 0.4);
-    st.ball.pos.y = clamp(gk.pos.y, -HALF_WID + 0.4, HALF_WID - 0.4);
-    st.ball.vel.x = 0;
-    st.ball.vel.y = 0;
-    st.ball.vz = 0;
-    st.ball.z = 0;
-    st.ball.spin = 0;
-    st.ball.lastTouchTeam = gk.team;
-    st.ball.lastKicker = gk.idx;
-    owner.kickCooldown = Math.max(owner.kickCooldown, 0.28);
+    gk.facing = Math.atan2(toBallY, toBallX);
+    gk.vel.x = (toBallX / toBallD) * smotherSpeed;
+    gk.vel.y = (toBallY / toBallD) * smotherSpeed;
+    owner.kickCooldown = Math.max(owner.kickCooldown, 0.5);
     this.livePassTargetIdx = -1;
     this.livePassTargetUntil = -1;
-    this.beginGkHold(gk);
+
+    if (atFeet) {
+      // already on the ball — he collapses on it and gathers it to his body now.
+      st.ball.ownerIdx = gk.idx;
+      st.ball.pos.x = clamp(gk.pos.x + upfield * 0.4, -HALF_LEN + 0.4, HALF_LEN - 0.4);
+      st.ball.pos.y = clamp(gk.pos.y, -HALF_WID + 0.4, HALF_WID - 0.4);
+      st.ball.vel.x = 0;
+      st.ball.vel.y = 0;
+      st.ball.vz = 0;
+      st.ball.z = 0;
+      st.ball.spin = 0;
+      st.ball.lastTouchTeam = gk.team;
+      st.ball.lastKicker = gk.idx;
+      this.beginGkHold(gk);
+      this.registerSave(gk);
+      return true;
+    }
+    // lunging from a step or two away: knock it off the attacker and TOWARD the keeper,
+    // so it rolls to him (out of the attacker's reach) and he gathers it as he sprawls in
+    // to meet it. No teleport — the ball travels — and the attacker can't simply re-collect
+    // it at his own feet. integrateBall hands the diving keeper the ball on contact.
+    const tkx = gk.pos.x - st.ball.pos.x;
+    const tky = gk.pos.y - st.ball.pos.y;
+    const tkd = len(tkx, tky) || 1;
+    const knock = clamp(tkd / 0.32, 4.5, 11);
+    st.ball.ownerIdx = -1;
+    st.ball.lastTouchTeam = gk.team;
+    st.ball.lastKicker = gk.idx;
+    this.lastTurnover = { tick: st.tick, team: gk.team };
+    st.ball.vel.x = (tkx / tkd) * knock;
+    st.ball.vel.y = (tky / tkd) * knock;
+    st.ball.vz = 0;
+    st.ball.spin = 0;
     this.registerSave(gk);
     return true;
   }
@@ -6796,6 +7039,19 @@ export class MatchSim {
     if ((incoming.pos === 'GK') !== off.isGK) return false;
     const lineupSlot = this.cfg.teams[team].lineup.starters.indexOf(off.squadIdx);
     const offSquadIdx = off.squadIdx;
+    if (!off.isGK) {
+      const opp = (1 - team) as 0 | 1;
+      const overall = (a: { pace: number; pass: number; shoot: number; tackle: number }) =>
+        a.pace + a.pass + a.shoot + a.tackle;
+      const outfield = st.players
+        .filter((p) => p.team === team && !p.isGK && !p.sentOff)
+        .map((p) => overall(p.attrs));
+      const loss = substitutionMomentumLoss(
+        overall(off.attrs), outfield,
+        st.score[team] - st.score[opp], this.matchMinute(),
+      );
+      if (loss < 0) this.applyMomentum(team, { self: loss, opp: 0 });
+    }
     off.attrs = incoming;
     off.squadIdx = onSquadIdx;
     off.isGK = incoming.pos === 'GK';
@@ -6808,6 +7064,54 @@ export class MatchSim {
     st.subbedOn[team].push(onSquadIdx);
     st.substitutionsUsed[team]++;
     return true;
+  }
+
+  /** At a break, replace each injured-off player: sub a like-for-like bench player if one is
+   * available, else take him off (man down) — and if he was the keeper with no GK sub, move
+   * the best emergency outfielder into goal. Runs for AI and user teams alike; the user's
+   * voluntary choice is handled separately in the match-runner, but this guarantees the game
+   * never proceeds with a player frozen on the turf. */
+  private resolveInjuredOff(): void {
+    const st = this.state;
+    if (!isBreakPhase(st.phase)) return;
+    for (const team of [0, 1] as const) {
+      const injured = st.players.find((p) => p.team === team && p.injuredOff);
+      if (!injured) continue;
+      const squad = this.cfg.teams[team].data.players;
+      const onSquad = new Set(st.players.filter((p) => p.team === team).map((p) => p.squadIdx));
+      const wantGK = injured.isGK;
+      const bench = squad.map((_, i) => i).filter((i) =>
+        (squad[i].pos === 'GK') === wantGK
+        && !onSquad.has(i)
+        && !st.subbedOff[team].includes(i)
+        && !st.subbedOn[team].includes(i));
+      const canSub = st.substitutionsUsed[team] < this.maxSubstitutions() && bench.length > 0;
+      if (canSub) {
+        const overall = (i: number) => squad[i].pace + squad[i].pass + squad[i].shoot + squad[i].tackle;
+        const on = bench.reduce((a, b) => (overall(b) > overall(a) ? b : a));
+        injured.injuredOff = false;        // substitute() reuses this SimPlayer slot for the incoming player
+        this.substitute(team, injured.idx, on);
+      } else {
+        // no replacement: he leaves the pitch (man down)
+        injured.injuredOff = false;
+        injured.sentOff = true;
+        if (this.redCardMinute[team] < 0) {
+          this.redCardMinute[team] = this.matchMinute(); // backs-to-the-wall: man down for any reason
+          this.redCardRewardBlock[team] = 0;
+        }
+        // an injured keeper with no GK sub: move the best emergency outfielder into goal
+        if (wantGK) {
+          injured.isGK = false; // he's off injured; the makeshift outfielder is now the only keeper
+          const outfield = st.players.filter((p) => p.team === team && !p.isGK && !p.sentOff);
+          if (outfield.length) {
+            const emergency = outfield.reduce((a, b) => (b.attrs.keeping > a.attrs.keeping ? b : a));
+            emergency.isGK = true;
+            const goalX = this.attackSign(team) * -HALF_LEN; // own goal line
+            emergency.pos = { x: goalX, y: 0 };
+          }
+        }
+      }
+    }
   }
 
   /** The CPU manager makes substitutions: in the second half it pulls off its most tired
@@ -6850,7 +7154,7 @@ export class MatchSim {
     if (ball.ownerIdx >= 0 || ball.z < HEADER_MIN_Z || ball.z > HEADER_MAX_Z) return;
     if (ball.vz > 0.6) return; // climbing — wait for it to drop, never jump at a rising ball
     for (const p of st.players) {
-      if (p.isGK || p.sentOff || p.kickCooldown > 0 || p.slideTimer > 0 || (p.downTimer && p.downTimer > 0)) continue;
+      if (p.isGK || p.sentOff || p.injuredOff || p.kickCooldown > 0 || p.slideTimer > 0 || (p.downTimer && p.downTimer > 0)) continue;
       if (p.control && this.cfg.teams[p.team].controller !== 'ai') continue; // human decides
       if (dist(p.pos, ball.pos) > 0.85) continue;
       if (this.rng.next() > 0.3) continue; // not every man attacks every frame
@@ -6890,7 +7194,7 @@ export class MatchSim {
     const settleTicks = Math.round(0.22 / DT);
     const justSettled = st.tick - this.lastTurnover.tick < settleTicks;
     for (const p of st.players) {
-      if (p.sentOff || p.team === owner.team || p.isGK || p.kickCooldown > 0 || p.slideTimer > 0
+      if (p.sentOff || p.injuredOff || p.team === owner.team || p.isGK || p.kickCooldown > 0 || p.slideTimer > 0
         || (p.downTimer && p.downTimer > 0)) continue; // a man on the ground can't tackle
       // CPU defenders AND uncontrolled team-mates on a human team defend;
       // only the actively controlled player is left to the human
@@ -7090,6 +7394,8 @@ export class MatchSim {
     // fall scaled to how heavy the challenge was. Down ~2s: the mocap fall lays him
     // out, he holds it a beat, then the get-up clip lifts him (play is stopped anyway).
     this.knockDown(victim, offender, 2.0, clamp((severity - 0.15) / 0.7, 0.3, 1));
+    const fromBehind = this.isFromBehindTackle(offender, victim);
+    this.applyInjury(victim, rollInjury({ contactSeverity: severity, fromBehind, nonContact: false, rng: () => this.rng.next() }));
     this.emit({ type: 'foul', team: offender.team, player: offender.idx });
     // a genuine decision the fouled side's way settles any grievance they've built
     // up (with sarcastic applause if it had been festering); a phantom call is the

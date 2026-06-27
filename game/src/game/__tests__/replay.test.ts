@@ -61,6 +61,7 @@ function makeState(cfg: MatchConfig, tick: number): MatchState {
     penaltyAim: 0,
     excitement: 0,
     momentum: [0, 0],
+    injuries: [],
     winner: -1,
   };
 }

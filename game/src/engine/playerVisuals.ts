@@ -82,6 +82,13 @@ export interface PlayerVisual {
   diveRunOut?: boolean;
   /** arm bones for the procedural throw-in pose, resolved lazily */
   armBones?: { upper: THREE.Object3D; lower: THREE.Object3D; hand: THREE.Object3D | null; side: 1 | -1 }[] | null;
+  /** smoothed (rendered) ground position. Lags the sim position ONLY across a sudden
+   * snap (e.g. a keeper's body aligned to the ball as he makes a save) so it slides in
+   * rather than teleporting. Normal running tracks the sim exactly; large jumps (resets)
+   * snap. Render-only — never read by the sim. */
+  rx?: number;
+  rz?: number;
+  rInit?: boolean;
 }
 
 type PlayerMaterialRole = 'kit' | 'skin' | 'hair' | 'boot';
@@ -327,7 +334,7 @@ export class PlayerFactory {
   }
 
   /** advance animation according to sim state */
-  update(v: PlayerVisual, p: SimPlayer, dt: number, replay = false) {
+  update(v: PlayerVisual, p: SimPlayer, dt: number, replay = false, smooth = false) {
     v.group.visible = !p.sentOff;
     if (p.sentOff) return;
     // Keep the selection ring flat on the pitch at a fixed ground height, no matter how the
@@ -341,8 +348,28 @@ export class PlayerFactory {
       _ringV.set(0, 0.05 - v.group.position.y, 0).applyQuaternion(inv);
       v.ring.position.copy(_ringV);
     }
-    v.group.position.set(p.pos.x, 0, p.pos.y);
     const speed = Math.hypot(p.vel.x, p.vel.y);
+    // Render-side de-teleport. The sim resolves a save by snapping a body into place
+    // (a keeper's y aligned to the ball, ~up to 2m) and the renderer otherwise sets the
+    // ground position straight from the sim, so that snap reads as a teleport. Ease the
+    // RENDERED position toward the sim one with a velocity-aware cap: genuine running
+    // (gap <= cap) tracks exactly, a save snap slides in over a few frames, and a large
+    // jump (a reset/restart, gap > 4m) is placed instantly. Off during replay / non-play.
+    if (!smooth || !v.rInit) {
+      v.rx = p.pos.x; v.rz = p.pos.y; v.rInit = true;
+    } else {
+      const dx = p.pos.x - (v.rx ?? p.pos.x);
+      const dz = p.pos.y - (v.rz ?? p.pos.y);
+      const gap = Math.hypot(dx, dz);
+      const cap = (speed + 22) * dt;
+      if (gap > 4 || gap <= cap || gap < 1e-4) {
+        v.rx = p.pos.x; v.rz = p.pos.y;
+      } else {
+        v.rx = (v.rx ?? p.pos.x) + (dx / gap) * cap;
+        v.rz = (v.rz ?? p.pos.y) + (dz / gap) * cap;
+      }
+    }
+    v.group.position.set(v.rx ?? p.pos.x, 0, v.rz ?? p.pos.y);
     const a = v.actions;
 
     // resolve the sim state to a skeletal clip where one exists.

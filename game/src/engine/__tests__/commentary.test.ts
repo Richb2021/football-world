@@ -75,6 +75,7 @@ function makeState(cfg: MatchConfig): MatchState {
     penaltyAim: 0,
     excitement: 0,
     momentum: [0, 0],
+    injuries: [],
     winner: -1,
   };
 }

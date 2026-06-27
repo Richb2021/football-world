@@ -27,6 +27,7 @@
       "tackle": 30,
       "keeping": 74,
       "shirtNumber": 1,
+      "position": "GK",
       "appearance": {
         "skinTone": "#bf8154",
         "hairColor": "#17110d",
@@ -44,6 +45,7 @@
       "tackle": 75,
       "keeping": 8,
       "shirtNumber": 2,
+      "position": "FB",
       "appearance": {
         "skinTone": "#bf8154",
         "hairColor": "#17110d",
@@ -61,6 +63,7 @@
       "tackle": 84,
       "keeping": 8,
       "shirtNumber": 3,
+      "position": "FB",
       "appearance": {
         "skinTone": "#bf8154",
         "hairColor": "#4b2d1b",
@@ -78,6 +81,7 @@
       "tackle": 83,
       "keeping": 8,
       "shirtNumber": 4,
+      "position": "CB",
       "appearance": {
         "skinTone": "#4a2b1d",
         "hairColor": "#17110d",
@@ -95,6 +99,7 @@
       "tackle": 89,
       "keeping": 8,
       "shirtNumber": 5,
+      "position": "FB",
       "appearance": {
         "skinTone": "#4a2b1d",
         "hairColor": "#2b1a12",
@@ -112,6 +117,7 @@
       "tackle": 67,
       "keeping": 7,
       "shirtNumber": 6,
+      "position": "CM",
       "appearance": {
         "skinTone": "#7a4a2b",
         "hairColor": "#2b1a12",
@@ -129,6 +135,7 @@
       "tackle": 43,
       "keeping": 8,
       "shirtNumber": 7,
+      "position": "WF",
       "appearance": {
         "skinTone": "#4a2b1d",
         "hairColor": "#2b1a12",
@@ -146,6 +153,7 @@
       "tackle": 76,
       "keeping": 7,
       "shirtNumber": 8,
+      "position": "DM",
       "appearance": {
         "skinTone": "#7a4a2b",
         "hairColor": "#17110d",
@@ -163,6 +171,7 @@
       "tackle": 40,
       "keeping": 8,
       "shirtNumber": 9,
+      "position": "ST",
       "appearance": {
         "skinTone": "#4a2b1d",
         "hairColor": "#2b1a12",
@@ -180,6 +189,7 @@
       "tackle": 50,
       "keeping": 8,
       "shirtNumber": 10,
+      "position": "ST",
       "appearance": {
         "skinTone": "#4a2b1d",
         "hairColor": "#17110d",
@@ -197,6 +207,7 @@
       "tackle": 39,
       "keeping": 8,
       "shirtNumber": 11,
+      "position": "WF",
       "appearance": {
         "skinTone": "#d9a173",
         "hairColor": "#17110d",
@@ -214,6 +225,7 @@
       "tackle": 38,
       "keeping": 8,
       "shirtNumber": 12,
+      "position": "WF",
       "appearance": {
         "skinTone": "#d9a173",
         "hairColor": "#7a5533",
@@ -231,6 +243,7 @@
       "tackle": 72,
       "keeping": 7,
       "shirtNumber": 13,
+      "position": "DM",
       "appearance": {
         "skinTone": "#7a4a2b",
         "hairColor": "#17110d",
@@ -248,6 +261,7 @@
       "tackle": 79,
       "keeping": 7,
       "shirtNumber": 14,
+      "position": "CM",
       "appearance": {
         "skinTone": "#d9a173",
         "hairColor": "#4b2d1b",
@@ -265,6 +279,7 @@
       "tackle": 84,
       "keeping": 8,
       "shirtNumber": 15,
+      "position": "CB",
       "appearance": {
         "skinTone": "#2f1b14",
         "hairColor": "#2b1a12",
@@ -282,6 +297,7 @@
       "tackle": 30,
       "keeping": 88,
       "shirtNumber": 16,
+      "position": "GK",
       "appearance": {
         "skinTone": "#d9a173",
         "hairColor": "#2b1a12",
@@ -299,6 +315,7 @@
       "tackle": 85,
       "keeping": 8,
       "shirtNumber": 17,
+      "position": "CB",
       "appearance": {
         "skinTone": "#2f1b14",
         "hairColor": "#2b1a12",
@@ -316,6 +333,7 @@
       "tackle": 60,
       "keeping": 7,
       "shirtNumber": 18,
+      "position": "CM",
       "appearance": {
         "skinTone": "#d9a173",
         "hairColor": "#4b2d1b",
@@ -333,6 +351,7 @@
       "tackle": 90,
       "keeping": 8,
       "shirtNumber": 19,
+      "position": "FB",
       "appearance": {
         "skinTone": "#bf8154",
         "hairColor": "#2b1a12",
@@ -350,6 +369,7 @@
       "tackle": 32,
       "keeping": 8,
       "shirtNumber": 20,
+      "position": "WF",
       "appearance": {
         "skinTone": "#d9a173",
         "hairColor": "#2b1a12",
@@ -367,6 +387,7 @@
       "tackle": 81,
       "keeping": 8,
       "shirtNumber": 21,
+      "position": "FB",
       "appearance": {
         "skinTone": "#d9a173",
         "hairColor": "#17110d",
@@ -384,6 +405,7 @@
       "tackle": 34,
       "keeping": 8,
       "shirtNumber": 22,
+      "position": "ST",
       "appearance": {
         "skinTone": "#d9a173",
         "hairColor": "#17110d",
@@ -401,6 +423,7 @@
       "tackle": 30,
       "keeping": 72,
       "shirtNumber": 23,
+      "position": "GK",
       "appearance": {
         "skinTone": "#bf8154",
         "hairColor": "#4b2d1b",
@@ -418,6 +441,7 @@
       "tackle": 58,
       "keeping": 7,
       "shirtNumber": 24,
+      "position": "AM",
       "appearance": {
         "skinTone": "#bf8154",
         "hairColor": "#4b2d1b",
@@ -435,6 +459,7 @@
       "tackle": 63,
       "keeping": 7,
       "shirtNumber": 25,
+      "position": "AM",
       "appearance": {
         "skinTone": "#bf8154",
         "hairColor": "#2b1a12",
@@ -452,6 +477,7 @@
       "tackle": 72,
       "keeping": 8,
       "shirtNumber": 26,
+      "position": "CB",
       "appearance": {
         "skinTone": "#d9a173",
         "hairColor": "#4b2d1b",
@@ -465,15 +491,15 @@
     "starters": [
       15,
       4,
-      18,
-      13,
-      3,
       16,
-      10,
+      3,
+      18,
+      12,
       7,
-      9,
       6,
-      19
+      23,
+      11,
+      9
     ]
   }
 }

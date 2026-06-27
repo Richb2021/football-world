@@ -293,7 +293,11 @@ export class Hud {
       if (e.type === 'goal') this.banner('GOAL!', 2200);
       else if (e.type === 'halfTime') this.banner('HALF TIME', 2400);
       else if (e.type === 'fullTime') this.banner('FULL TIME', 2600);
-      else if (e.type === 'save') this.banner('SAVED!', 1100);
+      // the sim fires 'save' the instant it resolves the stop — when the keeper is still
+      // up to ~2m out and mid-dive (the body/ball then slide into his hands over a few
+      // render frames). Hold the banner briefly so "SAVED!" lands as he secures it, not
+      // before he's reached it.
+      else if (e.type === 'save') this.banner('SAVED!', 1100, 150);
       else if (e.type === 'post') this.banner('OFF THE POST!', 1300);
       else if (e.type === 'penMissed') this.banner('MISSED!', 1500);
       else if (e.type === 'offside') this.banner('OFFSIDE', 1300);
@@ -301,15 +305,20 @@ export class Hud {
       else if (e.type === 'penalty') this.banner('PENALTY', 1600);
       else if (e.type === 'yellowCard') this.banner('YELLOW CARD', 1400);
       else if (e.type === 'redCard') this.banner('RED CARD', 1600);
+      else if (e.type === 'injury') this.banner('INJURY', 1600);
     }
   }
 
-  banner(text: string, ms: number) {
-    const el = document.getElementById('h-banner')!;
-    el.textContent = text;
-    el.classList.add('show');
-    if (this.bannerTimeout) window.clearTimeout(this.bannerTimeout);
-    this.bannerTimeout = window.setTimeout(() => el.classList.remove('show'), ms);
+  banner(text: string, ms: number, delayMs = 0) {
+    const show = () => {
+      const el = document.getElementById('h-banner')!;
+      el.textContent = text;
+      el.classList.add('show');
+      if (this.bannerTimeout) window.clearTimeout(this.bannerTimeout);
+      this.bannerTimeout = window.setTimeout(() => el.classList.remove('show'), ms);
+    };
+    if (delayMs > 0) window.setTimeout(show, delayMs);
+    else show();
   }
 
   /** Substitution notification — shows the team and who came off/on. */

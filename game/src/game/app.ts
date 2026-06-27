@@ -17,7 +17,7 @@ import {
 } from '../ui/careerScreens';
 import {
   advance, currentEvent, newCareer, userFixture, leagueTable, userStarterForm,
-  careerMomentumForTeam, careerStarterIndexes, isPlayerUnavailable, recordCareerMatchMomentum, type Career, type CareerMode,
+  careerMomentumForTeam, careerStarterIndexes, isPlayerUnavailable, recordCareerMatchMomentum, markPlayerUnavailable, type Career, type CareerMode,
 } from './career';
 import {
   seedTournamentInbox, recordUserMatchForm, pushResultMessages, generateRoundMeta,
@@ -1268,6 +1268,10 @@ export class App {
             postMatchRngSeed = (career.seed ^ (career.step * 40503)) >>> 0;
             const rng = new Rng(postMatchRngSeed);
             recordCareerMatchMomentum(career, home, away, outcome.momentum ?? [0, 0], outcome.score);
+            for (const inj of outcome.injuries ?? []) {
+              const injTeamId = TEAMS[inj.team === 0 ? home : away].id;
+              if (inj.matchesOut > 0) markPlayerUnavailable(career, injTeamId, inj.name, inj.matchesOut, 'Injured');
+            }
             recordUserMatchForm(career, [userGoals, oppGoals], starters, rng);
             pushResultMessages(career, [userGoals, oppGoals], opponentName, rng, fx.opponent);
           }
@@ -2041,7 +2045,7 @@ export class App {
   private async playMatch(
     cfg: MatchConfig,
     localTeam: 0 | 1,
-    onEnd: (outcome: { score: [number, number]; winner: -1 | 0 | 1; momentum?: [number, number]; reason?: string; scorers?: { team: 0 | 1; player: string; minute: number; ownGoal?: boolean; assist?: string }[] }) => void,
+    onEnd: (outcome: { score: [number, number]; winner: -1 | 0 | 1; momentum?: [number, number]; reason?: string; scorers?: { team: 0 | 1; player: string; minute: number; ownGoal?: boolean; assist?: string }[]; injuries?: { team: 0 | 1; name: string; matchesOut: number }[] }) => void,
     net?: { session: NetTransport; role: 'host' | 'guest' },
     skipIntro = false,
   ) {
@@ -2096,7 +2100,7 @@ export class App {
   private playMatchWithPrematch(
     cfg: MatchConfig,
     localTeam: 0 | 1,
-    onEnd: (outcome: { score: [number, number]; winner: -1 | 0 | 1; momentum?: [number, number]; reason?: string; scorers?: { team: 0 | 1; player: string; minute: number; ownGoal?: boolean; assist?: string }[] }) => void,
+    onEnd: (outcome: { score: [number, number]; winner: -1 | 0 | 1; momentum?: [number, number]; reason?: string; scorers?: { team: 0 | 1; player: string; minute: number; ownGoal?: boolean; assist?: string }[]; injuries?: { team: 0 | 1; name: string; matchesOut: number }[] }) => void,
     net?: { session: NetTransport; role: 'host' | 'guest' },
   ) {
     const bgUrl = this.assets.uiUrls.prematchStadium ?? this.assets.uiUrls.teamSelect;

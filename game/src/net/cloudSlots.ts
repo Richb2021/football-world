@@ -2,7 +2,7 @@
 /**
  * Supabase-backed implementation of CloudSlotStore<T>.
  *
- * The saves table schema (slot-aware):
+ * The soccer-only saves table schema (slot-aware):
  *   (user_id, game_id, mode, slot, data, updated_at)
  *
  * `data` is either:
@@ -10,7 +10,7 @@
  *   - legacy:  raw T blob (old Stars rows that stored StarsState directly)
  */
 import type { CloudSlotStore, SlotMeta } from './saveSlots';
-import { GAME_ID } from './supabase';
+import { GAME_ID, SAVES_TABLE } from './supabase';
 
 export interface SlotRow {
   user_id: string;
@@ -63,7 +63,7 @@ export function makeCloudSlotStore<T>(userId: string, client: SlotClient): Cloud
       let result: { data: SlotRow[] | null; error: unknown };
       try {
         result = await (client
-          .from('saves')
+          .from(SAVES_TABLE)
           .select('user_id,game_id,mode,slot,data,updated_at') as unknown as {
             eq(c: string, v: unknown): {
               eq(c: string, v: unknown): {
@@ -100,7 +100,7 @@ export function makeCloudSlotStore<T>(userId: string, client: SlotClient): Cloud
     async put(mode: string, meta: SlotMeta, payload: T): Promise<void> {
       // Strip syncedAt — it's local bookkeeping, never uploaded.
       const { syncedAt: _drop, ...cloudMeta } = meta;
-      const { error } = await client.from('saves').upsert(
+      const { error } = await client.from(SAVES_TABLE).upsert(
         {
           user_id: userId,
           game_id: GAME_ID,
@@ -116,7 +116,7 @@ export function makeCloudSlotStore<T>(userId: string, client: SlotClient): Cloud
 
     async del(mode: string, id: string): Promise<void> {
       const { error } = await client
-        .from('saves')
+        .from(SAVES_TABLE)
         .delete()
         .eq('user_id', userId)
         .eq('game_id', GAME_ID)

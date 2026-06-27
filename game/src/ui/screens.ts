@@ -25,6 +25,8 @@ export interface SubstitutionRow {
   playerIdx?: number;
   squadIdx: number;
   pos: string;
+  /** specific role (CB/FB/WB/DM/CM/AM/W/WF/ST) shown in place of the coarse pos when known */
+  position?: string;
   name: string;
   overall: number;
   /** visible short-term stamina bar, 0..1 */
@@ -198,7 +200,7 @@ function squadButtonHtml(
     data-pos="${escapeHtml(row.pos)}" data-name="${escapeHtml(row.name)}" data-overall="${row.overall}"
     style="--energy:${Math.round(energy * 100)}%;--condition:${Math.round(condition * 100)}%"
     ${opts.disabled ? 'disabled' : ''}>
-    <span class="squad-pos">${escapeHtml(row.pos)}</span>
+    <span class="squad-pos">${escapeHtml(row.position ?? row.pos)}</span>
     <span class="squad-main">
       <span class="squad-name">${escapeHtml(row.name)}${(row.yellowCards ?? 0) > 0 ? ' <span class="squad-card-caution" title="On a yellow card" aria-label="On a yellow card">🟨</span>' : ''}${subBadge}</span>
       <span class="squad-energy"><span></span></span>
@@ -867,11 +869,11 @@ export class UI {
       const bench = players.map((_, i) => i).filter((i) => !starters.includes(i));
       const starterRows: SubstitutionRow[] = starters.map((i) => {
         const p = players[i];
-        return { squadIdx: i, pos: p.pos, name: p.name, overall: overallRating(p), energy: 1, staminaCeiling: 1 };
+        return { squadIdx: i, pos: p.pos, position: p.position, name: p.name, overall: overallRating(p), energy: 1, staminaCeiling: 1 };
       });
       const benchRows: SubstitutionRow[] = bench.map((i) => {
         const p = players[i];
-        return { squadIdx: i, pos: p.pos, name: p.name, overall: overallRating(p), energy: 1, staminaCeiling: 1 };
+        return { squadIdx: i, pos: p.pos, position: p.position, name: p.name, overall: overallRating(p), energy: 1, staminaCeiling: 1 };
       });
       this.screen(`
         <h1 class="h-screen">${opts.title}</h1>

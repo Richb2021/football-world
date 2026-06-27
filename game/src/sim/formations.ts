@@ -1,4 +1,4 @@
-import type { FormationId, Lineup, Vec2, Pos, TeamData, TeamTactics } from './types';
+import type { FormationId, Lineup, Vec2, Pos, PlayerPosition, TeamData, TeamTactics } from './types';
 
 /**
  * Slot positions in attack-normalized space: x -1 = own goal line, +1 = opponent goal line,
@@ -163,11 +163,32 @@ export function overallRating(p: { pace: number; pass: number; shoot: number; ta
   return p.shoot * 0.45 + p.pace * 0.3 + p.pass * 0.15 + p.tackle * 0.1;
 }
 
-type SlotRole = 'GK' | 'CB' | 'FB' | 'WB' | 'DM' | 'CM' | 'AM' | 'W' | 'WF' | 'ST';
+type SlotRole = PlayerPosition;
+
+/** How well a player's SPECIFIC position covers a slot role. Exact match dominates;
+ * neighbouring roles can cover at a discount (a full-back covers wing-back, a winger
+ * covers wide-forward, a CM covers DM/AM), so a squad short in one role still fields a
+ * sensible XI. Returns 0 for incompatible pairs. Big numbers vs roleFitScore (coarse)
+ * so a player's real position decides his slot when it is known. */
+const POSITION_FIT: Record<SlotRole, Partial<Record<SlotRole, number>>> = {
+  GK: { GK: 200 },
+  CB: { CB: 130, FB: 45, WB: 30, DM: 35 },
+  FB: { FB: 130, WB: 95, CB: 50, W: 40 },
+  WB: { WB: 130, FB: 95, W: 60, CB: 30, AM: 25 },
+  DM: { DM: 130, CM: 75, CB: 45, AM: 40 },
+  CM: { CM: 130, DM: 75, AM: 75, W: 35 },
+  AM: { AM: 130, CM: 75, WF: 55, W: 55, DM: 35, ST: 40 },
+  W:  { W: 130, WF: 75, AM: 55, WB: 50, FB: 30 },
+  WF: { WF: 130, W: 75, ST: 60, AM: 55 },
+  ST: { ST: 130, WF: 60, AM: 35 },
+};
+export function positionFit(playerPosition: SlotRole, role: SlotRole): number {
+  return POSITION_FIT[role]?.[playerPosition] ?? 0;
+}
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
-function slotRole(formation: FormationId, slotIdx: number): SlotRole {
+export function slotRole(formation: FormationId, slotIdx: number): SlotRole {
   if (slotIdx === 0) return 'GK';
   const slot = FORMATIONS[formation]?.[slotIdx] ?? { x: 0, y: 0 };
   const need = FORMATION_NEEDS[formation]?.[slotIdx - 1] ?? 'MF';
@@ -289,7 +310,7 @@ export function normalizeTactics(tactics: Partial<TeamTactics> | undefined, form
 }
 
 export function normalizeLineupForFormation(
-  players: { pos: Pos; pace: number; pass: number; shoot: number; tackle: number; keeping: number }[],
+  players: { pos: Pos; position?: PlayerPosition; pace: number; pass: number; shoot: number; tackle: number; keeping: number }[],
   formation: FormationId,
   preferredStarters?: number[],
 ): number[] {
@@ -306,8 +327,13 @@ export function normalizeLineupForFormation(
       .map((p, idx) => ({
         idx,
         p,
-        fit: roleFitScore(p.pos, role),
-        attrFit: roleAttrBonus(p, role),
+        // a known SPECIFIC position decides the slot (exact role dominates); falls back
+        // to the coarse pos + attribute heuristic when `position` is absent.
+        fit: roleFitScore(p.pos, role) + (p.position ? positionFit(p.position, role) : 0),
+        // the attribute nudge (CB favours slow/strong, FB favours fast) is ONLY for
+        // guessing the slot when position is unknown — with a known position the slot is
+        // already decided, so defer to overall rating to pick the BEST man for that role.
+        attrFit: p.position ? 0 : roleAttrBonus(p, role),
         rating: overallRating(p),
         preferred: preferredOrder.has(idx),
         order: preferredOrder.get(idx) ?? Number.MAX_SAFE_INTEGER,
@@ -334,7 +360,7 @@ export function normalizeLineupForFormation(
 }
 
 /** Pick the strongest legal XI for a formation. Returns squad indices, GK first, in slot order. */
-export function autoLineup(players: { pos: Pos; pace: number; pass: number; shoot: number; tackle: number; keeping: number }[], formation: FormationId): number[] {
+export function autoLineup(players: { pos: Pos; position?: PlayerPosition; pace: number; pass: number; shoot: number; tackle: number; keeping: number }[], formation: FormationId): number[] {
   return normalizeLineupForFormation(players, formation);
 }
 

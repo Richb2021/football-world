@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   careerMomentumForTeam, newCareer, ensureCareerSystems, playerStateKey, userStarterForm,
-  isPlayerUnavailable, careerStarterIndexes,
+  isPlayerUnavailable, careerStarterIndexes, markPlayerUnavailable,
 } from '../career';
 import {
   seedTournamentInbox, recordUserMatchForm, applyMoraleDelta, recomputeUnhappy,
@@ -229,6 +229,16 @@ describe('cup meta', () => {
     expect(activeArcHeat(c, 'one-result-from-history')).toBeGreaterThanOrEqual(0);
     expect(c.cupNarrative!.headlines[0].tone).toBe('positive');
     expect(c.cupNarrative!.headlines[0].title.toLowerCase()).toMatch(/fairytale|believe|history|dream/);
+  });
+
+  it('a recorded injury makes the player unavailable next match', () => {
+    const c = newCareer('cup', 0, 12345, 'international-cup');
+    c.leagueId = 'international-cup';
+    ensureCareerSystems(c);
+    const teamId = TEAMS[c.userTeam].id;
+    const name = c.squads[teamId][5].name;
+    markPlayerUnavailable(c, teamId, name, 2, 'Injured');
+    expect(isPlayerUnavailable(c, teamId, name)).toBe(true);
   });
 
   it('limits required messages generated in a normal round window', () => {

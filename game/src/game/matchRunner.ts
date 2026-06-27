@@ -37,10 +37,7 @@ export interface MatchOutcome {
   momentum?: [number, number];
   /** set when the match ended by forfeit, for the result-screen note */
   reason?: string;
-  /** the goal log, so career modes can credit a Be-A-Pro avatar for goals they
-   *  actually scored (player = scorer name; ownGoal flags own goals; assist = the
-   *  team-mate who set it up). */
-  scorers?: { team: 0 | 1; player: string; minute: number; ownGoal?: boolean; assist?: string }[];
+  injuries?: { team: 0 | 1; name: string; matchesOut: number }[];
 }
 
 interface RunnerOpts {
@@ -127,7 +124,7 @@ export function buildSubstitutionRoster(
     players.filter((p) => p.team === team && p.sentOff).map((p) => p.squadIdx),
   );
   const bench = squadPlayers
-    .map((p, squadIdx) => ({ squadIdx, pos: p.pos, name: p.name, overall: overallRating(p), energy: 1, staminaCeiling: 1 }))
+    .map((p, squadIdx) => ({ squadIdx, pos: p.pos, position: p.position, name: p.name, overall: overallRating(p), energy: 1, staminaCeiling: 1 }))
     .filter((p) => !activeSquads.has(p.squadIdx) && !subbed.has(p.squadIdx) && !sentOffSquads.has(p.squadIdx));
   return { starters, bench };
 }
@@ -282,6 +279,9 @@ export class MatchRunner {
             }
             opts.audio.handleEvents(m.ev, { crowdTeam: 0 });
             opts.hud.handleEvents(m.ev);
+            if (m.ev.some((e) => e.type === 'injury' && e.team === this.opts.localTeam)) {
+              this.openSubstitutionMenu('A player is injured — choose a replacement.');
+            }
             if (m.ev.some((e) => e.type === 'goal')) {
               this.renderer.goalShake();
               // the host shows the TV score graphic in its own loop; the guest
@@ -391,6 +391,9 @@ export class MatchRunner {
         if (commentaryEvents.length) this.commentary.handleEvents(commentaryEvents, sim.state, this.opts.cfg);
         this.opts.audio.handleEvents(sim.events, { crowdTeam: 0 });
         this.opts.hud.handleEvents(sim.events);
+        if (sim.events.some((e) => e.type === 'injury' && e.team === this.opts.localTeam)) {
+          this.openSubstitutionMenu('A player is injured — choose a replacement.');
+        }
         if (sim.events.some((e) => e.type === 'goal')) {
           this.renderer.goalShake();
           // TV score graphic with the running score + scorers/times. holdMs <= 0
@@ -413,7 +416,7 @@ export class MatchRunner {
       if (sim.events.length && this.startExitPresentation(sim.events)) break;
       if (sim.events.some((e) => e.type === 'hydrationBreak') && this.startHydrationBreak()) break;
       if (sim.state.phase === 'finished' && !this.ended && !this.exitPresentation) {
-        this.finish({ score: [sim.state.score[0], sim.state.score[1]], winner: sim.state.winner, momentum: [sim.state.momentum[0], sim.state.momentum[1]], scorers: sim.state.goals });
+        this.finish({ score: [sim.state.score[0], sim.state.score[1]], winner: sim.state.winner, momentum: [sim.state.momentum[0], sim.state.momentum[1]], injuries: sim.state.injuries });
         return;
       }
     }
@@ -541,7 +544,7 @@ export class MatchRunner {
 
     this.exitPresentation = null;
     if (scene.kind === 'fullTime') {
-      this.finish({ score: [state.score[0], state.score[1]], winner: state.winner, momentum: [state.momentum[0], state.momentum[1]], scorers: state.goals });
+      this.finish({ score: [state.score[0], state.score[1]], winner: state.winner, momentum: [state.momentum[0], state.momentum[1]], injuries: state.injuries });
       return true;
     }
 

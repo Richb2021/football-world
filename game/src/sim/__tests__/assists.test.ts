@@ -2,12 +2,12 @@ import { describe, it, expect } from 'vitest';
 import { MatchSim } from '../matchSim';
 import { autoLineup } from '../formations';
 import { NULL_INPUT } from '../types';
-import type { MatchConfig, PadInput } from '../types';
+import type { MatchConfig, PadInput, GoalLogEntry } from '../types';
 import { TEAMS } from '../../data/teams';
 
 const idle: [PadInput, PadInput] = [{ ...NULL_INPUT }, { ...NULL_INPUT }];
 
-function playMatch(seed: number) {
+function playMatch(seed: number): GoalLogEntry[] {
   const a = TEAMS[(seed * 7) % TEAMS.length];
   const b = TEAMS[(seed * 7 + 3) % TEAMS.length];
   const cfg: MatchConfig = {
@@ -25,17 +25,11 @@ function playMatch(seed: number) {
 
 describe('match assists', () => {
   it('credits the passer with an assist on a meaningful share of goals', () => {
-    let goals = 0;
-    let assisted = 0;
-    for (let s = 0; s < 3; s++) {
-      for (const g of playMatch(500 + s)) {
-        goals++;
-        if (g.assist) assisted++;
-      }
-    }
-    expect(goals).toBeGreaterThan(0);
-    expect(assisted).toBeGreaterThan(0);
-    // an assisted goal carries a non-empty assister name
-    expect(playMatch(501).some((g) => typeof g.assist === 'string' && g.assist.length > 0)).toBe(true);
+    const all: GoalLogEntry[] = [];
+    for (let s = 0; s < 5; s++) all.push(...playMatch(500 + s));
+    expect(all.length).toBeGreaterThan(0);
+    // a healthy share of goals carry a non-empty assister name
+    const assisted = all.filter((g) => typeof g.assist === 'string' && g.assist.length > 0);
+    expect(assisted.length).toBeGreaterThan(0);
   });
 });

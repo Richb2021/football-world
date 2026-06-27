@@ -55,6 +55,11 @@ export class MatchRenderer {
   private playerVisuals: PlayerVisual[] = [];
   private ball!: THREE.Group;
   private ballMesh!: THREE.Mesh;
+  /** smoothed (rendered) ball ground position — lags the sim ball only across a sudden
+   * snap (e.g. a keeper claiming a save) so it slides in rather than teleporting. */
+  private _renderBallX = 0;
+  private _renderBallZ = 0;
+  private _renderBallInit = false;
   private _ballHandA = new THREE.Vector3();
   private _ballHandB = new THREE.Vector3();
   private camTarget = new THREE.Vector3();
@@ -429,8 +434,11 @@ export class MatchRenderer {
 
   render(state: MatchState, dt: number, cameraMode: RenderCameraMode = {}) {
     if (this.disposed) return;
+    // smooth out sim position snaps (a keeper aligned to the ball on a save) only during
+    // live play — restarts/replays should place players instantly.
+    const smoothPlayers = state.phase === 'play' && !cameraMode.replay;
     for (let i = 0; i < this.playerVisuals.length && i < state.players.length; i++) {
-      this.factory.update(this.playerVisuals[i], state.players[i], dt, !!cameraMode.replay);
+      this.factory.update(this.playerVisuals[i], state.players[i], dt, !!cameraMode.replay, smoothPlayers);
     }
     // ball — during a throw-in hold, draw it in the thrower's raised hands
     // (the sim keeps it on the line for the restart rules)
@@ -544,7 +552,29 @@ export class MatchRenderer {
         }
       }
     }
-    this.ball.position.set(ballX, 0, ballZ);
+    // Render-side smoothing: the sim snaps the ball onto the keeper in a single tick when
+    // he claims a save/smother/gather. Ease the RENDERED ball to that spot over a few frames
+    // so it slides into his hands instead of teleporting. The cap tracks the ball's own
+    // velocity (so genuine fast motion is never held back) plus a fixed catch-up so a snap
+    // closes in ~3-5 frames. Restarts / non-play phases place it instantly.
+    if (!this._renderBallInit || state.phase !== 'play') {
+      this._renderBallX = ballX;
+      this._renderBallZ = ballZ;
+      this._renderBallInit = true;
+    } else {
+      const bdx = ballX - this._renderBallX;
+      const bdz = ballZ - this._renderBallZ;
+      const bgap = Math.hypot(bdx, bdz);
+      const cap = (Math.hypot(b.vel.x, b.vel.y) + 26) * dt;
+      if (bgap > cap && bgap > 1e-4) {
+        this._renderBallX += (bdx / bgap) * cap;
+        this._renderBallZ += (bdz / bgap) * cap;
+      } else {
+        this._renderBallX = ballX;
+        this._renderBallZ = ballZ;
+      }
+    }
+    this.ball.position.set(this._renderBallX, 0, this._renderBallZ);
     this.ballMesh.position.y = ballH + BALL_RADIUS * 1.6;
     const speed = Math.hypot(b.vel.x, b.vel.y);
     this.ballMesh.rotation.x += speed * dt * 1.4;

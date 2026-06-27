@@ -10,6 +10,12 @@ import { FORMATION_IDS, autoLineup, overallRating } from '../sim/formations';
 import type { FormationId } from '../sim/types';
 import { UI, bind } from './screens';
 
+/** Shows a player's specific role (CB/FB/WB/DM/CM/AM/W/WF/ST) when known, else the
+ * coarse GK/DF/MF/FW. */
+function posLabel(p: { pos: string; position?: string }): string {
+  return p.position ?? p.pos;
+}
+
 const MODE_LABEL: Record<string, string> = {
   league: 'LEAGUE SEASON',
   cup: 'CUP',
@@ -344,7 +350,7 @@ export function squadScreen(ui: UI, career: Career, onChanged: () => void, onBac
       const st = career.playerStates?.[playerStateKey(sqTeamId, p.name)];
       const form = Math.round(st?.form ?? 50);
       return `<tr data-i="${i}" data-xi="${inXI}" class="pick-row" style="cursor:pointer">
-        <td>${p.pos}</td><td>${p.name}</td><td class="num">${p.age}</td>
+        <td>${posLabel(p)}</td><td>${p.name}</td><td class="num">${p.age}</td>
         <td class="num">${Math.round(overallRating(p))}</td>
         <td class="num" style="color:${formColour(form)}">${formArrow(form)} ${form}</td>
         <td class="num subtle">£${(playerValue(p) / 1000).toFixed(2)}M</td>
@@ -418,7 +424,7 @@ export function trainingScreen(ui: UI, career: Career, onChanged: () => void, on
       const st = career.playerStates[playerStateKey(teamId, p.name)] ?? { fitness: 84, form: 50, morale: 58, sharpness: 56 };
       const availability = playerAvailabilityLabel(career, teamId, p.name) ?? 'OK';
       return `<tr>
-        <td>${p.pos}</td><td>${p.name}</td>
+        <td>${posLabel(p)}</td><td>${p.name}</td>
         <td class="num">${Math.round(overallRating(p))}</td>
         <td class="num">${Math.round(st.fitness)}</td>
         <td class="num">${Math.round(st.sharpness)}</td>
@@ -492,7 +498,7 @@ export function transferScreen(ui: UI, career: Career, onChanged: () => void, on
           const ask = askingPrice(career.squads[l.teamId], l.player);
           const opening = Math.round(ask * 0.86 / 10) * 10;
           return `<tr>
-            <td>${l.player.pos}</td><td>${l.player.name}</td>
+            <td>${posLabel(l.player)}</td><td>${l.player.name}</td>
             <td class="subtle">${TEAMS.find((t) => t.id === l.teamId)?.short}</td>
             <td class="num">${Math.round(overallRating(l.player))}</td>
             <td class="num money">£${(l.value / 1000).toFixed(2)}M</td>
@@ -509,7 +515,7 @@ export function transferScreen(ui: UI, career: Career, onChanged: () => void, on
         <tr><th>POS</th><th>PLAYER</th><th>OVR</th><th>VALUE</th><th></th></tr>
         ${squad.map((p, i) => `
           <tr>
-            <td>${p.pos}</td><td>${p.name}</td>
+            <td>${posLabel(p)}</td><td>${p.name}</td>
             <td class="num">${Math.round(overallRating(p))}</td>
             <td class="num money">£${(playerValue(p) / 1000).toFixed(2)}M</td>
             <td class="row" style="gap:4px;justify-content:flex-end">

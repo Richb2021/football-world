@@ -34,6 +34,14 @@ export interface KitStyle {
   kitAssetKey?: string;
 }
 
+/** Specific on-pitch role, finer than the coarse `pos` (GK/DF/MF/FW). Used by the
+ * lineup slotter to place a player in his real position (e.g. a fast centre-back
+ * stays central instead of being guessed into full-back from his pace). Optional —
+ * players without it fall back to the coarse `pos` + attribute heuristic.
+ *   CB centre-back · FB full-back · WB wing-back · DM holding mid · CM central mid
+ *   AM attacking mid · W wide mid/winger · WF wide forward/inside forward · ST striker */
+export type PlayerPosition = 'GK' | 'CB' | 'FB' | 'WB' | 'DM' | 'CM' | 'AM' | 'W' | 'WF' | 'ST';
+
 export interface PlayerAttrs {
   name: string;
   pos: Pos;
@@ -44,6 +52,8 @@ export interface PlayerAttrs {
   tackle: number;
   keeping: number;
   shirtNumber?: number;
+  /** Specific role; finer than `pos`. See PlayerPosition. */
+  position?: PlayerPosition;
   appearance?: Partial<PlayerAppearance>;
 }
 
@@ -241,6 +251,10 @@ export interface SimPlayer {
   /** true when the shove went with his facing (clipped from behind) so he pitches onto
    * his front; false/undefined topples him backward (a tackle into his front) */
   fallForward?: boolean;
+  /** >0 (sim-seconds) while a knocked player plays on with a reduced skill level */
+  knockTimer?: number;
+  /** true when a forced-off injury has taken him out of the game (pending sub or man-down) */
+  injuredOff?: boolean;
 }
 
 export interface SimBall {
@@ -274,7 +288,7 @@ export interface SimEvent {
     | 'out' | 'bounce' | 'tackle' | 'nearMiss' | 'halfTime' | 'fullTime'
     | 'kickoff' | 'penScored' | 'penMissed' | 'matchEnd'
     | 'foul' | 'offside' | 'yellowCard' | 'redCard' | 'penalty' | 'pass' | 'addedTime'
-    | 'hydrationBreak'
+    | 'hydrationBreak' | 'injury'
     // crowd reactions: a boo at a clearly wrong refereeing decision, ironic applause
     // when an aggrieved team finally gets one their way, and a sarcastic mock cheer
     // when a shot is skied or dragged miles wide. `team` = the team the crowd is
@@ -330,5 +344,7 @@ export interface MatchState {
   /** per-team momentum, roughly -12..12. Positive sharpens execution slightly,
    * negative introduces a small drag under pressure. */
   momentum: [number, number];
+  /** forced-off injuries accrued this match, for end-of-match career persistence */
+  injuries: { team: 0 | 1; name: string; matchesOut: number }[];
   winner: -1 | 0 | 1; // resolved at finish (draw allowed in league)
 }
