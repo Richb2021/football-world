@@ -80,6 +80,10 @@ describe('phantom event hunt', () => {
     expect(goals).toBeGreaterThan(30); // sanity: matches still produce goals
     // Active diving keepers and contact saves create legitimate rebound chances;
     // an avalanche relative to either goals or saves still means regression.
-    expect(saveGoalChains).toBeLessThan(Math.max(10, goals * 0.16, saves * 0.16));
+    // Onside-arriving forwards convert more legitimate rebounds (Phase B B5b) — the
+    // chain rate per save rose ~0.13→0.165. 0.18 absorbs that re-baseline while still
+    // tripping on a genuine save->rebound avalanche (and the upcoming GK task). The
+    // keeper save/spill/rebound code is unchanged by B5b — per-shot leakage is the same.
+    expect(saveGoalChains).toBeLessThan(Math.max(10, goals * 0.18, saves * 0.18));
   }, 180000); // ~95-120s alone; can exceed 120s under full-suite CPU contention
 });

@@ -1,7 +1,7 @@
 import { HALF_LEN, HALF_WID } from '../sim/constants';
 import type { MatchConfig, MatchState, SimPhase, SimPlayer } from '../sim/types';
 
-export type ExitPresentationKind = 'halfTime' | 'fullTime';
+export type ExitPresentationKind = 'halfTime' | 'fullTime' | 'extraTimeBreak' | 'penalties';
 
 export interface SubstitutionPresentationChange {
   playerIdx: number;

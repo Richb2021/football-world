@@ -40,7 +40,14 @@ describe('off-ball positioning', () => {
     let atkFrames = 0, defProgSum = 0, deepDefFrames = 0; // back-line depth when attacking
     let playTicks = 0, clusterPairSum = 0;
 
-    for (let seed = 1; seed <= 20; seed++) {
+    // Phase B's behaviour overhaul (onside-holding forwards, defender de-bunch,
+    // wide wingers) shifted match dynamics so the rare penalty incident no longer
+    // fires within seeds 1..20 — penSettledSeen went to 0 (a coverage gap, NOT a
+    // quality regression: when a penalty IS sampled the keeper still holds his line
+    // at ~0.9m, well inside the <3m bar). Widen the battery to 1..40 to sample the
+    // scenario again (penalties land on seeds 24 & 35). The quality assertions below
+    // are unchanged.
+    for (let seed = 1; seed <= 40; seed++) {
       const sim = new MatchSim(cfg(seed));
       const inp: PadInput = { moveX: 0, moveY: 0, pass: false, shoot: false, sprint: false, switchPlayer: false };
       let guard = 0;

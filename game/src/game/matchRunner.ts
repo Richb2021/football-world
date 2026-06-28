@@ -26,7 +26,7 @@ import {
 } from './presentation';
 import type { SubstitutionMenuOpts, PauseMenuView, PauseStatusView } from '../ui/screens';
 import {
-  encodeSnapshot, snapshotToRenderState, type Snapshot,
+  encodeSnapshot, snapshotToRenderState, updateGuestInjuredSet, type Snapshot,
 } from '../net/online';
 import type { NetTransport } from '../net/transport';
 import type { AdOpportunity } from './ads';
@@ -143,7 +143,7 @@ export function exitPresentationModeForConfig(
   cfg: Pick<MatchConfig, 'celebrationTeam' | 'celebrationWin' | 'trophyWin'>,
   winner: -1 | 0 | 1,
 ): NonNullable<RenderCameraMode['presentation']> {
-  if (kind === 'halfTime') return 'halfTimeExit';
+  if (kind === 'halfTime' || kind === 'extraTimeBreak' || kind === 'penalties') return 'halfTimeExit';
   const celebratingTeam = celebrationTeamForConfig(cfg, winner);
   if (celebratingTeam === null) return 'fullTimeExit';
   if (cfg.trophyWin) return 'trophyLift';
@@ -187,6 +187,10 @@ export class MatchRunner {
   private guestNoSnapMs = 0;
   private guestSim: MatchSim | null = null;
   private guestState: MatchState | null = null;
+  // guest-side reconstructed injuredOff set (the snapshot doesn't carry it). Owned
+  // here, so it's fresh per match and can never leak across matches. Fed from the
+  // event stream; consumed when rebuilding render state.
+  private guestInjured = new Set<number>();
   private goalReplay = new GoalReplayController();
   private readonly walkoutDuration = 6;
   private walkoutTimer = this.walkoutDuration;
@@ -214,6 +218,7 @@ export class MatchRunner {
       opts.cfg.teams[1].data.short,
       opts.kits[0].shirt,
       opts.kits[1].shirt,
+      opts.localTeam,
     );
     opts.hud.show(true);
     opts.hud.showMatchdayGraphic(
@@ -268,8 +273,12 @@ export class MatchRunner {
           this.snapCur = m;
           this.snapTime = 0;
           if (m.ev.length) {
+            // fold injury/sub events into the guest-side injuredOff set before any
+            // render rebuild this frame, so the marker appears the instant 'injury'
+            // arrives and clears on the matching 'sub'
+            updateGuestInjuredSet(this.guestInjured, m.ev);
             if (this.guestState) {
-              const eventState = snapshotToRenderState(m, this.snapPrev, 1, this.guestState);
+              const eventState = snapshotToRenderState(m, this.snapPrev, 1, this.guestState, this.guestInjured);
               this.guestState = eventState;
               this.goalReplay.record(eventState);
               this.goalReplay.startFromGoal(eventState, m.ev);
@@ -405,6 +414,21 @@ export class MatchRunner {
           this.reachedFullTime = true;
           this.finalScore = [sim.state.score[0], sim.state.score[1]];
         }
+        // Show sub banner for AI-team substitutions. User/peer subs keep their own
+        // explicit presentation (commitPendingSubstitutions / peer onMessage). AI
+        // injury-forced subs intentionally show the sub banner — the injury banner
+        // fires earlier (on the play-tick injury event) and this sub banner fires
+        // later at the break, so the two banners are at different times and both
+        // convey useful information to the user.
+        for (const e of sim.events) {
+          if (e.type !== 'sub') continue;
+          const team = e.team as 0 | 1;
+          if (this.opts.cfg.teams[team].controller !== 'ai') continue;
+          const teamCfg = this.opts.cfg.teams[team];
+          const offName = teamCfg.data.players[e.player!]?.name ?? '';
+          const onName = teamCfg.data.players[e.onSquadIdx!]?.name ?? '';
+          this.opts.hud.subBanner(teamCfg.data.short ?? '', offName, onName);
+        }
       }
       // net: broadcast the snapshot BEFORE any exit-presentation break, so the
       // guest always receives the half/full-time/matchEnd events — without this
@@ -478,7 +502,7 @@ export class MatchRunner {
     }
     if (this.snapCur && this.guestState) {
       const alpha = Math.min(1, this.snapTime / (3 * DT));
-      const state = snapshotToRenderState(this.snapCur, this.snapPrev, alpha, this.guestState);
+      const state = snapshotToRenderState(this.snapCur, this.snapPrev, alpha, this.guestState, this.guestInjured);
       const gOwner = state.ball.ownerIdx >= 0 ? state.players[state.ball.ownerIdx] : null;
       const gAttacking = state.phase !== 'play'
         ? state.restartTeam === this.opts.localTeam
@@ -611,15 +635,26 @@ export class MatchRunner {
     const full = events.some((e) => e.type === 'fullTime' || e.type === 'matchEnd');
     const half = events.some((e) => e.type === 'halfTime');
     if (!full && !half) return false;
-    const kind: ExitPresentationKind = full ? 'fullTime' : 'halfTime';
-    if (this.exitPresentation?.kind === kind) return true;
     const state = this.sim?.state ?? this.guestState;
-    const presentation = state ? exitPresentationModeForConfig(kind, this.opts.cfg, state.winner) : kind === 'halfTime' ? 'halfTimeExit' : 'fullTimeExit';
+    // Determine the presentation kind from the current sim phase so ET/penalties
+    // reuse the half-time break screen with the correct label.
+    let kind: ExitPresentationKind;
+    if (full) {
+      kind = 'fullTime';
+    } else if (state?.phase === 'penalties') {
+      kind = 'penalties';
+    } else if (state?.phase === 'extraTimeBreak') {
+      kind = 'extraTimeBreak';
+    } else {
+      kind = 'halfTime';
+    }
+    if (this.exitPresentation?.kind === kind) return true;
+    const presentation = state ? exitPresentationModeForConfig(kind, this.opts.cfg, state.winner) : kind !== 'fullTime' ? 'halfTimeExit' : 'fullTimeExit';
     const winnerCelebration = presentation === 'trophyLift' || presentation === 'winnerCelebration';
     // trophy/major-result celebrations linger; a normal full time is shorter
-    const duration = kind === 'halfTime' ? 5.0 : winnerCelebration ? 9.5 : 6.2;
+    const duration = kind !== 'fullTime' ? 5.0 : winnerCelebration ? 9.5 : 6.2;
     this.exitPresentation = { kind, timer: duration, duration };
-    if (kind === 'halfTime') {
+    if (kind === 'halfTime' || kind === 'extraTimeBreak' || kind === 'penalties') {
       this.opts.onAdOpportunity?.({ surface: 'break', placementId: 'half_time_break', reason: 'half_time' });
     }
     if (presentation === 'trophyLift' && state) {
@@ -638,8 +673,9 @@ export class MatchRunner {
         );
       }
     } else if (state) {
-      // the broadcast score graphic (score + scorers/times) at half time and full time
-      this.opts.hud.showScoreGraphic(state.goals, state.score, kind === 'fullTime' ? 'FULL TIME' : 'HALF TIME', duration * 1000);
+      // the broadcast score graphic (score + scorers/times) at half time, full time, ET break and penalties
+      const label = kind === 'fullTime' ? 'FULL TIME' : kind === 'extraTimeBreak' ? 'EXTRA TIME' : kind === 'penalties' ? 'PENALTIES' : 'HALF TIME';
+      this.opts.hud.showScoreGraphic(state.goals, state.score, label, duration * 1000);
     }
     return true;
   }

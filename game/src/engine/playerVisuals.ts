@@ -13,6 +13,36 @@ const RING_FLAT_Q = new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI
 const _ringQ = new THREE.Quaternion();
 const _ringV = new THREE.Vector3();
 
+// height (m) the injury cross floats above the player's ground spot. Fixed in world
+// space (NOT the head bone) so it stays put while the player lies prone after a fall.
+const INJURY_MARK_Y = 2.4;
+// shared, built once: a red-on-white medical cross drawn on a CanvasTexture (mirrors
+// makeBallTexture in matchRenderer.ts). Lazily created so headless tests that never
+// call create() don't need a canvas.
+let _injuryMarkTexture: THREE.Texture | null = null;
+function injuryMarkTexture(): THREE.Texture {
+  if (_injuryMarkTexture) return _injuryMarkTexture;
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 64;
+  const ctx = c.getContext('2d')!;
+  // white rounded disc backing so the cross reads against grass and dark kits
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(32, 32, 30, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // red medical cross
+  ctx.fillStyle = '#d52b2b';
+  ctx.fillRect(26, 14, 12, 36);
+  ctx.fillRect(14, 26, 36, 12);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  _injuryMarkTexture = tex;
+  return tex;
+}
+
 export interface PlayerCreateOptions {
   kit: KitColors;
   appearance: PlayerAppearance;
@@ -50,6 +80,10 @@ export interface PlayerVisual {
   mixer: THREE.AnimationMixer | null;
   actions: PlayerActions;
   ring: THREE.Mesh;
+  /** persistent over-head medical-cross marker, shown while p.injuredOff is set
+   * (a forced-off injury awaiting a sub / man-down). Render-only; billboarded and
+   * pinned to a fixed world-y so it doesn't sink while the player lies prone. */
+  injuryMark?: THREE.Sprite;
   current: string;
   baseRotY: number;
   visualRotY: number;
@@ -73,6 +107,11 @@ export interface PlayerVisual {
   fallPower?: number;
   /** which mocap clip is playing during a fall: the knock-down or the get-up */
   fallStage?: 'down' | 'up';
+  /** latched true once the get-up clip has been cross-faded into locomotion, so the
+   * remaining 'fall' frames (anim is still 'fall' while downTimer drains) hand off to the
+   * idle/run path instead of re-grabbing the clamped one-shot get-up. Cleared on a fresh
+   * fall and on leaving the fall state. */
+  fallDone?: boolean;
   /** latched idle<->run state, with hysteresis, so a player hovering at the speed
    * threshold doesn't flicker between standing and running every frame */
   locoMoving?: boolean;
@@ -321,6 +360,18 @@ export class PlayerFactory {
     ring.visible = false;
     group.add(ring);
 
+    // persistent over-head injury marker (medical cross). A Sprite is intrinsically
+    // billboarded toward the camera and ignores the group's tilt, so it stays upright
+    // and readable while the player runs, falls, or lies prone. Hidden until injuredOff.
+    const injuryMark = new THREE.Sprite(
+      new THREE.SpriteMaterial({ map: injuryMarkTexture(), transparent: true, depthTest: false, sizeAttenuation: true }),
+    );
+    injuryMark.scale.setScalar(0.9);
+    injuryMark.position.set(0, INJURY_MARK_Y, 0);
+    injuryMark.renderOrder = 10; // draw over players so it isn't occluded by a teammate
+    injuryMark.visible = false;
+    group.add(injuryMark);
+
     // blob shadow (cheap, in addition to soft shadow map)
     const blob = new THREE.Mesh(
       new THREE.CircleGeometry(0.42, 16),
@@ -330,13 +381,23 @@ export class PlayerFactory {
     blob.position.y = 0.02;
     group.add(blob);
 
-    return { group, mixer, actions, ring, current: 'idle', baseRotY: this.modelYaw, visualRotY: this.modelYaw, special: null };
+    return { group, mixer, actions, ring, injuryMark, current: 'idle', baseRotY: this.modelYaw, visualRotY: this.modelYaw, special: null };
   }
 
   /** advance animation according to sim state */
   update(v: PlayerVisual, p: SimPlayer, dt: number, replay = false, smooth = false) {
     v.group.visible = !p.sentOff;
     if (p.sentOff) return;
+    // Persistent injury marker: visible whenever the sim has this player forced off
+    // (injuredOff). It rides the group, so it hides automatically when the group is
+    // hidden (sentOff / man-down) and clears when resolveInjuredOff drops injuredOff
+    // (sub). Render-only — never written by the sim. Keep its world-y fixed (counter
+    // the group's vertical offset, which a dive/fall pushes around) so the cross
+    // hovers at a steady height instead of sinking while the player lies prone.
+    if (v.injuryMark) {
+      v.injuryMark.visible = !!p.injuredOff;
+      if (v.injuryMark.visible) v.injuryMark.position.y = INJURY_MARK_Y - v.group.position.y;
+    }
     // Keep the selection ring flat on the pitch at a fixed ground height, no matter how the
     // body tilts or drops during a dive/tackle. It's a child of the body group, so without
     // this it rotates with the body and sinks through the turf. Counter the group's world
@@ -518,7 +579,7 @@ export class PlayerFactory {
       // resuming after a throw: restart locomotion clips
       (run ?? walk)?.play();
     }
-    if (p.anim === 'fall' && a.fall) {
+    if (p.anim === 'fall' && a.fall && !v.fallDone) {
       // Real mocap fall: the knock-down clip drops him to the turf (its vertical root
       // motion + bone rotations lay the body out), it clamps on the lying pose, then
       // the get-up clip lifts him back to his feet over the last stretch of downTimer.
@@ -531,44 +592,79 @@ export class PlayerFactory {
       // rises. So 'up' latches once entered, and only a fresh fall resets it to 'down'.
       const stage: 'down' | 'up' = (a.getup && (v.fallStage === 'up' || (down > 0 && down < GETUP)))
         ? 'up' : 'down';
-      if (v.current !== 'fall' || v.fallStage !== stage) {
-        run?.stop();
-        walk?.stop();
-        a.idle?.stop();
-        a.tired?.stop();
-        const prev = v.special;
-        // pitched onto his front when the shove went with his facing (clipped from
-        // behind); toppled backward otherwise. The get-up matches: a prone push-up off
-        // the front, or the sit-up-and-rise from the back.
-        const forward = !!(p.fallForward && a.fallForward);
-        const downClip = forward ? a.fallForward! : a.fall;
-        const upClip = (p.fallForward && a.getupFront) ? a.getupFront : a.getup!;
-        const act = stage === 'up' ? upClip : downClip;
-        act.reset();
-        act.setLoop(THREE.LoopOnce, 1);
-        act.clampWhenFinished = true;
-        const dur = act.getClip().duration || 1;
-        // the library clips run long (knock-down ~2.5s, stand-up ~8s); pace them into
-        // the game's beat so the fall is snappy and the get-up isn't a slow grind
-        const target = stage === 'up' ? GETUP : 0.9;
-        act.timeScale = Math.min(14, Math.max(0.5, dur / target));
-        act.setEffectiveWeight(1);
-        act.play();
-        if (prev && prev !== act) prev.crossFadeTo(act, 0.12, false);
-        v.special = act;
-        v.fallStage = stage;
+      // The library get-up clip is paced to FINISH right at the end of the GETUP window
+      // (an 8.3s "Stand_Up" run at ~10x → 0.8s) and is clamped, so once it lands it FREEZES
+      // on the neutral upright frame for the rest of the down window (downTimer can outlast
+      // the get-up — e.g. a longer foul layoff) → the stiff "stood bolt upright" look before
+      // he runs off. So when the get-up has effectively completed (down has drained, or its
+      // action has reached the clamped end frame), cross-fade that tail straight into the
+      // looping idle/run and hand off to the normal locomotion path for the remainder.
+      const getup = v.special;
+      const upComplete = stage === 'up' && getup
+        && (down < 0.05 || getup.time >= (getup.getClip().duration || 1) - 1e-3);
+      if (upComplete) {
+        // idle when ~stationary (a fouled dead-ball victim the sim resolves to 'idle'),
+        // run when moving (an open-play hard-tackle riser already back up to speed).
+        const loco = speed > 0.6 ? (a.run ?? a.walk) : (a.idle ?? a.run ?? a.walk);
+        if (loco) {
+          if (!loco.isRunning()) loco.reset();
+          loco.setLoop(THREE.LoopRepeat, Infinity);
+          loco.setEffectiveWeight(1);
+          loco.timeScale = 1;
+          loco.play();
+          getup!.crossFadeTo(loco, 0.18, false);
+        }
+        // drop the one-shot pointer and latch the handoff so the next 'fall' frame (anim is
+        // still 'fall' while downTimer drains) does NOT re-grab the clamped get-up; let the
+        // function fall through to the locomotion block to drive the loco clip from here.
+        v.special = null;
+        v.fallStage = undefined;
+        v.fallDone = true;
+        v.group.rotation.x = 0;
+        v.group.rotation.z = 0;
+        v.group.position.y = 0;
+      } else {
+        if (v.current !== 'fall' || v.fallStage !== stage) {
+          run?.stop();
+          walk?.stop();
+          a.idle?.stop();
+          a.tired?.stop();
+          const prev = v.special;
+          // pitched onto his front when the shove went with his facing (clipped from
+          // behind); toppled backward otherwise. The get-up matches: a prone push-up off
+          // the front, or the sit-up-and-rise from the back.
+          const forward = !!(p.fallForward && a.fallForward);
+          const downClip = forward ? a.fallForward! : a.fall;
+          const upClip = (p.fallForward && a.getupFront) ? a.getupFront : a.getup!;
+          const act = stage === 'up' ? upClip : downClip;
+          act.reset();
+          act.setLoop(THREE.LoopOnce, 1);
+          act.clampWhenFinished = true;
+          const dur = act.getClip().duration || 1;
+          // the library clips run long (knock-down ~2.5s, stand-up ~8s); pace them into
+          // the game's beat so the fall is snappy and the get-up isn't a slow grind
+          const target = stage === 'up' ? GETUP : 0.9;
+          act.timeScale = Math.min(14, Math.max(0.5, dur / target));
+          act.setEffectiveWeight(1);
+          act.play();
+          if (prev && prev !== act) prev.crossFadeTo(act, 0.12, false);
+          v.special = act;
+          v.fallStage = stage;
+        }
+        v.group.rotation.x = 0;
+        v.group.rotation.z = 0;
+        v.group.position.y = 0;
+        v.mixer.update(dt);
+        v.current = 'fall';
+        return;
       }
-      v.group.rotation.x = 0;
-      v.group.rotation.z = 0;
-      v.group.position.y = 0;
-      v.mixer.update(dt);
-      v.current = 'fall';
-      return;
     }
-    if (p.anim === 'fall') {
+    if (p.anim === 'fall' && !v.fallDone) {
       // no mocap clip loaded — procedural fallback: topple sideways onto the turf,
       // lie there, then push back up to his feet. The tip-over runs on its own
       // accumulator; the getup is driven off the sim's downTimer.
+      // (Skipped once the mocap get-up has been handed off to locomotion: v.fallDone is
+      // latched, so the remaining 'fall' frames flow to the normal idle/run path below.)
       if (v.current !== 'fall') {
         run?.stop();
         walk?.stop();
@@ -608,10 +704,14 @@ export class PlayerFactory {
       v.current = 'fall';
       return;
     }
-    if (v.current === 'fall') {
-      // back on his feet: drop the fall clip, clear any laid-out pose, restart locomotion
+    if (v.current === 'fall' && p.anim !== 'fall') {
+      // back on his feet (the sim has left the fall state): drop the fall clip, clear any
+      // laid-out pose and the handoff latch, restart locomotion. Gated on p.anim so a
+      // handed-off fall (v.fallDone, p.anim still 'fall' while downTimer drains) does NOT
+      // clear v.fallDone early and let the get-up re-grab on the next frame.
       if (v.special) { v.special.stop(); v.special = undefined; }
       v.fallStage = undefined;
+      v.fallDone = false;
       v.group.rotation.x = 0;
       v.group.rotation.z = 0;
       v.group.position.y = 0;

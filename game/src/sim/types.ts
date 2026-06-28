@@ -288,7 +288,7 @@ export interface SimEvent {
     | 'out' | 'bounce' | 'tackle' | 'nearMiss' | 'halfTime' | 'fullTime'
     | 'kickoff' | 'penScored' | 'penMissed' | 'matchEnd'
     | 'foul' | 'offside' | 'yellowCard' | 'redCard' | 'penalty' | 'pass' | 'addedTime'
-    | 'hydrationBreak' | 'injury'
+    | 'hydrationBreak' | 'injury' | 'sub'
     // crowd reactions: a boo at a clearly wrong refereeing decision, ironic applause
     // when an aggrieved team finally gets one their way, and a sarcastic mock cheer
     // when a shot is skied or dragged miles wide. `team` = the team the crowd is
@@ -296,6 +296,11 @@ export interface SimEvent {
     | 'crowdBoo' | 'crowdIronic' | 'crowdMock';
   team?: 0 | 1;
   player?: number;
+  /** for 'sub' events: the squad index of the player coming on */
+  onSquadIdx?: number;
+  /** for 'sub' events: the on-pitch slot index of the player going off — same index space
+   *  as the 'injury' event's `player` field, so the guest can clear the injury marker. */
+  offPlayerIdx?: number;
   target?: number;
   power?: number;
   /** a tackle/block that snuffed out a goal threat near the defender's own goal — the crowd applauds */
@@ -339,6 +344,10 @@ export interface MatchState {
   penalties: PenaltyState | null;
   /** -1..1 current visible penalty aim marker, for normal penalties and shoot-outs */
   penaltyAim: number;
+  /** -1..1 held defending-keeper dive pre-commit (stick left/centre-stay/right) for an
+   * in-match penalty, latched into the keeper's guess at the strike. Mirrors penaltyAim.
+   * Optional so older serialized/test states default to neutral (treated as 0). */
+  penaltyDive?: number;
   /** crowd excitement 0..1 for audio */
   excitement: number;
   /** per-team momentum, roughly -12..12. Positive sharpens execution slightly,

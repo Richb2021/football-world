@@ -187,6 +187,15 @@ const dist = (a: Vec2, b: Vec2) => Math.hypot(a.x - b.x, a.y - b.y);
  * over — stops the controlled player flickering during quick passing moves */
 const SWITCH_BIAS = 1.6;
 
+/** stick magnitude below which a defending keeper's penalty dive reads as
+ * "centre / stay" rather than a committed left/right dive (held pre-commit). */
+const PENALTY_DIVE_DEADZONE = 0.3;
+
+/** a carrier is "pressured" when the nearest opponent is within this radius (m).
+ * ONE source of truth: the on-ball pass decision (sideways/back only under pressure)
+ * and the off-ball "show for the pass" trigger read the same number. */
+const CARRIER_PRESSURE_RADIUS = 4.5;
+
 interface HumanCtl {
   shootHeldSince: number; // tick when shoot press started, -1 idle
   passHeldSince: number; // tick when pass press started, -1 idle
@@ -299,6 +308,17 @@ export class MatchSim {
   private forwardRuns = new Map<number, { until: number; target: Vec2 }>();
   /** sticky marking assignments so defenders track a runner instead of flickering */
   private markAssignments = new Map<number, { targetIdx: number; until: number }>();
+  /** per-tick claim election so EXACTLY ONE defender commits per off-ball man,
+   * rebuilt once at the top of every play-phase tick by claimPrePass (no rng).
+   * recoveryClaims: in-behind runnerIdx -> the single elected recoverer's idx.
+   * centralBlockClaims: central carrierIdx -> the single elected blocker's idx.
+   * isNearestRecoverer / isNearestCentralBlocker consult these instead of each
+   * re-deriving "nearest" with a dead-band too small to pick a unique man, which
+   * let 2-3 defenders collapse onto the same runner. Election is deterministic:
+   * nearest eligible defender, LOWEST idx breaks ties; a defender already
+   * committed to that man via markAssignments keeps him. */
+  private recoveryClaims = new Map<number, number>();
+  private centralBlockClaims = new Map<number, number>();
   /** who each player last received a pass from, to discourage sterile return passes */
   private recentReceivedFrom = new Map<number, { from: number; tick: number }>();
   /** last possession change, for transition (counter-attack) tempo */
@@ -339,10 +359,16 @@ export class MatchSim {
   private dodgeState = new Map<number, number>();
   /** sticky "open channel" Y per team so runs don't snap between gaps each tick */
   private openChannelMemo = new Map<0 | 1, { y: number; until: number }>();
+  /** sticky single "show for the pass" dropper per team: the one supporter elected
+   * to come short to the carrier's feet. Memoised for a beat (mirrors openChannelMemo)
+   * so the choice doesn't flicker between men as distances jostle each tick. */
+  private dropperMemo = new Map<0 | 1, { idx: number; until: number }>();
   /** stable free-kick wall membership/order for the current dead ball */
   private wallCache: { posX: number; posY: number; team: 0 | 1; order: number[] } | null = null;
   /** smoothed shot-stopping line target so the keeper doesn't shimmy on a shot */
   private gkLineY: number | null = null;
+  /** Index of a keeper who is gathering a ball in physical travel (ownerIdx = -1, ball rolling to him). -1 = none. */
+  private gkGatherIdx = -1;
   private gkSetY = 0; // the keeper's y when the current shot became live (his set anchor)
   private shotOpenness = 0.7; // 0..1 quality of the live shot's chance (space + finisher), captured at strike
   private shotStruckDist = 14; // distance to goal where the live shot was struck — long shots are lower-quality chances
@@ -432,6 +458,7 @@ export class MatchSim {
       subbedOn: [[], []],
       penalties: null,
       penaltyAim: 0,
+      penaltyDive: 0,
       excitement: 0.3,
       momentum: initialMomentum,
       injuries: [],
@@ -1336,8 +1363,21 @@ export class MatchSim {
         st.penaltyAim = this.cfg.teams[st.restartTeam].controller !== 'ai'
           ? clamp(inp.moveY, -1, 1)
           : 0;
+        // the DEFENDING keeper (1 - restartTeam) gets the same lateral stick the
+        // attacker aims with — matchRunner has already rotated the raw stick into the
+        // set-piece camera basis, so the left/right axis arrives in moveY for both
+        // sides ("push toward a side = that side on screen"). Held as a pre-commit
+        // and latched into the keeper's guess at the strike. Small |moveY| = stay.
+        const defTeam = (1 - st.restartTeam) as 0 | 1;
+        if (this.cfg.teams[defTeam].controller !== 'ai') {
+          const dive = clamp(inputs[defTeam].moveY, -1, 1);
+          st.penaltyDive = Math.abs(dive) < PENALTY_DIVE_DEADZONE ? 0 : dive;
+        } else {
+          st.penaltyDive = 0;
+        }
       } else {
         st.penaltyAim = 0;
+        st.penaltyDive = 0;
       }
       const deadBallCanRoll = st.phase === 'throwIn' || st.phase === 'corner' || st.phase === 'goalKick';
       const deadBallRolling = deadBallCanRoll
@@ -1387,6 +1427,10 @@ export class MatchSim {
     this.goalkeeperLogic();
     this.limitOpenPlayBallSnap(frameBallStart);
     if (st.phase === 'play') this.checkBounds(ballFrameStart);
+    // clear any pending gather flag if the ball left play or was claimed by another player
+    if (this.gkGatherIdx >= 0 && (st.phase !== 'play' || st.ball.ownerIdx !== -1)) {
+      this.gkGatherIdx = -1;
+    }
 
     // clock ---------------------------------------------------------------
     const halfLen = st.half <= 2 ? this.cfg.halfLengthSec : this.cfg.halfLengthSec / 3;
@@ -1458,7 +1502,10 @@ export class MatchSim {
     const st = this.state;
     if (st.half === 1 || st.half === 3) {
       st.phase = st.half === 1 ? 'halfTime' : 'extraTimeBreak';
-      st.restartTimer = 2.5;
+      // half 3 (ET first period) triggers the 5.0 s exit-presentation just like
+      // ET-entry (half 2) and penalties; give it the same long restartTimer so the
+      // sim cannot tick the half forward while the interstitial is still on screen.
+      st.restartTimer = st.half === 3 ? 5.2 : 2.5;
       this.emit({ type: 'halfTime' });
       this.emit({ type: 'whistle' });
       return;
@@ -1468,8 +1515,9 @@ export class MatchSim {
         this.finishMatch();
       } else {
         st.phase = 'extraTimeBreak';
-        st.restartTimer = 3;
-        this.emit({ type: 'fullWhistle' });
+        st.restartTimer = 5.2;            // cover the exit-presentation duration so the sim doesn't tick through it
+        this.emit({ type: 'halfTime' });
+        this.emit({ type: 'whistle' });
       }
       return;
     }
@@ -1671,6 +1719,10 @@ export class MatchSim {
 
   private integratePlayers(inputs: [PadInput, PadInput], celebrating: boolean) {
     const st = this.state;
+    // elect ONE defender per off-ball man BEFORE any aiTarget call this tick, so
+    // the "nearest" gates consult a single committed choice instead of each
+    // re-deriving it and 2-3 collapsing onto the same runner (see claimPrePass).
+    if (!celebrating) this.claimPrePass();
     for (const p of st.players) {
       if (p.sentOff) {
         p.control = false;
@@ -2250,7 +2302,11 @@ export class MatchSim {
       // cover so the cutback lane is still screened. (Accepted trade: tighter central
       // cover wins/contests the ball more, so open-play turnovers run a little higher.)
       const carrierCentral = Math.abs(ownerY) < PENALTY_BOX_HALF_WIDTH;
-      const lateral = carrierCentral ? 2.4 : 6;
+      // RC3: widen the central cover offset (was a flat 2.4m ball-winning tuck that
+      // sat the cover man almost on top of the press, so the two bunched). Now
+      // quality-scaled (~4.0m poor → ~6.5m elite): an elite cover screens the lane
+      // cleanly from a step off, a poor one still tucks tighter to contest the ball.
+      const lateral = carrierCentral ? 4.0 + this.defensiveQuality(p) * 2.5 : 6;
       return { x: coverX, y: ownerY + (p.pos.y > ownerY ? lateral : -lateral) };
     }
     // Last line of cover: if no other outfielder is goal-side of the carrier and
@@ -2269,14 +2325,13 @@ export class MatchSim {
     // A carrier driving centrally at our goal: the single nearest defender peels
     // into the lane and cuts off the path, instead of retreating to his wide slot
     // and leaving the middle open. Only the nearest goes; the rest hold shape.
-    if (p.attrs.pos === 'DF' && Math.abs(owner.pos.y) < 14 && this.isNearestCentralBlocker(p, owner)) {
+    const pressExcluded = [press.primary?.idx ?? -1, press.secondary?.idx ?? -1];
+    if (p.attrs.pos === 'DF' && Math.abs(owner.pos.y) < 14
+      && this.isNearestCentralBlocker(p, owner, pressExcluded)) {
       const block = this.goalCutoffTarget(p, owner);
       if (block) return block;
     }
-    const centralCutbackScreen = this.centralCutbackScreenTarget(p, owner, [
-      press.primary?.idx ?? -1,
-      press.secondary?.idx ?? -1,
-    ]);
+    const centralCutbackScreen = this.centralCutbackScreenTarget(p, owner, pressExcluded);
     if (centralCutbackScreen) return centralCutbackScreen;
     if (press.tertiary?.idx === p.idx && press.dangerousReceiver) {
       // cut the lane to the most dangerous unmarked receiver
@@ -2383,26 +2438,143 @@ export class MatchSim {
   /** true when `p` is the single closest own defender to a carrier driving at our
    * goal — so exactly ONE man peels into the central lane to block the run, rather
    * than the whole back line retreating to its slots and leaving the middle open
-   * (the "they back off and let him run between them" complaint). */
-  private isNearestCentralBlocker(p: SimPlayer, carrier: SimPlayer): boolean {
+   * (the "they back off and let him run between them" complaint). Consults the
+   * per-tick centralBlockClaims election (one man per carrier, lowest-idx tie); the
+   * quality-scaled dead-band is a secondary safeguard when no claim exists yet
+   * (e.g. the carrier only just became central this tick). `excludedIdxs` drops
+   * men already committed to the press so the blocker is a genuinely free man. */
+  private isNearestCentralBlocker(p: SimPlayer, carrier: SimPlayer, excludedIdxs: number[] = []): boolean {
+    if (excludedIdxs.includes(p.idx)) return false;
     const myD = dist(p.pos, carrier.pos);
     if (myD > 26) return false;
+    const claimed = this.centralBlockClaims.get(carrier.idx);
+    if (claimed !== undefined) return claimed === p.idx;
+    // No election for this carrier — fall back to a quality-scaled nearest test.
+    // A high-quality defender holds off decisively (wide band → exactly one man),
+    // a poor one keeps a tighter band (may bunch a little — realistic).
+    const deadband = 1.0 + this.defensiveQuality(p) * 1.5;
     for (const q of this.state.players) {
       if (q.team !== p.team || q.isGK || q.sentOff || q === p || q.attrs.pos !== 'DF') continue;
-      if (dist(q.pos, carrier.pos) < myD - 0.3) return false;
+      if (excludedIdxs.includes(q.idx)) continue;
+      const qd = dist(q.pos, carrier.pos);
+      // lowest idx wins exact ties so the choice is order-stable and deterministic
+      if (qd < myD - deadband || (Math.abs(qd - myD) <= deadband && q.idx < p.idx)) return false;
     }
     return true;
   }
 
   /** true when `p` is the closest own outfield player to the runner, so only one
-   * defender peels off to recover rather than the whole back line chasing. */
+   * defender peels off to recover rather than the whole back line chasing. Consults
+   * the per-tick recoveryClaims election (one man per in-behind runner, lowest-idx
+   * tie); the quality-scaled dead-band is a secondary safeguard for a runner that
+   * had no election yet (the prePass only elects runners surfaced this tick). */
   private isNearestRecoverer(p: SimPlayer, runner: SimPlayer): boolean {
+    const claimed = this.recoveryClaims.get(runner.idx);
+    if (claimed !== undefined) return claimed === p.idx;
     const myD = dist(p.pos, runner.pos);
+    // RC1: widen the old flat 0.5m dead-band, quality-scaled (~1.0m poor → ~2.5m
+    // elite) so a single decisive defender commits instead of the whole back line.
+    const deadband = 1.0 + this.defensiveQuality(p) * 1.5;
     for (const q of this.state.players) {
       if (q.team !== p.team || q.isGK || q.sentOff || q === p) continue;
-      if (dist(q.pos, runner.pos) < myD - 0.5) return false;
+      const qd = dist(q.pos, runner.pos);
+      if (qd < myD - deadband || (Math.abs(qd - myD) <= deadband && q.idx < p.idx)) return false;
     }
     return true;
+  }
+
+  /** Per-tick claim PRE-PASS — the robust fix for "2-3 defenders collapse onto the
+   * same off-ball man". A mid-loop set only informs the LAST-index defender, so this
+   * runs ONCE at the top of every play-phase tick, BEFORE any aiTarget call, and
+   * elects the single nearest ELIGIBLE defender for each in-behind runner and each
+   * central carrier. isNearestRecoverer / isNearestCentralBlocker then CONSULT the
+   * election rather than each re-deriving "nearest" with a too-small dead-band.
+   *
+   * Fully deterministic, no rng: players are iterated in index order, the elected
+   * defender is the nearest by distance with the LOWEST idx breaking exact ties, and
+   * a man already committed to a runner via the markAssignments 1.3s memo keeps him
+   * (committed claims are honoured first, then the rest are filled). */
+  private claimPrePass() {
+    this.recoveryClaims.clear();
+    this.centralBlockClaims.clear();
+    const st = this.state;
+    if (st.phase !== 'play') return;
+    const owner = this.owner();
+    if (!owner || owner.isGK) return;
+    const defTeam = (1 - owner.team) as 0 | 1;
+
+    // index-ordered eligible defenders of the defending team
+    const defenders: SimPlayer[] = [];
+    for (const q of st.players) {
+      if (q.team !== defTeam || q.isGK || q.sentOff || q.injuredOff) continue;
+      defenders.push(q);
+    }
+    if (!defenders.length) return;
+
+    // who the press has tied up — the elected blocker must be a genuinely free man
+    const press = this.pressAssignments(defTeam, owner);
+    const pressIdxs = new Set<number>();
+    if (press.primary) pressIdxs.add(press.primary.idx);
+    if (press.secondary) pressIdxs.add(press.secondary.idx);
+
+    // --- in-behind runner election (RC2 for the recoverer gate) ---
+    // gather the distinct runners any defender would surface, then assign each to
+    // exactly one defender. markAssignments commitments win first.
+    const runners: SimPlayer[] = [];
+    const seenRunner = new Set<number>();
+    for (const d of defenders) {
+      if (d.attrs.pos !== 'DF' && d.attrs.pos !== 'MF') continue;
+      const r = this.findRunnerInBehind(d, owner);
+      if (r && !seenRunner.has(r.idx)) { seenRunner.add(r.idx); runners.push(r); }
+    }
+    // seed the press men as already "spoken for": they return early in aiTarget
+    // (press branch) and never reach the recoverer gate, so electing one of them
+    // would silently leave the runner unmarked. Give the runner to a free man.
+    const claimedDefenders = new Set<number>(pressIdxs);
+    // honour committed marks first: a defender already marking this runner keeps him
+    for (const r of runners) {
+      for (const d of defenders) {
+        if (claimedDefenders.has(d.idx)) continue;
+        const memo = this.markAssignments.get(d.idx);
+        if (memo && memo.until > st.tick && memo.targetIdx === r.idx) {
+          this.recoveryClaims.set(r.idx, d.idx);
+          claimedDefenders.add(d.idx);
+          break;
+        }
+      }
+    }
+    // fill the rest: nearest eligible (DF/MF) defender, lowest idx breaks ties
+    for (const r of runners) {
+      if (this.recoveryClaims.has(r.idx)) continue;
+      let bestIdx = -1;
+      let bestD = Infinity;
+      for (const d of defenders) {
+        if (claimedDefenders.has(d.idx)) continue;
+        if (d.attrs.pos !== 'DF' && d.attrs.pos !== 'MF') continue;
+        const dd = dist(d.pos, r.pos);
+        if (dd > 40) continue;
+        if (dd < bestD - 1e-6) { bestD = dd; bestIdx = d.idx; }
+      }
+      if (bestIdx >= 0) {
+        this.recoveryClaims.set(r.idx, bestIdx);
+        claimedDefenders.add(bestIdx);
+      }
+    }
+
+    // --- central carrier blocker election (RC2 for the central-blocker gate) ---
+    // exactly one DF peels into the central lane to block a carrier driving at goal.
+    if (Math.abs(owner.pos.y) < 14) {
+      let bestIdx = -1;
+      let bestD = Infinity;
+      for (const d of defenders) {
+        if (d.attrs.pos !== 'DF') continue;
+        if (pressIdxs.has(d.idx)) continue;
+        const dd = dist(d.pos, owner.pos);
+        if (dd > 26) continue;
+        if (dd < bestD - 1e-6) { bestD = dd; bestIdx = d.idx; }
+      }
+      if (bestIdx >= 0) this.centralBlockClaims.set(owner.idx, bestIdx);
+    }
   }
 
   /** Find attackers running in behind the defensive line */
@@ -2453,6 +2625,89 @@ export class MatchSim {
     return (p.attrs.pass + p.attrs.tackle) / 2;
   }
 
+  /**
+   * Is the carrier under enough pressure / starved of a forward ball that ONE
+   * support man should drop to his feet? Trigger = a defender inside the same
+   * close-down radius the on-ball pass logic uses (CARRIER_PRESSURE_RADIUS), OR
+   * no onside team-mate ahead of the ball (a forward outlet) at all.
+   */
+  private carrierNeedsShortOption(owner: SimPlayer): boolean {
+    if (this.nearestOpponentDist(owner) < CARRIER_PRESSURE_RADIUS) return true;
+    // No onside forward option: nobody ahead of the ball who isn't flagged offside.
+    const dir = this.attackSign(owner.team);
+    const ballProg = this.state.ball.pos.x * dir;
+    for (const q of this.state.players) {
+      if (q.team !== owner.team || q === owner || q.isGK || q.sentOff) continue;
+      if (q.pos.x * dir > ballProg + 1.5 && !this.isOffsideTarget(owner, q)) return false;
+    }
+    return true;
+  }
+
+  /**
+   * Elect EXACTLY ONE supporter per team to come short and show for the pass.
+   * Deterministic (no rng): the nearest eligible man to the carrier wins, lowest
+   * idx breaks ties. Eligible = a midfielder/forward, goal-side of the ball, not
+   * already committed to an in-behind dart. Memoised for a beat (mirrors
+   * openChannelMemo / markAssignments) so the choice can't flicker frame to frame.
+   * Returns the elected player's idx, or -1 when no short option is wanted.
+   */
+  private electDropper(owner: SimPlayer): number {
+    const st = this.state;
+    const team = owner.team;
+    const memo = this.dropperMemo.get(team);
+    const dir = this.attackSign(team);
+    const ballProg = st.ball.pos.x * dir;
+    const eligible = (q: SimPlayer): boolean => {
+      if (q.team !== team || q === owner || q.isGK || q.sentOff) return false;
+      if (q.attrs.pos !== 'MF' && q.attrs.pos !== 'FW') return false;
+      if (q.pos.x * dir >= ballProg) return false; // must be goal-side of the ball
+      const run = this.forwardRuns.get(q.idx); // not mid-dart in behind
+      if (run && run.until > st.tick) return false;
+      return true;
+    };
+    // hold the previous pick for a beat if he's still eligible and still wanted
+    if (memo && memo.until > st.tick) {
+      const held = st.players[memo.idx];
+      if (held && eligible(held) && this.carrierNeedsShortOption(owner)) return memo.idx;
+    }
+    if (!this.carrierNeedsShortOption(owner)) {
+      this.dropperMemo.delete(team);
+      return -1;
+    }
+    let bestIdx = -1;
+    let bestDist = Infinity;
+    for (const q of st.players) {
+      if (!eligible(q)) continue;
+      const d = dist(q.pos, owner.pos);
+      if (d < bestDist - 1e-6 || (Math.abs(d - bestDist) <= 1e-6 && (bestIdx === -1 || q.idx < bestIdx))) {
+        bestDist = d;
+        bestIdx = q.idx;
+      }
+    }
+    if (bestIdx === -1) {
+      this.dropperMemo.delete(team);
+      return -1;
+    }
+    this.dropperMemo.set(team, { idx: bestIdx, until: st.tick + Math.round(0.5 / DT) });
+    return bestIdx;
+  }
+
+  /**
+   * The point the elected dropper moves to: short of the carrier, on his OWN-GOAL
+   * side of the ball (progress strictly behind the ball, so he can NEVER be an
+   * offside target), offset to an open passing lane.
+   */
+  private dropToShowTarget(p: SimPlayer, owner: SimPlayer): Vec2 {
+    const dir = this.attackSign(p.team);
+    const ballProg = owner.pos.x * dir;
+    // a couple of metres behind the ball — guaranteed onside, close enough to receive
+    const dropProg = clamp(ballProg - 6, -HALF_LEN + 6, HALF_LEN - 8);
+    // bend off the carrier's line into space so the pass isn't into the presser
+    const laneSide = Math.sign((p.pos.y - owner.pos.y) || (p.idx % 2 ? 1 : -1));
+    const showY = clamp(owner.pos.y + laneSide * 7, -HALF_WID + 5, HALF_WID - 5);
+    return { x: dir * dropProg, y: showY };
+  }
+
   private supportTarget(p: SimPlayer, owner: SimPlayer): Vec2 {
     const st = this.state;
     const base = this.formationTarget(p);
@@ -2470,7 +2725,17 @@ export class MatchSim {
     // runs stutter: sprint, stop, reset, sprint again)
     const run = this.forwardRuns.get(p.idx);
     if (run && run.until > st.tick && dist(p.pos, run.target) > 1.4) {
-      return { x: run.target.x, y: run.target.y };
+      // A committed dart in behind only stands while the carrier can still play it.
+      // Otherwise keep the forward onside by re-clamping the stored target to the
+      // CURRENT offside line (it moves as the defence steps), so a run stored a few
+      // ticks ago can't leave him stranded offside waiting for a ball that won't come.
+      if (this.carrierCanReleaseInBehind(owner, p)) {
+        return { x: run.target.x, y: run.target.y };
+      }
+      const offsideLineProg = this.secondLastOpponentX(p.team);
+      const storedProg = run.target.x * dir;
+      const onsideProg = Math.min(storedProg, offsideLineProg - 0.6, HALF_LEN - 8);
+      return { x: dir * clamp(onsideProg, 4, HALF_LEN - 8), y: run.target.y };
     }
     if (role === 'holdingMidfielder' && ownerAhead > 3) {
       return {
@@ -2490,15 +2755,44 @@ export class MatchSim {
       && this.rng.next() < (p.attrs.pos === 'FW' ? 0.7 : 0.42) * clamp(0.86 + this.teamQuality(p.team) * 0.16, 0.66, 1.04) * runInstinct * mentality.risk) {
       const ownerProg = owner.pos.x * dir;
       if (ownerProg > -25 && ownerProg < HALF_LEN - 8) {
-        const lineProg = this.oppositionDefLineX(p.team) * dir;
-        const targetX = dir * clamp(lineProg + 7, 4, HALF_LEN - 8);
+        // Judge the run against the SAME line the offside rule uses (GK-included,
+        // unclamped) so "onside" here means onside to the referee.
+        const offsideLineProg = this.secondLastOpponentX(p.team);
+        // Dampen is deterministic — derived purely from runInstinct (raw attrs,
+        // matching line 2476). A high pace+shoot forward sits right on the line and
+        // breaks late/level; a weak one keeps a larger cushion and over-commits a
+        // touch when he does dart (so he strays offside more). Stretch the raw
+        // instinct fraction across [0, 2.5] so an elite forward reaches the 0.4 floor.
+        const instinctScaled = clamp(((runInstinct - 0.55) / 0.65) * 2.5, 0, 2.5);
+        const onsideCushion = clamp(2.5 - instinctScaled, 0.4, 2.5);
         // Use formation slot for varied Y offsets so different players target different spaces
         const slotOffset = (p.slot.y * 8 + (p.idx % 5 - 2) * 2) * mentality.supportWidth * (0.88 + tactic.width * 0.28);
         const targetY = clamp(this.openChannelY(p.team) + slotOffset, -HALF_WID + 5, HALF_WID - 5);
-        this.forwardRuns.set(p.idx, {
-          until: st.tick + Math.round(3.0 / DT),
-          target: { x: targetX, y: targetY },
-        });
+        // BASELINE: hold onside, a hair in front of the offside line (clamped so a
+        // weaker forward never drifts beyond it). Mirror transitionSupportTarget's
+        // `- cushion` onside pattern rather than the old `+ 7` overshoot.
+        const onsideProg = Math.min(offsideLineProg - onsideCushion, HALF_LEN - 8);
+        if (this.carrierCanReleaseInBehind(owner, p)) {
+          // The carrier can actually slide it through this beat: commit the dart in
+          // behind. Elite forwards arrive level (small overshoot, ~0.8m); weaker ones
+          // over-commit early and stray a touch further past the line. Keep the hold
+          // SHORT (~0.9s) and timed to the release so the forward arrives as the ball
+          // is struck instead of standing offside for 3 seconds.
+          const overshoot = clamp(0.8 + (2.5 - instinctScaled), 0.8, 3.3);
+          const behindProg = clamp(offsideLineProg + overshoot, 4, HALF_LEN - 8);
+          this.forwardRuns.set(p.idx, {
+            until: st.tick + Math.round(0.9 / DT),
+            target: { x: dir * behindProg, y: targetY },
+          });
+        } else {
+          // No release imminent: hold onside. Short hold so the consume path re-clamps
+          // to the (moving) line frequently rather than freezing a stale onside point.
+          const holdProg = clamp(onsideProg, 4, HALF_LEN - 8);
+          this.forwardRuns.set(p.idx, {
+            until: st.tick + Math.round(0.5 / DT),
+            target: { x: dir * holdProg, y: targetY },
+          });
+        }
       }
     }
 
@@ -2536,9 +2830,64 @@ export class MatchSim {
         y: clamp(side * 5.4, -HALF_WID + 4, HALF_WID - 4),
       };
     }
+    // Show for the pass: ONE elected supporter drops to the carrier's feet when
+    // the carrier is pressured / starved of a forward ball. He targets a point
+    // strictly behind the ball (own-goal side) so he can never be flagged offside.
+    if ((p.attrs.pos === 'FW' || p.attrs.pos === 'MF') && this.electDropper(owner) === p.idx) {
+      const show = this.dropToShowTarget(p, owner);
+      return { x: clamp(show.x, -HALF_LEN + 2, HALF_LEN - 2), y: show.y };
+    }
+
     let x = base.x;
     let y = base.y;
-    if (p.attrs.pos === 'FW') {
+    // ----- role-first dispatch ------------------------------------------------
+    // A winger / wide midfielder shares a single WIDE path: hold the touchline by
+    // default, invert to the half-space only when he is a high-shoot threat.
+    if (role === 'wideForward' || role === 'wideMidfielder') {
+      // Width hold (lifted out of the old MF branch so EVERY winger reaches it,
+      // not just the role-gated wideMidfielder). Compute baseWidth as before.
+      const overloadSqueeze = 1 - Math.max(0, tactic.centralOverload - 0.6) * 0.4;
+      const baseWidth = p.slot.y * (HALF_WID * (0.42 + tactic.width * 0.18)) * mentality.supportWidth * overloadSqueeze;
+      // A winger only tucks into the half-space when his OWN flank is being driven
+      // — the carrier is wide on his side and level with or ahead of him (e.g. an
+      // overlapping full-back). Until then he holds the wide channel and shows for
+      // the pass rather than drifting inside as a spectator.
+      const carrierDrivingMyFlank = Math.sign(owner.pos.y || laneSide) === laneSide
+        && Math.abs(owner.pos.y) > HALF_WID * 0.34
+        && (owner.pos.x - p.pos.x) * dir > -6;
+      // Inside-forward variant (the shoot-driven MINORITY): only a genuine
+      // goal threat inverts, and only ABOVE a high threshold so most wingers
+      // stay wide. He tucks toward the half-space (openChannelY), not the touchline.
+      const invertScore = clamp((p.attrs.shoot - 72) / 40, 0, 1);
+      const inverts = invertScore > 0.55 && !carrierDrivingMyFlank;
+      // X: push ahead of the carrier, clamped onside.
+      x = Math.max(base.x * dir, owner.pos.x * dir + 6) * dir;
+      x = this.clampToAttackingLine(p.team, x, 0.6);
+      // Reliability damps the width hold by off-ball IQ (pass): a high-IQ winger
+      // is pinned to the touchline, a low-IQ one drifts in / shows late.
+      const reliability = clamp(0.5 + (p.attrs.pass - 60) / 100 * 0.5, 0.2, 1);
+      if (inverts) {
+        // half-space tuck — between the touchline and the centre
+        const halfSpace = clamp(this.openChannelY(p.team), -HALF_WID + 5, HALF_WID - 5);
+        const naiveY = laneSide * Math.abs(baseWidth);
+        y = naiveY * (1 - invertScore * 0.6) + halfSpace * (invertScore * 0.6);
+        y = clamp(y, -HALF_WID + 5, HALF_WID - 5);
+      } else if (carrierDrivingMyFlank) {
+        // own flank overloaded by the carrier: drift inside off the touchline so
+        // we don't run into him, opening the wide lane for the overlap.
+        const carrierOffset = laneSide * (5 + tactic.width * 3) * mentality.supportWidth;
+        y = baseWidth * 0.7 + carrierOffset * 0.3;
+        y = clamp(y, -HALF_WID + 5, HALF_WID - 5);
+      } else {
+        // DEFAULT: hold the touchline. A light per-lane stagger (NOT findAttackingSpace's
+        // central pull) keeps two same-side wide men from stacking on the same line.
+        const holdWidthY = laneSide * clamp(Math.abs(baseWidth) * 1.55 + 6, 16, HALF_WID - 4);
+        const stagger = laneSide * ((p.idx % 3) - 1) * 2.5;
+        const naiveY = baseWidth * 0.7 + laneSide * 6;
+        y = naiveY * (1 - reliability) + (holdWidthY + stagger) * reliability;
+        y = clamp(y, -HALF_WID + 4, HALF_WID - 4);
+      }
+    } else if (p.attrs.pos === 'FW') {
       x = Math.max(x * dir, owner.pos.x * dir + 8) * dir;
       x = this.clampToAttackingLine(p.team, x, 1.0);
       // Find actual open space instead of clustering around carrier
@@ -2562,19 +2911,8 @@ export class MatchSim {
       const overloadSqueeze = 1 - Math.max(0, tactic.centralOverload - 0.6) * 0.4;
       const baseWidth = p.slot.y * (HALF_WID * (0.42 + tactic.width * 0.18)) * mentality.supportWidth * overloadSqueeze;
       const carrierOffset = laneSide * (5 + tactic.width * 3) * mentality.supportWidth;
-      // A winger only tucks into the half-space when his OWN flank is being driven
-      // — the carrier is wide on his side and level with or ahead of him (e.g. an
-      // overlapping full-back). Until then he holds the wide channel and shows for
-      // the pass rather than drifting inside as a spectator.
-      const carrierDrivingMyFlank = Math.sign(owner.pos.y || laneSide) === laneSide
-        && Math.abs(owner.pos.y) > HALF_WID * 0.34
-        && (owner.pos.x - p.pos.x) * dir > -6;
-      if (role === 'wideMidfielder' && !carrierDrivingMyFlank) {
-        y = laneSide * clamp(Math.abs(baseWidth) * 1.55 + 6, 16, HALF_WID - 4);
-      } else {
-        y = baseWidth * 0.7 + carrierOffset * 0.3;
-        y = clamp(y, -HALF_WID + 5, HALF_WID - 5);
-      }
+      y = baseWidth * 0.7 + carrierOffset * 0.3;
+      y = clamp(y, -HALF_WID + 5, HALF_WID - 5);
       if (tactic.pivotDepth > 0.68 && p.slot.x < -0.3 && owner.pos.x * dir > -8) {
         const pivotProgress = clamp(owner.pos.x * dir - (11 + tactic.pivotDepth * 5), -HALF_LEN + 8, HALF_LEN - 20);
         x = dir * pivotProgress;
@@ -2829,6 +3167,30 @@ export class MatchSim {
     if (carrierProgress < -2) return false;
     if (passDistance > 42) return false;
     return carrierProgress > 8 || centralRunner || sprintingIntoGoal || immediateCentralDanger;
+  }
+
+  /**
+   * Attacking-side mirror of canCarrierThreatenRunnerBehind: would the carrier
+   * realistically be able to play the ball in behind to this runner THIS beat?
+   * Uses the same thresholds (passDistance <= 42, carrier not stuck deep, central
+   * or fast or already a box danger) so attack and defence agree on what a "real
+   * through-ball" is. A proactive forward only breaks past the line when this
+   * fires; otherwise he holds onside. `owner` is the ball-carrying teammate.
+   */
+  private carrierCanReleaseInBehind(owner: SimPlayer, runner: SimPlayer): boolean {
+    const dir = this.attackSign(owner.team);
+    const carrierProgress = owner.pos.x * dir;
+    const runnerProgress = runner.pos.x * dir;
+    const passDistance = dist(owner.pos, runner.pos);
+    const centralRunner = Math.abs(runner.pos.y) < PENALTY_BOX_HALF_WIDTH + 4;
+    const sprintingForward = runner.vel.x * dir > 1.4;
+    const immediateCentralDanger = runnerProgress > HALF_LEN - 24 && centralRunner;
+
+    // The carrier must actually be facing forward with the ball: if he's pinned in
+    // his own deep third or the runner is too far to reach, hold the line.
+    if (carrierProgress < -2) return false;
+    if (passDistance > 42) return false;
+    return carrierProgress > 8 || centralRunner || sprintingForward || immediateCentralDanger;
   }
 
   /** goal-side marking position against a specific runner */
@@ -3518,7 +3880,7 @@ export class MatchSim {
     const isClearingForward = forwardness > 4;
 
     // Strongly prefer forward passes; sideways/backward only when pressured or exhausted
-    const pressured = pressure < 4.5;
+    const pressured = pressure < CARRIER_PRESSURE_RADIUS;
     const exhausted = owner.stamina < 0.25;
     const riskThreshold = 0.8 / clamp(mentality.risk + (profile.passUrgency - 0.5) * 0.34, 0.78, 1.42);
     const passTempo = clamp(mentality.tempo, 0.92, 1.15);
@@ -3791,16 +4153,20 @@ export class MatchSim {
     if (!target || this.isOffsideTarget(owner, target)) return null;
     const aim = this.passAimForReceiver(owner, target, true);
     const d = dist(owner.pos, aim);
-    const skill = clamp(owner.attrs.pass / 100, 0, 1);
+    // The blocked-line check now lives inside crossTargetInBox: blocked targets
+    // are penalised so an open target (e.g. far post) is chosen instead.
+    // Only abort if no viable target was found at all (target already null above).
     const pressure = this.nearestOpponentDist(owner);
     const hurry = pressure < 7 ? 1.0 : 0;
-    // a clipped, DIPPING cross: low enough loft that it drops onto the runner,
-    // with the pace solved from the physics so it lands AT him rather than
-    // sailing 6-7m over his head (the old hot moon-ball never connected). The
-    // aerial aim cone in applyPassSkillToAim already gives it a touch less
-    // accuracy than a threaded pass, which is right for a ball into an area.
-    const loft = clamp(0.5 + d * 0.006, 0.48, 0.64);
-    const speed = clamp(this.speedForReach(d, loft) + hurry, 13, 25);
+    // Float the cross so it arcs over defenders (apex ~2.2 m mid-flight) and
+    // drops onto the runner in the DESCENDING header window (z ≤ HEADER_MIN_Z
+    // 1.55 m).  speedForHeaderReach solves the launch so the ball reaches header
+    // height at the runner — not the ground-level window that speedForReach
+    // targets (which causes the old driven ball that never connected).
+    // applyPassSkillToAim already adds an aerial cone (wider than ground) so
+    // poor passers spray it; a skill-gated curl is allowed by design.
+    const loft = clamp(0.9 + d * 0.006, 0.9, 1.1);
+    const speed = clamp(this.speedForHeaderReach(d, loft) + hurry, 14, 26);
     return { target, aim, speed, loft };
   }
 
@@ -4392,6 +4758,41 @@ export class MatchSim {
     return (lo + hi) / 2;
   }
 
+  /**
+   * Launch speed for a floated cross so the ball's DESCENDING arc first drops to
+   * HEADER_MIN_Z (1.55 m) at approximately `d` metres — the window where the
+   * receiver can chest or head it.  The existing speedForReach targets z < 1.0
+   * (ground-pass window), which is wrong for lofted crosses: we'd under-power the
+   * kick and the ball would sail over the box instead of dropping on the runner.
+   */
+  private speedForHeaderReach(d: number, loft: number): number {
+    // Forward-integrate with the same physics as simulateKick but record the
+    // first moment the ball is DESCENDING and below HEADER_MIN_Z.
+    const headerReachForSpeed = (speed: number): number => {
+      let s = speed;
+      let z = 0;
+      let vz = speed * loft * 0.45;
+      let traveled = 0;
+      for (let i = 0; i < 600; i++) {
+        if (z > 0.02) {
+          vz += GRAVITY * DT;
+          s *= 1 - BALL_AIR_DRAG * DT;
+        }
+        traveled += s * DT;
+        z += vz * DT;
+        if (z < 0) { z = 0; break; }
+        if (i > 2 && vz < 0 && z < HEADER_MIN_Z && s < 28) return traveled;
+      }
+      return traveled;
+    };
+    let lo = 11, hi = 44;
+    for (let i = 0; i < 24; i++) {
+      const m = (lo + hi) / 2;
+      if (headerReachForSpeed(m) < d) lo = m; else hi = m;
+    }
+    return (lo + hi) / 2;
+  }
+
   /** Snapshot every team-mate in an offside position the instant `passer` plays
    * the ball forward. Covers any forward delivery — a threaded pass, a hopeful
    * hoof, a keeper's punt — not just a deliberately targeted receiver, so a
@@ -4490,12 +4891,15 @@ export class MatchSim {
         ball.spin = 0;
         if (fromOpponent) this.lastTurnover = { tick: st.tick, team: bestP.team };
         ball.lastTouchTeam = bestP.team;
-        if (bestP.isGK && (wasShot || fromOpponent)) {
-          // a real catch (shot, cross or loose ball from the opposition):
+        const gkGatherOwn = this.gkGatherIdx === bestP.idx;
+        if (gkGatherOwn) this.gkGatherIdx = -1;
+        if (bestP.isGK && (wasShot || fromOpponent || gkGatherOwn)) {
+          // a real catch (shot, cross or loose ball from the opposition, or physical gather):
           // face upfield and hold it in hand — the 92/93 backpass rule means a
           // ball played by his own team stays at his feet instead
           const up = this.attackSign(bestP.team);
           bestP.facing = up > 0 ? 0 : Math.PI;
+          // loose-ball catches arrive within control radius already; just snap and hold.
           ball.pos.x = clamp(bestP.pos.x + up * 0.5, -HALF_LEN + 0.4, HALF_LEN - 0.4);
           ball.pos.y = bestP.pos.y;
           ball.vel.x = 0;
@@ -4895,7 +5299,9 @@ export class MatchSim {
       ball.lastKicker = hit.idx;
       this.livePassTargetIdx = -1;
       this.livePassTargetUntil = -1;
-      if (hit.isGK && (saveContact || fromOpponent || hit.diving)) this.beginGkHold(hit);
+      const gkGather = this.gkGatherIdx === hit.idx;
+      if (gkGather) this.gkGatherIdx = -1;
+      if (hit.isGK && (saveContact || fromOpponent || hit.diving || gkGather)) this.beginGkHold(hit);
       if (saveContact) this.registerSave(hit);
       else this.shotLive = false;
       return;
@@ -5277,11 +5683,16 @@ export class MatchSim {
     if (!shooter || looseSave || shooter.team === gk.team) return 0;
     // A near-post chance can come after the runner has cut inside the post.
     // Classify by side and diagonal shape, not only by being outside the frame.
-    if (Math.abs(shooter.pos.y) <= GOAL_HALF_WIDTH * 0.75) return 0;
+    // The gates are deliberately GENEROUS: a genuine cut-in / level-with-the-post
+    // effort must be recognised (the buffs are the baseline for real near-post
+    // shots), while a central strike still falls through to ordinary resolution.
+    if (Math.abs(shooter.pos.y) <= GOAL_HALF_WIDTH * 0.55) return 0;
     const side = Math.sign(shooter.pos.y || 0) as -1 | 0 | 1;
     if (!side || side !== Math.sign(yAtLine || 0)) return 0;
-    if (Math.abs(shooter.pos.y) <= Math.abs(yAtLine) + 0.25) return 0;
-    if (Math.abs(yAtLine) <= GOAL_HALF_WIDTH * 0.5) return 0;
+    // a level shooter (ball line at the same width as the man) is still a post
+    // effort: only require he isn't carrying the ball notably back toward centre.
+    if (Math.abs(shooter.pos.y) < Math.abs(yAtLine) - 0.2) return 0;
+    if (Math.abs(yAtLine) <= GOAL_HALF_WIDTH * 0.34) return 0;
     if (distToLine >= 12) return 0;
     return side;
   }
@@ -5365,7 +5776,16 @@ export class MatchSim {
         const yAtLine = ball.pos.y + ball.vel.y * tToLine;
         const shooter = st.players[ball.lastKicker];
         const nearPostSide = this.nearPostThreatSide(shooter, p, yAtLine, distToLine);
-        const targetLineY = this.nearPostCoverageY(nearPostSide, yAtLine, p.pos.y);
+        let targetLineY = this.nearPostCoverageY(nearPostSide, yAtLine, p.pos.y);
+        // SMALL post-side bisector nudge on a recognised near-post threat: shade a
+        // fraction toward the bisector of the ball's line and the post (not to post
+        // level — that gaps the far post). Kept tiny and inside the gkSetY±0.7 clamp
+        // and the nearPostCoverageY cap below; scaled a touch by keeping.
+        if (nearPostSide) {
+          const postY = nearPostSide * GOAL_HALF_WIDTH;
+          const bisector = (targetLineY + postY) / 2;
+          targetLineY += (bisector - targetLineY) * (0.18 + keeping * 0.12);
+        }
         if (this.gkLineY == null) this.gkSetY = p.pos.y; // anchor at the moment the shot is struck
         this.gkLineY = this.gkLineY == null ? targetLineY : this.gkLineY + (targetLineY - this.gkLineY) * 0.35;
         // edge at most ~0.7m from his set position — no walking across to a corner
@@ -5707,7 +6127,9 @@ export class MatchSim {
       const reachSpan = armReach + 1.6;
       const stretchFrac = clamp(gapNow / reachSpan, 0, 1.3);
       const withinArmReach = gapNow <= 1.1; // point-blank, straight at him — always kept out
-      const nearPostCovered = nearPostThreat && gapNow <= armReach + 0.85;
+      // near-post cover slack scaled by keeping: an elite keeper genuinely fills
+      // his post (wide slack), a poor one barely competes for the squeeze (narrow).
+      const nearPostCovered = nearPostThreat && gapNow <= armReach + (0.40 + 0.45 * kq);
       // steep in placement: only a genuine corner (high stretch) with pace beats
       // him; mid efforts are mostly kept out, central ones always. Scaled by the
       // quality of the chance so the keeper isn't beaten by every speculative shot.
@@ -5753,12 +6175,16 @@ export class MatchSim {
       gk.anim = 'dive';
     }
     const penaltyShot = this.penaltyDiveGuess !== null;
+    const ordinaryReach = 1.24 + keepingAttr * 0.014;
     const reach = penaltyShot
       ? 0.9 + keepingAttr * 0.008
       // a recognised near-post effort: the keeper genuinely competes for his near
       // post even when he is a fraction off it, so a shot squeezed in at the post
-      // is contested rather than handed a zero-chance window
-      : (nearPostThreat ? 1.62 + keepingAttr * 0.016 : 1.24 + keepingAttr * 0.014);
+      // is contested rather than handed a zero-chance window. The near-post bonus
+      // over his ordinary reach is SCALED by keeping: an elite keeper stretches a
+      // long way to cover his post, a poor one gets only a token extra — so the
+      // near post stays beatable against a weak keeper.
+      : (nearPostThreat ? ordinaryReach + (0.06 + keepingAttr * 0.0046) : ordinaryReach);
     const gap = Math.abs(yAtLine - gk.pos.y);
     // resolve only once the ball is genuinely at the keeper, so a save never
     // visibly teleports the ball across the box; until then keep tracking
@@ -5787,9 +6213,14 @@ export class MatchSim {
           * (1.06 - hard * 0.42)
           * (1.14 - stretch * 0.5)
           * (1 - Math.max(0, stretch - 0.62) * 0.1)
-          + (nearPostThreat ? 0.26 : 0),
+          // near-post save boost scaled by keeping: an elite keeper turns the
+          // squeeze into a near-certain stop, a poor keeper gets only a small lift
+          // so a clean near-post strike still beats him.
+          + (nearPostThreat ? 0.10 + 0.22 * keepingQuality : 0),
         0.06,
-        penaltyShot ? 0.38 : nearPostThreat ? 0.92 : 0.86,
+        // and the near-post cap is keeping-relative too: ~0.84 for a weak keeper,
+        // ~0.94 for an elite one, instead of a flat near-unbeatable 0.92.
+        penaltyShot ? 0.38 : nearPostThreat ? 0.84 + 0.10 * keepingQuality : 0.86,
       );
       const looseGather = looseSave && speed < 13 && gap < reach + 0.95 && Math.max(0, zAtLine) < 1.35;
       if ((gap < reach + 0.75 && this.rng.next() < saveProb) || looseGather) {
@@ -5822,16 +6253,43 @@ export class MatchSim {
         if (looseGather || (catchable && this.rng.next() < holdProb)) {
           // catch: keeper gathers it, faces upfield, ball held safely in hand
           const up = this.attackSign(gk.team);
-          ball.ownerIdx = gk.idx;
-          gk.facing = up > 0 ? 0 : Math.PI;
-          // gather the ball INTO his hands (at his own y), not wherever it crossed — a ball
-          // caught at full stretch must end up with him, never sitting off to one side.
-          ball.pos.x = clamp(gk.pos.x + up * 0.5, -HALF_LEN + 0.4, HALF_LEN - 0.4);
-          ball.pos.y = clamp(gk.pos.y, -HALF_WID + 0.5, HALF_WID - 0.5);
-          ball.vel = { x: 0, y: 0 };
-          ball.vz = 0; ball.z = 0; ball.spin = 0;
-          ball.lastTouchTeam = gk.team;
-          this.beginGkHold(gk);
+          const gatherDx = ball.pos.x - gk.pos.x;
+          const gatherDy = ball.pos.y - gk.pos.y;
+          const gatherD = Math.hypot(gatherDx, gatherDy);
+          if (gatherD > CONTROL_RADIUS) {
+            // Ball is not yet in his hands — steer it to him physically over 1–3 ticks.
+            // Guard: clamp the target x so the gather vector never carries the ball over
+            // the goal line (keeper-ahead-of-ball geometry on a full-stretch catch).
+            const targetX = clamp(gk.pos.x + up * 0.4, -HALF_LEN + 0.4, HALF_LEN - 0.4);
+            const targetY = clamp(gk.pos.y, -HALF_WID + 0.5, HALF_WID - 0.5);
+            const tvx = targetX - ball.pos.x;
+            const tvy = targetY - ball.pos.y;
+            const td = Math.hypot(tvx, tvy) || 1;
+            // Cap at 9 m/s so the ball always stays within the GK's controlCap on arrival.
+            const gatherSpeed = clamp(td / 0.12, 0, 9);
+            ball.vel.x = (tvx / td) * gatherSpeed;
+            ball.vel.y = (tvy / td) * gatherSpeed;
+            // Gentle descent so an airborne gather doesn't float flat at height —
+            // bring z to 0 over the ~0.12 s travel; clamp so on-ground gathers stay ~0.
+            ball.vz = clamp(-ball.z / 0.12, -6, 0); ball.spin = 0;
+            ball.ownerIdx = -1;
+            ball.lastTouchTeam = gk.team;
+            ball.lastKicker = gk.idx;
+            this.lastTurnover = { tick: this.state.tick, team: gk.team };
+            this.gkGatherIdx = gk.idx;
+            gk.facing = up > 0 ? 0 : Math.PI;
+            // beginGkHold fires via handleBallPlayerContacts once gkGatherIdx triggers
+          } else {
+            // Already in reach — snap and hold now.
+            ball.ownerIdx = gk.idx;
+            gk.facing = up > 0 ? 0 : Math.PI;
+            ball.pos.x = clamp(gk.pos.x + up * 0.5, -HALF_LEN + 0.4, HALF_LEN - 0.4);
+            ball.pos.y = clamp(gk.pos.y, -HALF_WID + 0.5, HALF_WID - 0.5);
+            ball.vel = { x: 0, y: 0 };
+            ball.vz = 0; ball.z = 0; ball.spin = 0;
+            ball.lastTouchTeam = gk.team;
+            this.beginGkHold(gk);
+          }
         } else if (stretch > 0.42 && Math.abs(yAtLine) > GOAL_HALF_WIDTH - 2.6) {
           // a stretching fingertip save on a corner-bound shot — tipped round the post. Start
           // it at his reach, just OUTSIDE the post (so it can never sneak in for a goal), and
@@ -5934,19 +6392,40 @@ export class MatchSim {
     const upfield = this.attackSign(gk.team);
     const wide = Math.sign(yAtLine || ball.pos.y || this.rng.range(-1, 1) || 1);
     if (bodyBlock) {
-      // he got his BODY to it — collapse on the ball and GATHER it at his chest, rather
-      // than letting it squirt several metres into the box ("the ball miles away from him").
-      ball.ownerIdx = gk.idx;
-      ball.pos.x = clamp(gk.pos.x + upfield * 0.4, -HALF_LEN + 0.4, HALF_LEN - 0.4);
-      ball.pos.y = clamp(gk.pos.y, -HALF_WID + 0.4, HALF_WID - 0.4);
-      ball.vel.x = 0;
-      ball.vel.y = 0;
-      ball.vz = 0;
-      ball.z = 0;
-      ball.spin = 0;
-      ball.lastTouchTeam = gk.team;
-      ball.lastKicker = gk.idx;
-      this.beginGkHold(gk);
+      // he got his BODY to it — collapse on the ball and GATHER it at his chest.
+      const bbDx = ball.pos.x - gk.pos.x;
+      const bbDy = ball.pos.y - gk.pos.y;
+      const bbD = Math.hypot(bbDx, bbDy);
+      if (bbD > CONTROL_RADIUS) {
+        // Ball still a step away — steer it physically toward his body.
+        const targetX = clamp(gk.pos.x + upfield * 0.4, -HALF_LEN + 0.4, HALF_LEN - 0.4);
+        const targetY = clamp(gk.pos.y, -HALF_WID + 0.4, HALF_WID - 0.4);
+        const tvx = targetX - ball.pos.x;
+        const tvy = targetY - ball.pos.y;
+        const td = Math.hypot(tvx, tvy) || 1;
+        // Cap at 9 m/s so ball stays within the GK's controlCap on arrival.
+        ball.vel.x = (tvx / td) * clamp(td / 0.12, 0, 9);
+        ball.vel.y = (tvy / td) * clamp(td / 0.12, 0, 9);
+        // Gentle descent so an airborne gather doesn't float flat at height.
+        ball.vz = clamp(-ball.z / 0.12, -6, 0); ball.spin = 0;
+        ball.ownerIdx = -1;
+        ball.lastTouchTeam = gk.team;
+        ball.lastKicker = gk.idx;
+        this.lastTurnover = { tick: this.state.tick, team: gk.team };
+        this.gkGatherIdx = gk.idx;
+      } else {
+        ball.ownerIdx = gk.idx;
+        ball.pos.x = clamp(gk.pos.x + upfield * 0.4, -HALF_LEN + 0.4, HALF_LEN - 0.4);
+        ball.pos.y = clamp(gk.pos.y, -HALF_WID + 0.4, HALF_WID - 0.4);
+        ball.vel.x = 0;
+        ball.vel.y = 0;
+        ball.vz = 0;
+        ball.z = 0;
+        ball.spin = 0;
+        ball.lastTouchTeam = gk.team;
+        ball.lastKicker = gk.idx;
+        this.beginGkHold(gk);
+      }
     } else {
       // a fingertip/leg block at full stretch spills loose — the rebound is contextual to
       // where it struck him (the ball's height at the keeper): legs block it back out, body
@@ -6023,7 +6502,30 @@ export class MatchSim {
     this.livePassTargetUntil = -1;
 
     if (atFeet) {
-      // already on the ball — he collapses on it and gathers it to his body now.
+      // already on the ball (or within one reach) — he collapses on it and gathers it.
+      const afDx = st.ball.pos.x - gk.pos.x;
+      const afDy = st.ball.pos.y - gk.pos.y;
+      const afD = Math.hypot(afDx, afDy);
+      if (afD > CONTROL_RADIUS) {
+        // Still a step away — steer ball toward keeper's body physically.
+        const targetX = clamp(gk.pos.x + upfield * 0.4, -HALF_LEN + 0.4, HALF_LEN - 0.4);
+        const targetY = clamp(gk.pos.y, -HALF_WID + 0.4, HALF_WID - 0.4);
+        const tvx = targetX - st.ball.pos.x;
+        const tvy = targetY - st.ball.pos.y;
+        const td = Math.hypot(tvx, tvy) || 1;
+        // Cap at 9 m/s so ball stays within the GK's controlCap on arrival.
+        st.ball.vel.x = (tvx / td) * clamp(td / 0.12, 0, 9);
+        st.ball.vel.y = (tvy / td) * clamp(td / 0.12, 0, 9);
+        // Gentle descent so an airborne gather doesn't float flat at height.
+        st.ball.vz = clamp(-st.ball.z / 0.12, -6, 0); st.ball.spin = 0;
+        st.ball.ownerIdx = -1;
+        st.ball.lastTouchTeam = gk.team;
+        st.ball.lastKicker = gk.idx;
+        this.lastTurnover = { tick: st.tick, team: gk.team };
+        this.gkGatherIdx = gk.idx;
+        this.registerSave(gk);
+        return true;
+      }
       st.ball.ownerIdx = gk.idx;
       st.ball.pos.x = clamp(gk.pos.x + upfield * 0.4, -HALF_LEN + 0.4, HALF_LEN - 0.4);
       st.ball.pos.y = clamp(gk.pos.y, -HALF_WID + 0.4, HALF_WID - 0.4);
@@ -6352,8 +6854,18 @@ export class MatchSim {
       this.kickBall(taker, { x: dir * HALF_LEN, y: aimY }, power, 0.12);
       this.shotLive = true;
       // the keeper picks a corner and goes — he cannot read the ball mid-flight,
-      // otherwise every penalty gets saved
-      this.penaltyDiveGuess = this.rng.pick([-1, -1, 0, 1, 1]);
+      // otherwise every penalty gets saved.
+      //
+      // DETERMINISM CONTRACT: ALWAYS draw the AI guess first so the seeded rng call
+      // count is identical for AI and human, host and guest (mandatory for online
+      // lockstep). THEN, if the DEFENDING keeper's team is human, overwrite the guess
+      // with his latched stick direction. The save resolution downstream is untouched.
+      const aiGuess = this.rng.pick([-1, -1, 0, 1, 1]);
+      const defTeam = (1 - team) as 0 | 1;
+      const heldDive = st.penaltyDive ?? 0;
+      this.penaltyDiveGuess = this.cfg.teams[defTeam].controller !== 'ai'
+        ? (Math.abs(heldDive) < PENALTY_DIVE_DEADZONE ? 0 : Math.sign(heldDive)) as -1 | 0 | 1
+        : aiGuess;
       this.emit({ type: 'shot', team, power: power / 30 });
       st.excitement = Math.min(1, st.excitement + 0.35);
     } else if (phase === 'corner') {
@@ -6374,11 +6886,23 @@ export class MatchSim {
         this.kickBall(taker, target, 25, 0.12, boxMate?.idx ?? -1, false);
         this.emitPass(taker, boxMate?.idx ?? -1, 0.6);
         this.triggerBoxRuns(team, taker.idx, taker.pos.y || st.restartPos.y);
-      } else {
-        // lofted corner, hangs for headers; AI deliveries carry a mid charge so
-        // they apex inside the headable band rather than dying at chest height
-        const lift = human ? heldSec : 0.55;
+      } else if (human) {
+        // human lofted corner: held pass/shoot → high delivery the player aimed
+        const lift = heldSec;
         this.kickBall(taker, target, clamp(19 + lift * 5, 19, 25), clamp(0.78 + lift * 0.2, 0.78, 0.98), boxMate?.idx ?? -1, false);
+        this.emitPass(taker, boxMate?.idx ?? -1, 0.5);
+        this.triggerBoxRuns(team, taker.idx, taker.pos.y || st.restartPos.y);
+      } else {
+        // AI lofted corner: physics-solved delivery so the ball CARRIES to the
+        // attacker cluster (28–40 m away) and stays a LONG_AERIAL ball over the
+        // near-post crowd.  Mirror of aiCrossOption — lower, distance-scaled
+        // loft so it dips onto the runner rather than moonballing past him.
+        // Ceiling raised to 34 so far-post / penalty-spot targets (~35–40 m) are
+        // reachable; speedForReach self-limits well below 34 for typical corners.
+        const d = dist(taker.pos, target);
+        const loft = clamp(0.45 + d * 0.006, 0.45, 0.62);
+        const speed = clamp(this.speedForReach(d, loft), 18, 34);
+        this.kickBall(taker, target, speed, loft, boxMate?.idx ?? -1, false);
         this.emitPass(taker, boxMate?.idx ?? -1, 0.5);
         this.triggerBoxRuns(team, taker.idx, taker.pos.y || st.restartPos.y);
       }
@@ -6458,10 +6982,12 @@ export class MatchSim {
       const aiShoots = !human && canShoot && (Math.abs(st.restartPos.y) < 18 || this.rng.next() < 0.55);
       if (canShoot && (chargeBtn === 'shoot' || aiShoots)) {
         this.takeFreeKickShot(taker, human ? inp : NULL_INPUT, heldSec);
-        if (human) {
-          this.humans[team].aftertouchUntil = st.tick + Math.round(0.5 / DT);
-          armedCurl = true;
-        }
+        // Step 4 (curl): drop the unconditional aim-coupled curl arming.
+        // The aftertouch spin reads the SAME stick axis used for aiming, which
+        // bent the ball off the arrow whenever the player aimed across.
+        // FK shots now follow the aim arrow (dampened by shoot via applyShotSkillToAimY)
+        // and do NOT arm aftertouch curl — aftertouchUntil stays -1 (cleared below).
+        // A skill-gated bend can be added later with a decoupled curl input.
       } else if (human && chargeBtn === 'shoot') {
         // out of range: lofted ball dropped onto a box runner, not a blind launch
         const dir = this.attackSign(team);
@@ -6565,19 +7091,64 @@ export class MatchSim {
     const st = this.state;
     const dir = this.attackSign(taker.team);
     const distanceToGoal = HALF_LEN - st.restartPos.x * dir;
-    const aimY = Math.abs(inp.moveY) > 0.1
+    // --- Step 3: route aim through applyShotSkillToAimY (like every open-play shot).
+    // Low-shoot takers spray it; elite is pinpoint. AI (inp === NULL_INPUT, moveY=0)
+    // aims centrally with a small positional nudge so it isn't always dead-centre.
+    const pressure = this.nearestOpponentDist(taker);
+    const intendedY = Math.abs(inp.moveY) > 0.1
       ? clamp(inp.moveY * GOAL_HALF_WIDTH * 0.92, -GOAL_HALF_WIDTH * 0.94, GOAL_HALF_WIDTH * 0.94)
       : clamp(-st.restartPos.y * 0.16 + this.rng.range(-1.1, 1.1), -GOAL_HALF_WIDTH, GOAL_HALF_WIDTH);
-    const power = clamp(20.8 + heldSec * 1.1 + distanceToGoal * 0.06 + taker.attrs.shoot * 0.018, 22, 25.4);
+    const aimY = this.applyShotSkillToAimY(taker, intendedY, distanceToGoal, pressure);
+    // --- Step 1: driven power band — FK shots now reach the goal at pace.
+    // Cap at 32 so the physics-solved loft keeps the ball under the crossbar at
+    // close range (16–25 m). The speed-floor of 27 ensures all FK shots drive
+    // through to the goal even from the edge of the shooting zone.
+    const power = clamp(26 + heldSec * 9 + distanceToGoal * 0.18 + taker.attrs.shoot * 0.10, 27, 32);
+    // --- Step 2: loft solved from required vz (same physics-solve as before,
+    // but clamp widened to [0.30, 0.95] so the solver isn't force-floored to 0.5).
+    // tGoal / tWall use the naive d/power estimate (slightly short due to drag) which
+    // means the solver slightly overestimates the needed vz — that is intentional: it
+    // gives a small safety margin that keeps the ball off the turf at the goal line.
     const tGoal = distanceToGoal / Math.max(1, power);
     const tWall = 9.15 / Math.max(1, power);
     const skill = clamp(taker.attrs.shoot / 100, 0, 1);
     const targetZ = 1.35 + skill * 0.58 + clamp((distanceToGoal - 18) / 16, 0, 1) * 0.32;
     const idealVz = (targetZ - 0.5 * GRAVITY * tGoal * tGoal) / Math.max(0.01, tGoal);
-    const wallVz = (1.78 - 0.5 * GRAVITY * tWall * tWall) / Math.max(0.01, tWall);
+    const wallVz = (1.9 - 0.5 * GRAVITY * tWall * tWall) / Math.max(0.01, tWall);
     const launchVz = Math.max(idealVz, wallVz);
-    const loft = clamp(launchVz / Math.max(0.01, power * 0.45), 0.5, 0.72);
+    let loft = clamp(launchVz / Math.max(0.01, power * 0.45), 0.30, 0.95);
+    // --- Fix 2: close-range shots (d ≤ ~20 m) can sail over the bar because the wall
+    // constraint forces enough loft that the ball is still climbing when it reaches the
+    // goal. Binary-search reduce loft so zAtGoal ≤ 2.2 m (below GOAL_HEIGHT = 2.44 m).
+    // We integrate a 1-D ballistic model (same drag as integrateBall) to check.
+    const FK_GOAL_Z_CAP = 2.2;
+    const fkZAtGoal = (testLoft: number): number => {
+      let s = power, z = 0, vz = power * testLoft * 0.45, d = 0;
+      for (let i = 0; i < 600; i++) {
+        if (z > 0.02) { vz += GRAVITY * DT; s *= 1 - BALL_AIR_DRAG * DT; }
+        d += s * DT; z += vz * DT;
+        if (z < 0) return 0;
+        if (d >= distanceToGoal) return z;
+      }
+      return z;
+    };
+    if (fkZAtGoal(loft) > FK_GOAL_Z_CAP) {
+      let lo = 0.30, hi = loft;
+      for (let i = 0; i < 20; i++) {
+        const m = (lo + hi) / 2;
+        if (fkZAtGoal(m) > FK_GOAL_Z_CAP) hi = m; else lo = m;
+      }
+      loft = (lo + hi) / 2;
+    }
     this.kickBall(taker, { x: dir * HALF_LEN, y: aimY }, power, loft, -1, false);
+    // --- Fix 1: skill-gated curl — elite FK takers bend the ball; poor takers don't.
+    // Spin is decoupled from the aim stick (moveY does NOT affect magnitude or sign).
+    // The lateral force at the physics step (line ~4776): vel.perp += spin * DT * 4,
+    // spin decays with tau ≈ 0.83 s. At spinScale=1.2: shoot=90 ≈ 1.1 m lateral over
+    // 25 m; shoot=50 ≈ 0 m. Capped so that even an aimed shot (aimY ≈ 2.4 m) stays
+    // inside the goal width (GOAL_HALF_WIDTH = 3.66 m) when shoot=99.
+    const FK_SPIN_SCALE = 1.2;
+    st.ball.spin = clamp((taker.attrs.shoot - 50) / 40, 0, 1) * FK_SPIN_SCALE;
     this.shotLive = true;
     this.emit({ type: 'shot', team: taker.team, power: power / 30 });
     st.excitement = Math.min(1, st.excitement + 0.32);
@@ -6748,11 +7319,14 @@ export class MatchSim {
               : { x: dir * (HALF_LEN - 7.5), y: clamp(inp.moveY * 6 - Math.sign(ctl.pos.y) * 4, -8, 8) };
             const aimCross = boxMate ? this.passAimForReceiver(ctl, boxMate, lofted) : fallbackAim;
             const dCross = dist(ctl.pos, aimCross);
-            // dipping cross pitched to drop onto the target (pace solved from the
-            // physics), not a hot moon-ball that flies over everyone's head
-            const crossLoft = lofted ? clamp(0.5 + dCross * 0.006, 0.48, 0.64) : 0.12;
+            // Floated cross: arc clears defenders (apex ≥ 2.2 m) and DROPS onto
+            // the runner in the header window (z ≤ HEADER_MIN_Z 1.55 m).
+            // speedForHeaderReach solves launch so the ball reaches header height
+            // at the target, not the ground window used by the old speedForReach.
+            // A ground ball (no-loft) stays as a driven cutback for short lanes.
+            const crossLoft = lofted ? clamp(0.9 + dCross * 0.006, 0.9, 1.1) : 0.12;
             const crossSpeed = lofted
-              ? clamp(this.speedForReach(dCross, crossLoft), 13, 25)
+              ? clamp(this.speedForHeaderReach(dCross, crossLoft), 14, 26)
               : clamp(21 + dCross * 0.18, 22, 26);
             this.kickBall(ctl, aimCross, crossSpeed, crossLoft, boxMate?.idx ?? -1);
             h.passTargetIdx = boxMate?.idx ?? -1;
@@ -6928,10 +7502,21 @@ export class MatchSim {
       if (prog < HALF_LEN - 20 || Math.abs(q.pos.y) > 17) continue;
       const crosserSide = Math.sign(crosser.pos.y || 1);
       const farPost = Math.sign(q.pos.y || q.slot.y || 0) === -crosserSide;
+      // Check whether an opponent blocks the direct corridor to this target
+      // within the first 8 m of flight (before the ball climbs past them).
+      // A blocked target loses a heavy penalty so an open target (e.g. far
+      // post) is preferred — the cross reroutes rather than being abandoned.
+      let corridorBlocked = false;
+      for (const opp of this.state.players) {
+        if (opp.team === crosser.team || opp.sentOff || opp.isGK) continue;
+        if (dist(opp.pos, crosser.pos) > 8) continue;
+        if (pointSegDist(opp.pos, crosser.pos, q.pos) < 1.6) { corridorBlocked = true; break; }
+      }
       const score = prog - Math.abs(q.pos.y) * 0.34
         + (q.attrs.pos === 'FW' ? 2.6 : q.attrs.pos === 'MF' ? 0.8 : 0)
         + q.attrs.shoot * 0.025
-        + (farPost ? 0.55 : 0);
+        + (farPost ? 0.55 : 0)
+        - (corridorBlocked ? 20 : 0);
       if (score > bestScore) { bestScore = score; best = q; }
     }
     return best;
@@ -7063,6 +7648,7 @@ export class MatchSim {
     st.subbedOff[team].push(offSquadIdx);
     st.subbedOn[team].push(onSquadIdx);
     st.substitutionsUsed[team]++;
+    this.emit({ type: 'sub', team, player: offSquadIdx, onSquadIdx, offPlayerIdx });
     return true;
   }
 
@@ -7498,6 +8084,21 @@ export class MatchSim {
     this.emit({ type: 'whistle', team: offender?.team });
   }
 
+  /**
+   * Returns the offside rule's reference x-value for `team`: the second-most-advanced
+   * opponent (sorted by attacking progress), GK included, unclamped. Falls back to
+   * HALF_LEN when fewer than 2 opponents are available. Used by isOffsideTarget and
+   * (from Task B5b) the run-target assist.
+   */
+  private secondLastOpponentX(team: 0 | 1): number {
+    const dir = this.attackSign(team);
+    const defenders = this.state.players
+      .filter((p) => p.team !== team && !p.sentOff)
+      .map((p) => p.pos.x * dir)
+      .sort((a, b) => b - a);
+    return defenders[1] ?? defenders[0] ?? HALF_LEN;
+  }
+
   private isOffsideTarget(passer: SimPlayer, target: SimPlayer): boolean {
     if (target.team !== passer.team || target.isGK || target.sentOff) return false;
     const dir = this.attackSign(passer.team);
@@ -7505,11 +8106,7 @@ export class MatchSim {
     const ballProgress = this.state.ball.pos.x * dir;
     if (targetProgress <= 0) return false; // only in the attacking half
     if (targetProgress <= ballProgress + 0.5) return false;
-    const defenders = this.state.players
-      .filter((p) => p.team !== passer.team && !p.sentOff)
-      .map((p) => p.pos.x * dir)
-      .sort((a, b) => b - a);
-    const secondLast = defenders[1] ?? defenders[0] ?? HALF_LEN;
+    const secondLast = this.secondLastOpponentX(passer.team);
     return targetProgress > Math.max(ballProgress, secondLast) + 0.5;
   }
 
@@ -7534,6 +8131,7 @@ export class MatchSim {
       p.vel = { x: 0, y: 0 };
       p.anim = 'idle';
     });
+    this.emit({ type: 'halfTime' });
     this.emit({ type: 'whistle' });
   }
 
@@ -7560,7 +8158,10 @@ export class MatchSim {
       return;
     }
     if (pen.stage === 'aim') {
-      // human shooter aims with stick Y; human keeper pre-commits with stick Y
+      // human shooter aims with stick Y; the human keeper pre-commits LEFT/STAY/RIGHT
+      // with the same lateral stick (moveY in this top-down shootout view — the
+      // attacker aims on the very same axis, so pushing the stick a way sends the
+      // keeper that way). Held as a continuous pre-commit, quantized at the strike.
       if (this.cfg.teams[shooterTeam].controller !== 'ai') pen.aim = clamp(inputs[shooterTeam].moveY, -1, 1);
       if (this.cfg.teams[keeperTeam].controller !== 'ai') pen.dive = clamp(inputs[keeperTeam].moveY, -1, 1);
       st.penaltyAim = pen.aim;
@@ -7569,9 +8170,14 @@ export class MatchSim {
         if (this.cfg.teams[shooterTeam].controller === 'ai') {
           pen.aim = this.rng.pick([-0.85, -0.5, 0, 0.5, 0.85]);
         }
-        if (this.cfg.teams[keeperTeam].controller === 'ai') {
-          pen.dive = this.rng.pick([-0.8, 0, 0.8]);
-        }
+        // DETERMINISM CONTRACT: always draw the AI keeper guess so the rng call count
+        // is identical for AI and human keepers (online lockstep). For a human keeper
+        // the draw is discarded and his latched LEFT/STAY/RIGHT stick is used instead,
+        // quantized to -1/0/+1 (dead-zone = stay).
+        const aiDive = this.rng.pick([-0.8, 0, 0.8]);
+        pen.dive = this.cfg.teams[keeperTeam].controller !== 'ai'
+          ? (Math.abs(pen.dive) < PENALTY_DIVE_DEADZONE ? 0 : Math.sign(pen.dive))
+          : aiDive;
         // strike
         const shotSkill = clamp(this.effectiveAttr(shooter, 'shoot') / 100, 0.42, 0.98);
         const aimPressure = Math.abs(pen.aim);

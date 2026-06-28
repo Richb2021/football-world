@@ -48,7 +48,9 @@ export interface Snapshot {
   subs: [number, number];
   goals: GoalLogEntry[];
   penAim: number;
-  pens: { st: [number[], number[]]; t: 0 | 1; aim: number } | null;
+  /** defending-keeper dive pre-commit, so the guest keeper sees his own DIVE marker */
+  penDive?: number;
+  pens: { st: [number[], number[]]; t: 0 | 1; aim: number; dive?: number } | null;
   ev: SimEvent[];
 }
 
@@ -95,13 +97,51 @@ export function encodeSnapshot(state: MatchState, events: SimEvent[]): Snapshot 
     subs: [state.substitutionsUsed[0], state.substitutionsUsed[1]],
     goals: state.goals.slice(-8),
     penAim: round2(state.penaltyAim),
-    pens: state.penalties ? { st: state.penalties.scores, t: state.penalties.shooterTeam, aim: round2(state.penalties.aim) } : null,
+    penDive: round2(state.penaltyDive ?? 0),
+    pens: state.penalties ? { st: state.penalties.scores, t: state.penalties.shooterTeam, aim: round2(state.penalties.aim), dive: round2(state.penalties.dive) } : null,
     ev: events,
   };
 }
 
-/** Build a renderable MatchState-shaped object from a snapshot (guest side). */
-export function snapshotToRenderState(s: Snapshot, prev: Snapshot | null, alpha: number, template: MatchState): MatchState {
+/**
+ * Guest-side persistent injury tracking. The snapshot tuple does NOT carry
+ * `injuredOff` (it's host-authoritative sim state the guest never receives), so the
+ * guest reconstructs it from the event stream for RENDER ONLY. An 'injury' event marks
+ * a player forced off; the matching 'sub' (or a sent-off / man-down resolution) clears
+ * it. The accumulation set is OWNED BY THE CALLER (the per-match runner) — passing it in
+ * keeps mutable state out of this pure rebuild so it can never leak across matches: a
+ * new match constructs a fresh runner with a fresh set.
+ */
+export type GuestInjuredSet = Set<number>;
+
+/** key an injured player by team + idx (idx alone is unique per match, but pairing with
+ *  team keeps it robust and makes the 'sub' clear explicit). */
+function injuryKey(team: number, idx: number): number {
+  return team * 100000 + idx;
+}
+
+/** Fold this snapshot's events into the caller's injured set: 'injury' adds the named
+ *  player, 'sub' removes the player going off. Mutates `set` in place. */
+export function updateGuestInjuredSet(set: GuestInjuredSet, events: SimEvent[]): void {
+  for (const e of events) {
+    if (e.player === undefined || e.team === undefined) continue;
+    if (e.type === 'injury') set.add(injuryKey(e.team, e.player));
+    else if (e.type === 'sub' && e.offPlayerIdx !== undefined)
+      set.delete(injuryKey(e.team, e.offPlayerIdx));
+  }
+}
+
+/** Stamp the reconstructed injuredOff flag onto each rebuilt player from the set. */
+function applyGuestInjured(template: MatchState, set: GuestInjuredSet | undefined): void {
+  if (!set) return;
+  for (const p of template.players) {
+    p.injuredOff = set.has(injuryKey(p.team, p.idx));
+  }
+}
+
+/** Build a renderable MatchState-shaped object from a snapshot (guest side). The
+ *  optional `guestInjured` set (caller-owned, per-match) reconstructs injuredOff. */
+export function snapshotToRenderState(s: Snapshot, prev: Snapshot | null, alpha: number, template: MatchState, guestInjured?: GuestInjuredSet): MatchState {
   const lerp = (a: number, b: number) => a + (b - a) * alpha;
   const from = prev ?? s;
   template.phase = s.phase;
@@ -120,6 +160,7 @@ export function snapshotToRenderState(s: Snapshot, prev: Snapshot | null, alpha:
   template.substitutionsUsed = s.subs;
   template.goals = s.goals;
   template.penaltyAim = s.penAim;
+  template.penaltyDive = s.penDive ?? 0;
   template.restartTeam = s.rt;
   template.ball.ownerIdx = s.owner;
   template.ball.held = s.held === true;
@@ -141,13 +182,15 @@ export function snapshotToRenderState(s: Snapshot, prev: Snapshot | null, alpha:
     p.vel.x = (b[0] - a[0]) * 20;
     p.vel.y = (b[1] - a[1]) * 20;
   }
+  applyGuestInjured(template, guestInjured);
   if (s.pens && template.penalties) {
     template.penalties.scores = s.pens.st;
     template.penalties.shooterTeam = s.pens.t;
     template.penalties.aim = s.pens.aim;
+    template.penalties.dive = s.pens.dive ?? 0;
   } else if (s.pens) {
     template.penalties = {
-      shooterTeam: s.pens.t, round: 0, scores: s.pens.st, stage: 'aim', timer: 0, aim: s.pens.aim, dive: 0, winner: -1,
+      shooterTeam: s.pens.t, round: 0, scores: s.pens.st, stage: 'aim', timer: 0, aim: s.pens.aim, dive: s.pens.dive ?? 0, winner: -1,
     };
   }
   return template;

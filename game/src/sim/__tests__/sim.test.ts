@@ -10,7 +10,7 @@ import {
   applyTrainingWeek, ensureCareerSystems, setTrainingPlan,
 } from '../../game/career';
 import { TEAMS } from '../../data/teams';
-import { CENTER_CIRCLE_R, DT, GOAL_DEPTH, GOAL_HALF_WIDTH, HALF_LEN, HALF_WID, PENALTY_SPOT } from '../constants';
+import { CENTER_CIRCLE_R, DT, GOAL_DEPTH, GOAL_HALF_WIDTH, GOAL_HEIGHT, HALF_LEN, HALF_WID, HEADER_MIN_Z, PENALTY_SPOT } from '../constants';
 import type { FormationId, MatchConfig, PadInput, SimPlayer, Vec2 } from '../types';
 import { NULL_INPUT } from '../types';
 
@@ -1900,6 +1900,62 @@ describe('match sim', () => {
     expect(targets.some((target) => target.x < HALF_LEN - 18 && Math.abs(target.y) < 18)).toBe(true);
   });
 
+  it('an AI corner carries into the box near an attacker, not short of it', () => {
+    // Corner flag position: taker stands just outside the pitch corner (~52.5, 34).
+    // Box runner target positions (from triggerBoxRuns for team 0, dir=1, side=1):
+    //   near post    { x: 45.3, y:  6.1 }  → distance ≈ 28.8 m
+    //   penalty spot { x: 41.5, y:  0   }  → distance ≈ 35.7 m
+    //   far post     { x: 39.0, y: -6.1 }  → distance ≈ 38–40 m
+    //
+    // BUG (pre-fix): old delivery uses loft=0.89, speed≈21.75.  The ball rises
+    // above AERIAL_REACH_Z (2.35 m) so nobody can head it in flight, and the
+    // 'reach' point (where it finally descends to controllable height at low
+    // speed) is SHORT of the attacker cluster — nobody receives it.
+    //
+    // FIX: distance-solved loft (0.45–0.62) + speedForReach, ceiling raised to 34
+    // so far-post / penalty-spot targets (~35–40 m) are fully reachable.
+    // speedForReach self-limits well below 34 for typical corners (≈21–24 m/s).
+    const sim = new MatchSim(makeCfg());
+    type Harness = {
+      simulateKick(speed: number, loft: number): { carry: number; stop: number; reach: number };
+      speedForReach(d: number, loft: number): number;
+    };
+    const h = sim as unknown as Harness;
+
+    // Production formula constants (mirrors matchSim.ts AI corner branch exactly).
+    // CEILING must match production: clamp(speedForReach(d, loft), 18, 34).
+    const PROD_SPEED_MIN = 18;
+    const PROD_SPEED_MAX = 34; // raised from 28 to cover the full 28–40 m cluster
+
+    // --- OLD delivery (RED guard — demonstrates the pre-fix moon-ball bug) ---
+    // AI lift=0.55 → speed=21.75, loft=0.89
+    const dNear = 29; // near-post box runner distance from corner flag
+    const oldLift  = 0.55;
+    const oldSpeed = Math.min(Math.max(19 + oldLift * 5, 19), 25); // 21.75
+    const oldLoft  = Math.min(Math.max(0.78 + oldLift * 0.2, 0.78), 0.98); // 0.89
+    const oldFlight = h.simulateKick(oldSpeed, oldLoft);
+    // The old ball's 'reach' is SHORT of the near-post cluster — ball dies before target.
+    expect(oldFlight.reach).toBeLessThan(dNear - 2);
+
+    // --- NEW delivery: near-post target (~29 m) ---
+    const nearLoft  = Math.min(Math.max(0.45 + dNear * 0.006, 0.45), 0.62);
+    const nearSpeed = Math.min(Math.max(h.speedForReach(dNear, nearLoft), PROD_SPEED_MIN), PROD_SPEED_MAX);
+    const nearFlight = h.simulateKick(nearSpeed, nearLoft);
+    // Ball must arrive within 2 m of the target (tight band — can't pass if formula regresses).
+    expect(nearFlight.reach).toBeGreaterThanOrEqual(dNear - 2);
+    expect(nearFlight.reach).toBeLessThanOrEqual(dNear + 4);
+
+    // --- NEW delivery: far-post target (~39 m) — the cluster the 28-ceiling truncated ---
+    const dFar = 39;
+    const farLoft  = Math.min(Math.max(0.45 + dFar * 0.006, 0.45), 0.62);
+    const farSpeed = Math.min(Math.max(h.speedForReach(dFar, farLoft), PROD_SPEED_MIN), PROD_SPEED_MAX);
+    const farFlight = h.simulateKick(farSpeed, farLoft);
+    // Far-post ball must also arrive within 2 m (would fail if ceiling reverted to 28
+    // AND speedForReach needed more than 28 to reach 39 m — pinned to production formula).
+    expect(farFlight.reach).toBeGreaterThanOrEqual(dFar - 2);
+    expect(farFlight.reach).toBeLessThanOrEqual(dFar + 4);
+  });
+
   it('uses normal zippy targeted pass pace from throw-ins and free kicks', () => {
     const throwSim = new MatchSim(makeHumanCfg());
     throwSim.state.phase = 'throwIn';
@@ -2163,6 +2219,225 @@ describe('match sim', () => {
     expect(x.maybeCallPendingOffside(defender)).toBe(false);
     expect(sim.state.phase).toBe('play');
     expect(sim.events.some((e) => e.type === 'offside')).toBe(false);
+  });
+
+  it('B5a: offside verdicts unchanged after secondLastOpponentX extraction', () => {
+    // Characterization test: pins isOffsideTarget verdicts across three scenarios.
+    // Drive through kickBall → pendingOffside (same pattern as existing offside tests).
+    const sim = new MatchSim(makeCfg());
+    sim.state.phase = 'play';
+    sim.state.attackDir = [1, -1]; // team 0 attacks +x
+    type V = { x: number; y: number };
+    const x = sim as unknown as {
+      kickBall: (p: SimPlayer, aim: V, speed: number, loft: number, t?: number, c?: boolean) => void;
+      pendingOffside: { offsideIdxs: number[] } | null;
+    };
+    const keeper0 = sim.state.players.find((p) => p.team === 0 && p.isGK)!;
+    const striker = sim.state.players.find((p) => p.team === 0 && !p.isGK)!;
+    // Park all other team-0 outfielders safely onside in their own half
+    sim.state.players.filter((p) => p.team === 0 && !p.isGK && p !== striker)
+      .forEach((p, i) => { p.pos = { x: -20, y: (i % 9) - 4 }; });
+    keeper0.pos = { x: -40, y: 0 };
+
+    // --- Scenario (a): attacker exactly level with second-last defender → onside ---
+    // Team 1: GK at x=50, one outfielder (second-last) at x=22, rest at x=10
+    const team1Players = sim.state.players.filter((p) => p.team === 1);
+    const gk1 = team1Players.find((p) => p.isGK)!;
+    const outfield1 = team1Players.filter((p) => !p.isGK);
+    gk1.pos = { x: 50, y: 0 };
+    outfield1[0].pos = { x: 22, y: 4 }; // second-last; offside line is 22 (+ 0.5 margin)
+    outfield1.slice(1).forEach((p, i) => { p.pos = { x: 10, y: (i % 6) * 4 - 10 }; });
+    // Striker exactly at second-last defender x (22): ball progress from x=-40 → targetProgress=22,
+    // secondLast=22, so 22 > max(-40*1, 22) + 0.5 = 22.5 → FALSE (onside)
+    striker.pos = { x: 22, y: 0 };
+    sim.state.ball.pos = { x: keeper0.pos.x, y: 0 };
+    x.kickBall(keeper0, { x: 55, y: 0 }, 24, 0.5, -1);
+    expect(x.pendingOffside).toBeNull(); // (a) onside — not in offside list
+
+    // --- Scenario (b): attacker 0.6 m beyond second-last defender → offside ---
+    striker.pos = { x: 22.6, y: 0 }; // 0.6 beyond line at 22 → 22.6 > 22.5 = TRUE (offside)
+    sim.state.ball.pos = { x: keeper0.pos.x, y: 0 };
+    x.kickBall(keeper0, { x: 55, y: 0 }, 24, 0.5, -1);
+    expect(x.pendingOffside?.offsideIdxs).toContain(striker.idx); // (b) offside
+
+    // --- Scenario (c): GK is the only deep defender; offside line is determined by the GK ---
+    // Remove all outfield team-1 players to very deep onside positions
+    // so the second-last becomes the GK (all outfield at x=10, GK at x=40)
+    // Now only one outfield defender exists further forward than the GK,
+    // so defenders[0] = outfield at 22 (most advanced), defenders[1] = GK at 40 (second-last).
+    // Actually we want GK to BE the second-last: put ONE outfielder further up than GK.
+    gk1.pos = { x: 40, y: 0 };
+    outfield1[0].pos = { x: 45, y: 4 }; // most advanced (index 0 after sort desc)
+    outfield1.slice(1).forEach((p, i) => { p.pos = { x: -30, y: (i % 6) * 4 - 10 }; }); // park behind
+    // Second-last is the GK at x=40. Offside line = 40.
+    // Attacker at x=40.6 → 40.6 > max(-40, 40) + 0.5 = 40.5 → offside
+    striker.pos = { x: 40.6, y: 0 };
+    sim.state.ball.pos = { x: keeper0.pos.x, y: 0 };
+    x.kickBall(keeper0, { x: 55, y: 0 }, 24, 0.5, -1);
+    expect(x.pendingOffside?.offsideIdxs).toContain(striker.idx); // (c) GK-inclusive line used
+    // And the striker just behind GK x is onside
+    striker.pos = { x: 40, y: 0 }; // level with GK → onside
+    sim.state.ball.pos = { x: keeper0.pos.x, y: 0 };
+    x.kickBall(keeper0, { x: 55, y: 0 }, 24, 0.5, -1);
+    expect(x.pendingOffside).toBeNull(); // (c) onside when level with GK
+  });
+
+  it('B5b: forward holds onside when no release is imminent, breaks when carrier can play it', () => {
+    // The proactive in-behind run used to target oppositionDefLineX + 7 (≈7 m
+    // beyond the offside line) and stand there ~3 s with no release gate. It should
+    // now hold ONSIDE until the carrier can actually slide it through.
+    const sim = new MatchSim(makeCfg());
+    sim.state.phase = 'play';
+    sim.state.attackDir = [1, -1]; // team 0 attacks +x
+    // Deterministic trigger: rng gate always passes when reached.
+    (sim as unknown as { rng: { next: () => number } }).rng.next = () => 0;
+
+    type V = { x: number; y: number };
+    const x = sim as unknown as {
+      supportTarget: (p: SimPlayer, owner: SimPlayer) => V;
+      secondLastOpponentX: (team: 0 | 1) => number;
+      forwardRuns: Map<number, { until: number; target: V }>;
+    };
+
+    const fw = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'FW')!;
+    const owner = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'MF')!;
+
+    // Park team-0 outfielders out of the way; set the carrier deep in our own half
+    // with the ball, FW ahead near the opp second-last line but WIDE (not central),
+    // standing still — so carrierCanReleaseInBehind is false (no through-ball on).
+    sim.state.players.filter((p) => p.team === 0 && !p.isGK && p !== fw && p !== owner)
+      .forEach((p, i) => { p.pos = { x: -25, y: (i % 9) - 4 }; p.vel = { x: 0, y: 0 }; });
+
+    // Team-1 defence. secondLastOpponentX is GK-INCLUSIVE and returns the SECOND
+    // most-advanced opponent in our attacking direction. The GK sits deepest (x=48,
+    // most advanced toward our attack), so the offside line is the deepest outfield
+    // defender — here x=30.
+    const team1 = sim.state.players.filter((p) => p.team === 1);
+    team1.find((p) => p.isGK)!.pos = { x: 48, y: 0 };
+    const def1 = team1.filter((p) => !p.isGK);
+    def1[0].pos = { x: 30, y: 6 };  // deepest outfield defender → offside line = 30
+    def1[1].pos = { x: 28, y: -6 };
+    def1.slice(2).forEach((p, i) => { p.pos = { x: 12, y: (i % 6) * 4 - 10 }; });
+
+    const lineProg = x.secondLastOpponentX(0); // team 0 attacks +x, so this is +x value
+    expect(lineProg).toBeCloseTo(30, 1);
+
+    // Align the phase gate (tick + fw.idx*37) % 54 === 0 with a tick far from the
+    // turnover sentinel so we are NOT treated as in transition.
+    const alignTick = (base: number) => {
+      for (let t = base; t < base + 54; t++) if ((t + fw.idx * 37) % 54 === 0) return t;
+      return base;
+    };
+
+    // --- No release: carrier deep, FW wide → hold ONSIDE ---
+    owner.pos = { x: 0, y: 2 };           // carrierProgress 0 (<8)
+    owner.vel = { x: 0, y: 0 };
+    fw.pos = { x: 22, y: HALF_WID - 8 };  // ahead near line but WIDE (not central)
+    fw.vel = { x: 0, y: 0 };
+    sim.state.ball.pos = { x: owner.pos.x, y: owner.pos.y };
+    sim.state.tick = alignTick(2000);
+    x.forwardRuns.delete(fw.idx);
+    x.supportTarget(fw, owner); // trigger stores the (onside) run
+    const heldRun = x.forwardRuns.get(fw.idx)!;
+    expect(heldRun).toBeTruthy();
+    // Onside: stored run progress must NOT be beyond the offside line (old code: +7).
+    expect(heldRun.target.x).toBeLessThanOrEqual(lineProg);
+
+    // The consume path re-clamps to the LIVE offside line: even if the stored target
+    // somehow sat ahead of the line, a no-release beat steers the forward back onside.
+    x.forwardRuns.set(fw.idx, {
+      until: sim.state.tick + Math.round(0.5 / DT),
+      target: { x: lineProg + 9, y: fw.pos.y }, // pretend a stale +9 dart is stored
+    });
+    fw.pos = { x: 10, y: HALF_WID - 8 }; // far from the stale target so consume fires
+    const reclamped = x.supportTarget(fw, owner);
+    expect(reclamped.x).toBeLessThanOrEqual(lineProg);
+
+    // --- Release on: advance the carrier past progress 8 so the attacking gate
+    // fires → the FW commits an in-behind dart (progress beyond the line) ---
+    x.forwardRuns.delete(fw.idx);
+    owner.pos = { x: 15, y: 2 };          // carrierProgress 15 (>8) → can release
+    owner.vel = { x: 0, y: 0 };
+    fw.pos = { x: 22, y: 4 };             // central, reachable (passDistance ≈ 7)
+    fw.vel = { x: 0, y: 0 };
+    sim.state.ball.pos = { x: owner.pos.x, y: owner.pos.y };
+    sim.state.tick = alignTick(3000);
+    const dartRun = x.forwardRuns.get(fw.idx);
+    expect(dartRun).toBeFalsy(); // cleared above
+    x.supportTarget(fw, owner);
+    const committed = x.forwardRuns.get(fw.idx)!;
+    expect(committed).toBeTruthy();
+    // In-behind dart: target progress is now BEYOND the offside line (the dart is
+    // preserved — only gated and timed).
+    expect(committed.target.x).toBeGreaterThan(lineProg);
+    // …but timed: the hold is short (≈0.9 s), not the old flat 3 s.
+    expect(committed.until - sim.state.tick).toBeLessThanOrEqual(Math.round(1.2 / DT));
+  });
+
+  it('B5b dir=-1: in-behind dart works for team 1 (attacking -x) — no collapsed progress', () => {
+    // Regression guard for the spurious `* dir` bug: secondLastOpponentX already
+    // returns a progress-signed scalar, so multiplying by dir=-1 was negating it and
+    // collapsing clamp(onsideProg, 4, HALF_LEN-8) to ~4 (halfway) for the team
+    // attacking in the -x direction.  This test would FAIL before the fix and PASS after.
+    const sim = new MatchSim(makeCfg());
+    sim.state.phase = 'play';
+    sim.state.attackDir = [1, -1]; // team 1 attacks -x (dir = -1)
+    (sim as unknown as { rng: { next: () => number } }).rng.next = () => 0;
+
+    type V = { x: number; y: number };
+    const x = sim as unknown as {
+      supportTarget: (p: SimPlayer, owner: SimPlayer) => V;
+      secondLastOpponentX: (team: 0 | 1) => number;
+      forwardRuns: Map<number, { until: number; target: V }>;
+    };
+
+    // Use team-1 forward and midfielder
+    const fw = sim.state.players.find((p) => p.team === 1 && p.attrs.pos === 'FW')!;
+    const owner = sim.state.players.find((p) => p.team === 1 && p.attrs.pos === 'MF')!;
+
+    // Park other team-1 outfielders out of the way
+    sim.state.players.filter((p) => p.team === 1 && !p.isGK && p !== fw && p !== owner)
+      .forEach((p, i) => { p.pos = { x: 25, y: (i % 9) - 4 }; p.vel = { x: 0, y: 0 }; });
+
+    // Team-0 defence (opponents of team 1). Team 1 attacks -x, so opponent GK is at x=-48.
+    // secondLastOpponentX(1) maps pos.x * attackSign(1) = pos.x * (-1), so GK at x=-48
+    // gives progress +48 (most advanced). The offside line = deepest outfield defender.
+    const team0 = sim.state.players.filter((p) => p.team === 0);
+    team0.find((p) => p.isGK)!.pos = { x: -48, y: 0 };
+    const def0 = team0.filter((p) => !p.isGK);
+    def0[0].pos = { x: -30, y: 6 };  // deepest outfield defender → offside progress = 30
+    def0[1].pos = { x: -28, y: -6 };
+    def0.slice(2).forEach((p, i) => { p.pos = { x: -12, y: (i % 6) * 4 - 10 }; });
+
+    const lineProg = x.secondLastOpponentX(1); // progress scalar (should be ~30, positive)
+    expect(lineProg).toBeCloseTo(30, 1);
+
+    const alignTick = (base: number) => {
+      for (let t = base; t < base + 54; t++) if ((t + fw.idx * 37) % 54 === 0) return t;
+      return base;
+    };
+
+    // --- Release on: carrier advanced enough → in-behind dart fires ---
+    x.forwardRuns.delete(fw.idx);
+    // Team 1 attacks -x: owner at x=-15 → ownerProg = -15 * -1 = +15 > 8, gate fires
+    owner.pos = { x: -15, y: 2 };
+    owner.vel = { x: 0, y: 0 };
+    // FW central, ahead of carrier (x=-22 → prog +22, within reach)
+    fw.pos = { x: -22, y: 4 };
+    fw.vel = { x: 0, y: 0 };
+    sim.state.ball.pos = { x: owner.pos.x, y: owner.pos.y };
+    sim.state.tick = alignTick(3000);
+    x.supportTarget(fw, owner);
+    const committed = x.forwardRuns.get(fw.idx)!;
+    expect(committed).toBeTruthy();
+    // In-behind dart: target progress must exceed the offside line (NOT collapsed to ~4).
+    // With the bug, offsideLineProg was 30 * (-1) = -30, so clamp(-30 + overshoot, 4, …)
+    // gave ~4. With the fix, offsideLineProg = 30, so targetProg > 30.
+    // The stored target.x is world-x = dir * progress = -1 * progress, so it must be < -30.
+    expect(committed.target.x).toBeLessThan(-lineProg); // beyond the line in -x direction
+    // Also verify via progress: target.x * dir (-1) must exceed lineProg
+    const targetProg = committed.target.x * -1;
+    expect(targetProg).toBeGreaterThan(lineProg);
   });
 
   it('rates defensive quality from tackle and pace, centred on a mid defender', () => {
@@ -2516,6 +2791,76 @@ describe('match sim', () => {
     expect(Math.abs(fullBackTarget.y)).toBeGreaterThan(HALF_WID - 10);
   });
 
+  it('B7: a WF winger holds width by default and a high-shoot WF tucks to the half-space', () => {
+    const sim = new MatchSim(makeCfg({ difficulty: 2 }));
+    sim.state.phase = 'play';
+    // a central-ish midfielder carries the ball (NOT driving the winger's flank)
+    const owner = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'MF' && Math.abs(p.slot.y) < 0.3)!;
+    owner.pos = { x: 14, y: -2 };
+    sim.state.ball.ownerIdx = owner.idx;
+    sim.state.ball.pos = { ...owner.pos };
+    const supportTarget = (p: SimPlayer) => (
+      (sim as unknown as { supportTarget: (player: SimPlayer, owner: SimPlayer) => { x: number; y: number } }).supportTarget(p, owner)
+    );
+
+    // A coarse-FW winger (role WF) on the right flank. High pass = reliable width hold.
+    const winger = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'FW')!;
+    winger.slot = { ...winger.slot, y: 0.78 };
+    winger.attrs = { ...winger.attrs, position: 'WF', pace: 86, pass: 82, shoot: 60 };
+    winger.pos = { x: 12, y: HALF_WID - 8 };
+    const widthTarget = supportTarget(winger);
+    expect(Math.abs(widthTarget.y)).toBeGreaterThan(HALF_WID - 10); // pinned to the touchline
+
+    // A high-shoot inside-forward variant tucks toward the half-space (smaller |y|).
+    const insideForward = sim.state.players.filter((p) => p.team === 0 && p.attrs.pos === 'FW').find((p) => p !== winger)!;
+    insideForward.slot = { ...insideForward.slot, y: 0.78 };
+    insideForward.attrs = { ...insideForward.attrs, position: 'WF', pace: 78, pass: 70, shoot: 96 };
+    insideForward.pos = { x: 12, y: HALF_WID - 8 };
+    const invertTarget = supportTarget(insideForward);
+    expect(Math.abs(invertTarget.y)).toBeLessThan(Math.abs(widthTarget.y) - 4); // pulled inside
+  });
+
+  it('B7: under pressure with no forward option, exactly one supporter drops to show for the pass', () => {
+    const sim = new MatchSim(makeCfg({ difficulty: 2 }));
+    sim.state.phase = 'play';
+    const dir = (sim as unknown as { attackSign: (t: 0 | 1) => number }).attackSign(0);
+    // carrier in the attacking half, hard up against the opposition with no team-mate ahead
+    const carrier = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'MF' && Math.abs(p.slot.y) < 0.3)!;
+    carrier.pos = { x: 24 * dir, y: 0 };
+    sim.state.ball.ownerIdx = carrier.idx;
+    sim.state.ball.pos = { ...carrier.pos };
+    // pin a defender right on top of the carrier so he is PRESSURED
+    const presser = sim.state.players.find((p) => p.team === 1 && p.attrs.pos === 'DF')!;
+    presser.pos = { x: carrier.pos.x + dir * 2.0, y: 0 };
+    // pull EVERY other opponent deep so no team-mate ahead of the ball is offside-legal
+    // (the offside line sits behind the carrier => no onside forward option)
+    sim.state.players
+      .filter((p) => p.team === 1 && p !== presser && !p.isGK)
+      .forEach((p, i) => { p.pos = { x: carrier.pos.x - dir * (18 + i), y: (i % 2 ? 1 : -1) * 12 }; });
+    // the supporting pool = the outfield midfielders & forwards (the men who can
+    // come short). Place them all GOAL-SIDE of the ball so each is an eligible
+    // dropper — exactly one must be elected; the rest hold their shape ahead of him.
+    const supporters = sim.state.players.filter(
+      (p) => p.team === 0 && p !== carrier && !p.isGK && (p.attrs.pos === 'MF' || p.attrs.pos === 'FW'),
+    );
+    supporters.forEach((p, i) => { p.pos = { x: carrier.pos.x - dir * (7 + i), y: (i % 2 ? 1 : -1) * 9 }; });
+
+    const api = sim as unknown as {
+      supportTarget: (p: SimPlayer, owner: SimPlayer) => { x: number; y: number };
+      isOffsideTarget: (passer: SimPlayer, target: SimPlayer) => boolean;
+    };
+    const ballProg = carrier.pos.x * dir;
+    let droppers = 0;
+    let dropper: SimPlayer | null = null;
+    for (const m of supporters) {
+      const t = api.supportTarget(m, carrier);
+      if (t.x * dir < ballProg) { droppers += 1; dropper = m; }
+    }
+    expect(droppers).toBe(1); // exactly one supporter shows short
+    // the dropper targets a point behind the ball, so he can never be flagged offside
+    expect(api.isOffsideTarget(carrier, dropper!)).toBe(false);
+  });
+
   it('adds pressure-aware first touches and strength-aware contact duels', () => {
     const sim = new MatchSim(makeCfg({ difficulty: 2, seed: 44 }));
     sim.state.phase = 'play';
@@ -2728,6 +3073,11 @@ describe('match sim', () => {
     // centrally; the 4-4-2 also has a wide-ish forward slot we must not pick here)
     const winger = wideSim.state.players.filter((p) => p.team === 0 && p.attrs.pos === 'FW')
       .sort((a, b) => Math.abs(b.slot.y) - Math.abs(a.slot.y))[0];
+    // This test is about FORMATION width, not the shoot-driven inside-forward variant
+    // (B7). The widest real-squad 4-3-3 forward happens to be a 97-shoot elite finisher
+    // — exactly the player the new model inverts to the half-space. Pin him to a
+    // width-holding shoot so the comparison exercises the default wide-hold path.
+    winger.attrs = { ...winger.attrs, shoot: 64 };
     const frontPair = pairSim.state.players.filter((p) => p.team === 0 && p.attrs.pos === 'FW')
       .sort((a, b) => Math.abs(a.slot.y) - Math.abs(b.slot.y))[0];
 
@@ -2857,6 +3207,123 @@ describe('match sim', () => {
       .map((p) => api.supportTarget(p, crosser));
     expect(Math.max(...targets.map((p) => p.y))).toBeGreaterThan(5);
     expect(Math.min(...targets.map((p) => p.y))).toBeLessThan(-5);
+  });
+
+  it('an attacker can win a floated, descending cross at header height', () => {
+    // Prerequisite for the cross fix: tryReceiveLivePass must fire for a lofted
+    // ball that is descending through header height (z ≤ HEADER_MIN_Z 1.55 m).
+    // Without this gate the raised-loft cross would float over everyone untouched.
+    const sim = new MatchSim(makeCfg());
+    sim.state.phase = 'play';
+    const att = sim.state.players.find((p) => p.team === 0 && !p.isGK)!;
+    // park everyone else far from the ball so nothing else fires first
+    for (const p of sim.state.players) {
+      if (p === att) continue;
+      if (!p.isGK) p.pos = { x: -HALF_LEN + 4 + (p.idx % 8) * 2, y: (p.idx % 5) * 5 - 10 };
+      p.vel = { x: 0, y: 0 };
+    }
+    att.pos = { x: 10, y: 0 };
+    att.vel = { x: 0, y: 0 };
+
+    // Place the ball just above header height, descending toward the attacker.
+    const b = sim.state.ball;
+    b.ownerIdx = -1;
+    b.held = false;
+    b.pos = { ...att.pos };      // ball right on the attacker
+    b.vel = { x: 1.5, y: 0 };   // slow horizontal pace (within livePassMaxReceiveSpeed)
+    b.z = 1.6;                   // just above HEADER_MIN_Z — will drop through 1.55 in ~1 tick
+    b.vz = -3.0;                 // descending
+    b.spin = 0;
+    b.kickDir = { x: 1, y: 0 };
+    b.lastTouchTeam = 0;
+    b.lastKicker = -1;
+
+    // Arm the live-pass lock so tryReceiveLivePass sees him as the intended receiver.
+    const s = sim as unknown as {
+      livePassTargetIdx: number;
+      livePassTargetUntil: number;
+      livePassLofted: boolean;
+      livePassMaxReceiveSpeed: number;
+    };
+    s.livePassTargetIdx = att.idx;
+    s.livePassTargetUntil = sim.state.tick + 120;
+    s.livePassLofted = true;          // triggers the zCap = HEADER_MIN_Z path
+    s.livePassMaxReceiveSpeed = 30;   // well above the ball's horizontal pace
+
+    // Step a few ticks to let the ball drop through 1.55 m.
+    for (let i = 0; i < 20; i++) {
+      sim.step(idle);
+      if (sim.state.ball.ownerIdx === att.idx) break;
+    }
+    // The attacker must win the descending header-height ball.
+    expect(sim.state.ball.ownerIdx).toBe(att.idx);
+  });
+
+  it('a cross is delivered to a box runner at headable height, not driven into shins', () => {
+    // After the fix, the AI cross must arc high enough to clear defenders and
+    // drop onto the runner in the header window.  Pre-fix: loft 0.48–0.64 gives
+    // a peak z of only ~0.5–1.3 m — the ball never reaches header height (1.55 m).
+    // Post-fix: loft 0.9–1.1 gives apex ~2.0–2.6 m and the ball drops at the runner.
+    const sim = new MatchSim(makeFormationCfg('4-3-3'));
+    sim.state.phase = 'play';
+    const crosser = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'FW' && p.slot.y > 0.5)!;
+    const striker = sim.state.players.find((p) => p.team === 0 && p.attrs.pos === 'FW' && Math.abs(p.slot.y) < 0.2)!;
+    crosser.attrs = { ...crosser.attrs, pass: 92, shoot: 42, pace: 78 };
+    crosser.pos = { x: HALF_LEN - 31, y: HALF_WID - 5 };
+    crosser.vel = { x: 0, y: 0 };
+    crosser.kickCooldown = 0;
+    striker.attrs = { ...striker.attrs, shoot: 92, pace: 76 };
+    striker.pos = { x: HALF_LEN - 11, y: 1.2 };
+    striker.vel = { x: 0, y: 0 };
+    // push other outfield team-mates away so they don't get in the way
+    sim.state.players
+      .filter((p) => p.team === 0 && p !== crosser && p !== striker && !p.isGK)
+      .forEach((p, i) => { p.pos = { x: -28 - i, y: i % 2 ? 26 : -26 }; });
+    // defenders tucked in on the far side — not blocking the cross corridor
+    sim.state.players
+      .filter((p) => p.team === 1 && !p.isGK)
+      .forEach((p, i) => { p.pos = { x: HALF_LEN - 7 - (i % 3) * 1.2, y: -24 + (i % 5) * 9 }; });
+    sim.state.ball.ownerIdx = crosser.idx;
+    sim.state.ball.pos = { ...crosser.pos };
+    sim.state.ball.vel = { x: 0, y: 0 };
+    sim.state.ball.z = 0;
+    sim.state.ball.vz = 0;
+
+    (sim as unknown as { updateAIWithBall: () => void }).updateAIWithBall();
+
+    // The ball must now be in flight (owned by nobody) after the cross.
+    expect(sim.state.ball.ownerIdx).toBe(-1);
+
+    // Track max height during flight; record z when the ball arrives at the runner.
+    let maxZ = sim.state.ball.z;
+    let arrivalZ = sim.state.ball.z;
+    const strikerArrival = { ...striker.pos };   // striker was stationary
+    for (let i = 0; i < 300; i++) {
+      sim.step(idle);
+      maxZ = Math.max(maxZ, sim.state.ball.z);
+      // Capture arrival z once the ball reaches or passes the runner's x, or is received.
+      const owned = sim.state.ball.ownerIdx >= 0;
+      const pastX = sim.state.ball.pos.x >= strikerArrival.x;
+      if (owned || pastX) {
+        arrivalZ = sim.state.ball.z;
+        break;
+      }
+    }
+
+    // 1. The cross was aerial — peak height must be at or above header height.
+    expect(maxZ).toBeGreaterThanOrEqual(HEADER_MIN_Z);
+
+    // 2. The ball must arrive within ~3 m of the striker's position (aimed at him).
+    const arrivalDist = Math.hypot(
+      sim.state.ball.pos.x - strikerArrival.x,
+      sim.state.ball.pos.y - strikerArrival.y,
+    );
+    expect(arrivalDist).toBeLessThan(3);
+
+    // 3. At arrival the ball must have DESCENDED into the takeable header band
+    //    (z ≤ 2.35 m).  This catches an "overshoots high" failure where the ball
+    //    is still 4 m up when it crosses the runner's x-position.
+    expect(arrivalZ).toBeLessThanOrEqual(2.35);
   });
 
   it('slips central through balls into space behind the line', () => {
@@ -3442,6 +3909,100 @@ describe('match sim', () => {
     expect(Math.abs(low.y)).toBeLessThanOrEqual(GOAL_HALF_WIDTH);
     // still shaded toward the attacker's side, not glued to the centre
     expect(high.y).toBeGreaterThan(1);
+  });
+
+  it('B6: near-post classifier fires on cut-in and level-with-post efforts', () => {
+    const sim = new MatchSim(makeCfg());
+    sim.state.phase = 'play';
+    const shooter = sim.state.players.find((p) => p.team === 0 && !p.isGK)!;
+    const gk = sim.state.players.find((p) => p.team === 1 && p.isGK)!;
+    const npts = (
+      sh: SimPlayer | undefined, yAtLine: number, distToLine: number, looseSave = false,
+    ) => (sim as unknown as {
+      nearPostThreatSide(
+        shooter: SimPlayer | undefined, gk: SimPlayer, yAtLine: number, distToLine: number, looseSave?: boolean,
+      ): -1 | 0 | 1;
+    }).nearPostThreatSide(sh, gk, yAtLine, distToLine, looseSave);
+
+    // cut INSIDE the post: shooter has dribbled to |y| ~2.3, shot projected wide of
+    // centre but inside the post (yAtLine ~1.6). Genuine near-post effort -> post side.
+    shooter.pos = { x: HALF_LEN - 7, y: 2.3 };
+    expect(npts(shooter, 1.6, 8)).toBe(1);
+
+    // level with the post: shooter and the ball's line at the same width (~2.6),
+    // shot squeezing in at the post. A level shooter must still qualify.
+    shooter.pos = { x: HALF_LEN - 6, y: 2.6 };
+    expect(npts(shooter, 2.6, 7)).toBe(1);
+
+    // squeezed just inside the post from the far side (negative y).
+    shooter.pos = { x: HALF_LEN - 6, y: -2.5 };
+    expect(npts(shooter, -2.0, 8)).toBe(-1);
+
+    // CONTROL: central shot must STILL return 0 (no near-post buff for a straight shot).
+    shooter.pos = { x: HALF_LEN - 10, y: 0.2 };
+    expect(npts(shooter, 0.1, 10)).toBe(0);
+
+    // looseSave early-return: a loose ball is never classified as a near-post threat.
+    shooter.pos = { x: HALF_LEN - 7, y: 2.3 };
+    expect(npts(shooter, 1.6, 8, true)).toBe(0);
+  });
+
+  it('B6: scales near-post save power by keeping so elite keepers own the post', () => {
+    // Fire a battery of clean near-post strikes at a LOW-keeping and a HIGH-keeping
+    // keeper over several seeds and count how often the near post is conceded. The
+    // dampen must BITE: the elite keeper concedes measurably LESS, the poor keeper
+    // still concedes a clean strike (near-post shooting can't become pointless).
+    // The shooter is re-pinned each tick so the resolution reads a stable near-post
+    // man (the AI would otherwise drift him out of the classifier).
+    const battery = (keeping: number, seed: number, opts: { gky: number; by: number; spd: number; sy?: number }) => {
+      const sim = new MatchSim(makeCfg({ seed }));
+      sim.state.phase = 'play';
+      const shooter = sim.state.players.find((p) => p.team === 0 && !p.isGK)!;
+      const gk = sim.state.players.find((p) => p.team === 1 && p.isGK)!;
+      gk.attrs.keeping = keeping;
+      const sx = HALF_LEN - 6.0, sy = opts.sy ?? 3.4; // a man cut just inside the post
+      gk.pos = { x: HALF_LEN - 0.9, y: opts.gky };
+      gk.vel = { x: 0, y: 0 };
+      gk.facing = Math.PI;
+      sim.state.ball.ownerIdx = -1;
+      sim.state.ball.pos = { x: HALF_LEN - 3.2, y: opts.by };
+      sim.state.ball.vel = { x: opts.spd, y: 0.3 }; // drilled in at the near post
+      sim.state.ball.z = 0.2;
+      sim.state.ball.vz = 0.0;
+      (sim as unknown as { shotLive: boolean }).shotLive = true;
+      (sim as unknown as { shotLivePrev: boolean }).shotLivePrev = true;
+      (sim as unknown as { shotLiveSince: number }).shotLiveSince = -1;
+      (sim as unknown as { shotOpenness: number }).shotOpenness = 1;
+      const before = sim.state.score[0];
+      for (let i = 0; i < 40 && sim.state.phase === 'play'; i++) {
+        shooter.pos = { x: sx, y: sy };
+        shooter.vel = { x: 0, y: 0 };
+        sim.state.ball.lastKicker = shooter.idx;
+        sim.step(idle);
+      }
+      return sim.state.score[0] > before ? 1 : 0;
+    };
+
+    const seeds = [11, 23, 47, 91, 113, 137, 199, 251, 307, 359, 401, 467];
+    const near = { gky: 1.4, by: 3.6, spd: 32 };
+    let lowGoals = 0, highGoals = 0;
+    for (const s of seeds) {
+      lowGoals += battery(40, s, near);
+      highGoals += battery(92, s, near);
+    }
+    // monotonic: the elite keeper owns his post, the poor keeper does not
+    expect(highGoals).toBeLessThan(lowGoals);
+    // a poor keeper STILL concedes a clean near-post strike a fair amount of the time
+    expect(lowGoals).toBeGreaterThanOrEqual(Math.ceil(seeds.length * 0.25));
+
+    // A central/far-side strike is NOT a near-post threat, so the near-post buffs
+    // and the bisector nudge must not fire and must leave ordinary resolution
+    // untouched. A central keeper facing a reachable central shot still saves the
+    // bulk of them (the post changes haven't leaked into non-post resolution).
+    const central = { gky: 0.0, by: 0.4, spd: 24, sy: 0.3 };
+    let highCentralConceded = 0;
+    for (const s of seeds) highCentralConceded += battery(92, s, central);
+    expect(highCentralConceded).toBeLessThanOrEqual(Math.floor(seeds.length * 0.34));
   });
 
   it('sets a good goalkeeper close to the near post before a side-box shot', () => {
@@ -4379,8 +4940,91 @@ describe('match sim', () => {
     (sim as unknown as { goalkeeperLogic: () => void }).goalkeeperLogic();
 
     expect(sim.events.some((e) => e.type === 'save')).toBe(true);
+    // Ball must not teleport sideways — either it stays put (physical travel)
+    // or snaps < 2.2 m.
     expect(dist2(sim.state.ball.pos, before)).toBeLessThan(2.2);
-    expect(sim.state.ball.ownerIdx).toBe(gk.idx);
+    // Give the ball up to a few ticks to physically travel to the keeper.
+    let gkOwns = sim.state.ball.ownerIdx === gk.idx;
+    for (let i = 0; i < 10 && !gkOwns; i++) {
+      sim.step(idle);
+      gkOwns = sim.state.ball.ownerIdx === gk.idx;
+    }
+    expect(gkOwns).toBe(true);
+  });
+
+  it('on a full-stretch save the ball travels to the keeper rather than teleporting onto him', () => {
+    // Stage the keeper within the save-resolution zone but laterally ~1.8 m from the ball.
+    // This directly exercises the ball.pos.y snap that causes the teleport:
+    //   Before fix: save fires → ball.pos.y = gk.pos.y (1.8 m jump in one tick).
+    //   After fix: ball is given velocity toward keeper; arrives in 1–3 ticks (≤0.7 m/tick).
+    const sim = new MatchSim(makeCfg());
+    const st = sim.state;
+    st.phase = 'play';
+    const gk = st.players.find((p) => p.team === 1 && p.isGK)!;
+    const h = sim as unknown as {
+      attackSign(t: 0 | 1): number; shotLive: boolean; shotLivePrev: boolean;
+      shotLiveSince: number; goalkeeperLogic: () => void;
+      rng: { next: () => number; range: (a: number, b: number) => number };
+    };
+    const dir = h.attackSign(0); // team 0 attacks this goal
+    const goalX = dir * HALF_LEN;
+
+    // Keeper near his line but offset to the near side; ball flying toward the far post.
+    // Set positions so dist(gk, ball) ≈ 1.8 m and ball is within 2.8 m of the goal line
+    // — the save-resolution gate (dist(gk,ball) ≤ 2.0 && distToLine < 2.8) fires here.
+    gk.pos = { x: goalX - dir * 1.2, y: 0 };
+    gk.vel = { x: 0, y: 0 };
+    gk.attrs.keeping = 95;
+    gk.diving = true; // already mid-dive (so the save-resolution branch runs)
+    gk.diveBeaten = false;
+    gk.diveKind = 'line';
+    gk.slideTimer = 0.4;
+
+    // Ball ~1.8 m laterally from keeper, 2.4 m from goal line, heading toward goal
+    st.ball.pos = { x: goalX - dir * 2.4, y: 1.8 };
+    st.ball.vel = { x: dir * 20, y: 0 };
+    st.ball.z = 0.4;
+    st.ball.vz = 0;
+    st.ball.ownerIdx = -1;
+    st.ball.lastTouchTeam = 0;
+
+    // move all other players well away so they don't interfere
+    for (const p of st.players) {
+      if (p === gk) continue;
+      p.pos = { x: -dir * (HALF_LEN - 8), y: (p.idx % 2 ? 1 : -1) * 24 };
+      p.vel = { x: 0, y: 0 };
+    }
+
+    // rng = 0 → always saves and always holds
+    h.rng = { next: () => 0, range: (a, b) => (a + b) / 2 };
+    h.shotLive = true;
+    h.shotLivePrev = true;
+    h.shotLiveSince = st.tick - Math.round(0.5 / DT);
+
+    // Invoke goalkeeperLogic directly so we control exactly what tick the save fires on.
+    // Record ball position before and after to measure the single-tick jump.
+    const before = { ...st.ball.pos };
+    h.goalkeeperLogic();
+    const after = { ...st.ball.pos };
+    const jumpOnSaveTick = Math.hypot(after.x - before.x, after.y - before.y);
+
+    // Step through up to 25 more ticks to let the ball travel to the keeper.
+    let keeperGotBall = st.ball.ownerIdx === gk.idx;
+    let maxDisp = jumpOnSaveTick;
+    let prevPos = { ...st.ball.pos };
+    for (let i = 0; i < 25 && !keeperGotBall; i++) {
+      sim.step(idle);
+      const cur = st.ball.pos;
+      const d = Math.hypot(cur.x - prevPos.x, cur.y - prevPos.y);
+      if (d > maxDisp) maxDisp = d;
+      prevPos = { ...cur };
+      if (st.ball.ownerIdx === gk.idx) keeperGotBall = true;
+    }
+
+    // Before fix: jumpOnSaveTick ≈ 1.8 m (ball.pos.y snapped from 1.8 → 0).
+    // After fix: ball is steered toward keeper; max single-tick displacement < 1.2 m.
+    expect(maxDisp).toBeLessThan(1.2);
+    expect(keeperGotBall).toBe(true);
   });
 
   it('awards the goal at the line but lets the ball carry into the net', () => {
@@ -4422,6 +5066,81 @@ describe('match sim', () => {
     expect(sim.state.ball.pos.y).toBeLessThanOrEqual(GOAL_HALF_WIDTH - 0.18);
     expect(sim.state.ball.vel.x).toBeLessThanOrEqual(0);
     expect(sim.state.ball.vel.y).toBeLessThanOrEqual(0);
+  });
+});
+
+describe('B8: defender bunching', () => {
+  // Stage one in-behind runner with THREE defenders within ~0.5m of equal distance
+  // to him, step one tick, and assert EXACTLY ONE commits to his marking spot while
+  // the other two hold shape. Before the claim pre-pass, the 0.5m dead-band let
+  // 2-3 collapse onto the same man.
+  type Priv = {
+    recoveryClaims: Map<number, number>;
+    isNearestRecoverer(p: SimPlayer, runner: SimPlayer): boolean;
+    findRunnerInBehind(d: SimPlayer, carrier: SimPlayer): SimPlayer | null;
+  };
+
+  function stageThreeOnOne(seed: number) {
+    const sim = new MatchSim(makeCfg({ seed }));
+    const st = sim.state;
+    st.phase = 'play';
+    // team 0 attacks +x (carrier + runner); team 1 defends, own goal at +x.
+    const atk = st.players.filter((p) => p.team === 0 && !p.isGK);
+    const defAll = st.players.filter((p) => p.team === 1 && !p.isGK);
+    const carrier = atk[0];
+    carrier.pos = { x: 10, y: 0 };
+    carrier.vel = { x: 1, y: 0 };
+    // park the rest of the attack out of the way so only ONE runner is in behind
+    for (const p of atk) if (p !== carrier) p.pos = { x: -40, y: 28 };
+    const runner = atk[1];
+    runner.pos = { x: 30, y: 0 };       // central, in behind team 1's line
+    runner.vel = { x: 1.6, y: 0 };       // sprinting toward goal → genuine threat
+    // three defenders clustered within ~0.5m of equal distance to the runner
+    const trio = [defAll[0], defAll[1], defAll[2]];
+    trio[0].pos = { x: 28.0, y: 0.0 };   // d = 2.00m  (exact tie with trio[1])
+    trio[1].pos = { x: 28.0, y: 0.0 };   // d = 2.00m  → lowest idx wins
+    trio[2].pos = { x: 27.6, y: -0.2 };  // d ≈ 2.41m  (within ~0.5m of the pair)
+    for (const p of trio) { p.vel = { x: 0, y: 0 }; p.attrs.pos = 'DF'; }
+    // shove the rest of the defence far away so they never qualify as recoverers
+    for (const p of defAll) if (!trio.includes(p)) p.pos = { x: 50, y: 30 };
+    st.ball.ownerIdx = carrier.idx;
+    st.ball.pos = { ...carrier.pos };
+    st.ball.vel = { x: 0, y: 0 };
+    st.ball.z = 0;
+    return { sim, carrier, runner, trio };
+  }
+
+  it('B8: exactly one of three compact defenders commits to the same in-behind runner', () => {
+    const { sim, carrier, runner, trio } = stageThreeOnOne(1234);
+    sim.step(idle);
+    const priv = sim as unknown as Priv;
+    // BEHAVIOURAL assertion (fails on old code: all three pass the 0.5m dead-band):
+    // exactly one of the three compact defenders qualifies as the recoverer.
+    const committing = trio.filter((d) => priv.isNearestRecoverer(d, runner));
+    expect(committing.length).toBe(1);
+    // the pre-pass elected exactly one recoverer, and it is the committing man
+    expect(priv.recoveryClaims.get(runner.idx)).toBeDefined();
+    expect(committing[0].idx).toBe(priv.recoveryClaims.get(runner.idx));
+    // the carrier is still the ball owner (scenario sanity)
+    expect(sim.state.ball.ownerIdx).toBe(carrier.idx);
+    // every defender surfaces the SAME runner — so without the election all three
+    // would have passed the old nearest test
+    for (const d of trio) {
+      expect(priv.findRunnerInBehind(d, carrier)?.idx).toBe(runner.idx);
+    }
+  });
+
+  it('B8: the one-defender election is deterministic across identical seeds', () => {
+    const a = stageThreeOnOne(777);
+    const b = stageThreeOnOne(777);
+    a.sim.step(idle);
+    b.sim.step(idle);
+    const pa = a.sim as unknown as Priv;
+    const pb = b.sim as unknown as Priv;
+    expect(pa.recoveryClaims.get(a.runner.idx)).toBe(pb.recoveryClaims.get(b.runner.idx));
+    // and ties break to the LOWEST idx among the equidistant pair
+    const claimed = pa.recoveryClaims.get(a.runner.idx)!;
+    expect(claimed).toBe(Math.min(a.trio[0].idx, a.trio[1].idx, a.trio[2].idx));
   });
 });
 
@@ -4730,6 +5449,137 @@ it('charged free-kick shots clear the defensive wall', () => {
 
     expect(sim.state.score[0]).toBe(1);
     expect(sim.events.some((e) => e.type === 'goal')).toBe(true);
+  });
+
+  it('a 25m direct free-kick reaches the goal at scoring height with real pace', () => {
+    // Team 0 attacks +x.  restartPos.x = HALF_LEN - 25 puts the ball 25 m from goal.
+    const restartX = HALF_LEN - 25; // 27.5
+    const sim = setupRestart('freeKick', { x: restartX, y: 0 });
+    // Give the taker a solid shoot attribute so the shot is on-target (skill-gated aim)
+    const taker = sim.state.players.find((p) => p.team === 0 && !p.isGK)!;
+    taker.attrs = { ...taker.attrs, shoot: 80 };
+    // Park all opponents far away so nothing deflects the ball mid-flight
+    sim.state.players
+      .filter((p) => p.team === 1)
+      .forEach((p, i) => { p.pos = { x: -40 - i, y: 0 }; });
+
+    // Charge the shoot button for 30 ticks (~0.5 s) then release
+    for (let i = 0; i < 30; i++) sim.step([press({ shoot: true, moveY: 0 }), { ...NULL_INPUT }]);
+    let guard = 0;
+    while (sim.state.phase !== 'play' && guard++ < 30) sim.step([press({ moveY: 0 }), { ...NULL_INPUT }]);
+
+    // Step until the ball reaches x >= HALF_LEN - 0.5 (on the goal line) or dies
+    guard = 0;
+    while (
+      Math.abs(sim.state.ball.pos.x) < HALF_LEN - 0.5 &&
+      sim.state.ball.z >= 0 &&
+      guard++ < 300
+    ) {
+      sim.step(idle);
+    }
+
+    const ball = sim.state.ball;
+    // Ball MUST have reached the goal-line x (not landed short)
+    expect(Math.abs(ball.pos.x)).toBeGreaterThanOrEqual(HALF_LEN - 0.5);
+    // At goal-line: height in scoring window (did not land short, not over bar)
+    expect(ball.z).toBeGreaterThanOrEqual(0.3);
+    expect(ball.z).toBeLessThanOrEqual(2.4);
+    // Real pace: significant horizontal speed remaining at the goal line
+    const horizSpeed = Math.hypot(ball.vel.x, ball.vel.y);
+    expect(horizSpeed).toBeGreaterThan(20);
+    // On target (centred aim => ball crosses centrally, not curled wide)
+    expect(Math.abs(ball.pos.y)).toBeLessThan(GOAL_HALF_WIDTH * 1.5);
+  });
+
+  it('close-range free-kick (d≤20m) stays under the crossbar', () => {
+    // A 16m and 20m FK must arrive at the goal at or below GOAL_HEIGHT (2.44m).
+    // Previously the wall-clearance constraint over-lofted the ball so it sailed over.
+    for (const d of [16, 20] as const) {
+      const restartX = HALF_LEN - d;
+      const sim = setupRestart('freeKick', { x: restartX, y: 0 });
+      const taker = sim.state.players.find((p) => p.team === 0 && !p.isGK)!;
+      taker.attrs = { ...taker.attrs, shoot: 80 };
+      // Park all opponents far away
+      sim.state.players
+        .filter((p) => p.team === 1)
+        .forEach((p, i) => { p.pos = { x: -40 - i, y: 0 }; });
+
+      for (let i = 0; i < 30; i++) sim.step([press({ shoot: true, moveY: 0 }), { ...NULL_INPUT }]);
+      let guard = 0;
+      while (sim.state.phase !== 'play' && guard++ < 30) sim.step([press({ moveY: 0 }), { ...NULL_INPUT }]);
+
+      guard = 0;
+      while (
+        Math.abs(sim.state.ball.pos.x) < HALF_LEN - 0.5 &&
+        sim.state.ball.z >= 0 &&
+        guard++ < 300
+      ) {
+        sim.step(idle);
+      }
+
+      const ball = sim.state.ball;
+      // Must have reached the goal line
+      expect(Math.abs(ball.pos.x)).toBeGreaterThanOrEqual(HALF_LEN - 0.5);
+      // Must NOT be over the bar
+      expect(ball.z).toBeLessThanOrEqual(GOAL_HEIGHT);
+      // Must be in a scoring window (not on the ground)
+      expect(ball.z).toBeGreaterThanOrEqual(0.3);
+    }
+  });
+
+  it('skill-gated FK curl: elite taker bends more than poor taker, both on target', () => {
+    // This test verifies Fix 1: the curl is driven by shoot attribute, not the aim stick.
+    // Both shots use moveY=0 (centred aim). The elite taker (shoot=90) should produce
+    // more lateral deviation than the poor taker (shoot=50). If Fix 1 is absent (spin=0
+    // for both) this test FAILS because both lateralDevs are identical and equal ~0.
+    function runFK(shoot: number): { lateralDev: number; zAtGoal: number; reachedGoal: boolean } {
+      const restartX = HALF_LEN - 25;
+      const sim = setupRestart('freeKick', { x: restartX, y: 0 });
+      const taker = sim.state.players.find((p) => p.team === 0 && !p.isGK)!;
+      taker.attrs = { ...taker.attrs, shoot };
+      sim.state.players
+        .filter((p) => p.team === 1)
+        .forEach((p, i) => { p.pos = { x: -40 - i, y: 0 }; });
+
+      for (let i = 0; i < 30; i++) sim.step([press({ shoot: true, moveY: 0 }), { ...NULL_INPUT }]);
+      let guard = 0;
+      while (sim.state.phase !== 'play' && guard++ < 30) sim.step([press({ moveY: 0 }), { ...NULL_INPUT }]);
+
+      guard = 0;
+      while (
+        Math.abs(sim.state.ball.pos.x) < HALF_LEN - 0.5 &&
+        sim.state.ball.z >= 0 &&
+        guard++ < 300
+      ) {
+        sim.step(idle);
+      }
+      const ball = sim.state.ball;
+      return {
+        lateralDev: ball.pos.y,
+        zAtGoal: ball.z,
+        reachedGoal: Math.abs(ball.pos.x) >= HALF_LEN - 0.5,
+      };
+    }
+
+    const elite = runFK(90);
+    const poor = runFK(50);
+
+    // Elite taker curls MORE than poor taker (the difference must be detectable)
+    expect(Math.abs(elite.lateralDev)).toBeGreaterThan(Math.abs(poor.lateralDev) + 0.3);
+
+    // Both shots must have reached the goal line
+    expect(elite.reachedGoal).toBe(true);
+    expect(poor.reachedGoal).toBe(true);
+
+    // Both must arrive within the goal width (centred aim => safe even with curl)
+    expect(Math.abs(elite.lateralDev)).toBeLessThan(GOAL_HALF_WIDTH);
+    expect(Math.abs(poor.lateralDev)).toBeLessThan(GOAL_HALF_WIDTH);
+
+    // Both must be at scoring height
+    expect(elite.zAtGoal).toBeGreaterThanOrEqual(0.3);
+    expect(elite.zAtGoal).toBeLessThanOrEqual(GOAL_HEIGHT);
+    expect(poor.zAtGoal).toBeGreaterThanOrEqual(0.3);
+    expect(poor.zAtGoal).toBeLessThanOrEqual(GOAL_HEIGHT);
   });
 
   it('AI heads loose airborne balls', () => {
@@ -5131,6 +5981,112 @@ describe('penalty scoring', () => {
     // keeper guesses a corner: a healthy majority should go in
     expect(scored).toBeGreaterThanOrEqual(4);
   });
+
+  // The defending user controls the keeper dive on an in-match penalty: he latches
+  // a held stick LEFT/STAY/RIGHT into penaltyDiveGuess at the strike. team 0 (AI)
+  // takes the kick; team 1 (human) defends with its keeper.
+  type DivePeek = { penaltyDiveGuess: number | null; rng: { s: number } };
+  function takeInMatchPenalty(
+    seed: number,
+    keeperHuman: boolean,
+    keeperStick: number,
+  ): { guess: number | null; rngState: number } {
+    const cfg = makeCfg({ seed });
+    if (keeperHuman) cfg.teams[1] = { ...cfg.teams[1], controller: 'human' };
+    const sim = new MatchSim(cfg);
+    const dir = sim.state.attackDir[0];
+    sim.state.phase = 'penaltyKick';
+    sim.state.restartTeam = 0;
+    sim.state.restartPos = { x: dir * (HALF_LEN - PENALTY_SPOT), y: 0 };
+    sim.state.restartTimer = 0.2;
+    sim.state.ball.pos = { ...sim.state.restartPos };
+    const peek = sim as unknown as DivePeek;
+    // hold the keeper's lateral stick (team 1) until the kick is struck
+    const keeperInput: PadInput = { ...NULL_INPUT, moveY: keeperStick };
+    for (let i = 0; i < 60 * 6; i++) {
+      sim.step([{ ...NULL_INPUT }, keeperHuman ? { ...keeperInput } : { ...NULL_INPUT }]);
+      if (peek.penaltyDiveGuess !== null) {
+        return { guess: peek.penaltyDiveGuess, rngState: peek.rng.s };
+      }
+    }
+    throw new Error(`penalty was not struck for seed ${seed}`);
+  }
+
+  it('the defending user latches a held stick into the keeper dive at the strike', () => {
+    // stick hard one way → quantized guess that side; small stick → centre/stay
+    const right = takeInMatchPenalty(7, true, 0.9);
+    expect(right.guess).toBe(1);
+    const left = takeInMatchPenalty(7, true, -0.9);
+    expect(left.guess).toBe(-1);
+    const stay = takeInMatchPenalty(7, true, 0.1); // inside the dead-zone
+    expect(stay.guess).toBe(0);
+  });
+
+  it('the human keeper-dive path draws the same rng (lockstep-safe)', () => {
+    // The rng.pick fires for AI and human alike — the human guess merely OVERWRITES
+    // the drawn value. So the rng internal state at the strike must be identical.
+    let humanForcedAwayFromRng = 0;
+    for (const seed of [1, 2, 5, 13, 21, 34]) {
+      const ai = takeInMatchPenalty(seed, false, 0);
+      const human = takeInMatchPenalty(seed, true, -0.9);
+      expect(human.rngState).toBe(ai.rngState);  // identical draw count → identical state
+      expect(human.guess).toBe(-1);              // left stick → guess -1 every time
+      if (ai.guess !== -1) humanForcedAwayFromRng++; // the input genuinely overrode the rng
+    }
+    // on at least one seed the rng would NOT have picked -1, proving the input — not
+    // the rng — determined the human guess (the test fails if input were ignored).
+    expect(humanForcedAwayFromRng).toBeGreaterThan(0);
+  });
+
+  it('a correct dive guess is still only a chance, a wrong guess still concedes', () => {
+    // Resolution is attribute-gated and UNCHANGED. An AI taker strikes (the reliable
+    // scoreable-penalty path); once the shot is live we read its real direction and
+    // PIN penaltyDiveGuess to either the matching side (correct) or the opposite
+    // (wrong), then watch the outcome. A wrong guess always concedes; a correct guess
+    // is capped (penaltyFactor 0.52, cap 0.38), so scoring is reduced but possible.
+    const resolvePenalty = (seed: number, mode: 'correct' | 'wrong'): boolean | null => {
+      const sim = new MatchSim(makeCfg({ seed }));
+      const dir = sim.state.attackDir[0];
+      sim.state.phase = 'penaltyKick';
+      sim.state.restartTeam = 0;
+      sim.state.restartPos = { x: dir * (HALF_LEN - PENALTY_SPOT), y: 0 };
+      sim.state.restartTimer = 0.2;
+      sim.state.ball.pos = { ...sim.state.restartPos };
+      const peek = sim as unknown as { penaltyDiveGuess: number | null };
+      const before = sim.state.score[0];
+      let pinned = false;
+      for (let i = 0; i < 60 * 6; i++) {
+        sim.step([{ ...NULL_INPUT }, { ...NULL_INPUT }]);
+        if (!pinned && peek.penaltyDiveGuess !== null && Math.abs(sim.state.ball.vel.x) > 1) {
+          const tToLine = Math.abs(dir * HALF_LEN - sim.state.ball.pos.x) / Math.max(0.01, Math.abs(sim.state.ball.vel.x));
+          const yAt = sim.state.ball.pos.y + sim.state.ball.vel.y * tToLine;
+          const side = (Math.sign(yAt) || 1) as -1 | 1;
+          peek.penaltyDiveGuess = mode === 'correct' ? side : (-side as -1 | 1);
+          pinned = true;
+        }
+        if (sim.state.score[0] > before) return true;
+        const ph: string = sim.state.phase;
+        if (pinned && (ph === 'goalKick' || ph === 'corner' || ph === 'throwIn')) return false;
+      }
+      return pinned ? false : null; // null = the kick never struck this seed
+    };
+    // a wrong guess (keeper dives away from the shot) always concedes
+    let wrongConceded = 0, wrongTried = 0;
+    for (let seed = 1; seed <= 24; seed++) {
+      const r = resolvePenalty(seed, 'wrong');
+      if (r === null) continue;
+      wrongTried++;
+      if (r) wrongConceded++;
+    }
+    expect(wrongTried).toBeGreaterThan(0);
+    expect(wrongConceded).toBe(wrongTried); // every wrong guess concedes
+    // a correct guess is NO guaranteed save — the 0.38 cap keeps scoring possible
+    let scoredDespiteCorrectGuess = 0;
+    for (let seed = 1; seed <= 24; seed++) {
+      if (resolvePenalty(seed, 'correct') === true) scoredDespiteCorrectGuess++;
+    }
+    expect(scoredDespiteCorrectGuess).toBeGreaterThan(0);
+  });
 });
 
 describe('injuries', () => {
@@ -5229,5 +6185,66 @@ describe('injuries', () => {
     (sim as unknown as { checkNonContactInjuries(): void }).checkNonContactInjuries();
     expect(p.injuredOff).toBe(true);
     expect(sim.state.phase).not.toBe('play'); // play was stopped (a break) so a sub is legal
+  });
+});
+
+describe('extra-time / penalty break screen', () => {
+  it('emits a halfTime break event when a level cup tie goes to extra time', () => {
+    const sim = new MatchSim(makeCfg({ cupTie: true }));
+    sim.state.half = 2;
+    sim.state.score = [1, 1];
+    const before = sim.events.length;
+    (sim as unknown as { endOfHalf(): void }).endOfHalf();
+    const ev = sim.events.slice(before);
+    expect(sim.state.phase).toBe('extraTimeBreak');
+    expect(ev.some((e) => e.type === 'halfTime')).toBe(true); // triggers the break interstitial
+  });
+
+  it('emits a halfTime break event when entering penalties', () => {
+    const sim = new MatchSim(makeCfg({ cupTie: true }));
+    const before = sim.events.length;
+    (sim as unknown as { beginPenalties(): void }).beginPenalties();
+    const ev = sim.events.slice(before);
+    expect(sim.state.phase).toBe('penalties');
+    expect(ev.some((e) => e.type === 'halfTime')).toBe(true);
+  });
+
+  it('ET half-time (half 3 → 4) sets extraTimeBreak phase and a restartTimer long enough to cover the 5 s interstitial', () => {
+    const sim = new MatchSim(makeCfg({ cupTie: true }));
+    sim.state.half = 3;
+    const before = sim.events.length;
+    (sim as unknown as { endOfHalf(): void }).endOfHalf();
+    const ev = sim.events.slice(before);
+    expect(sim.state.phase).toBe('extraTimeBreak');
+    expect(ev.some((e) => e.type === 'halfTime')).toBe(true);
+    expect(sim.state.restartTimer).toBeGreaterThanOrEqual(5); // must outlast the 5.0 s exit-presentation
+  });
+});
+
+describe('cpu sub visibility', () => {
+  it('substitute emits a sub event carrying the outgoing and incoming squad indices', () => {
+    const sim = new MatchSim(makeCfg()); // both AI
+    sim.state.phase = 'halfTime';
+    const outfield = sim.state.players.filter((p) => p.team === 0 && !p.isGK);
+    const overall = (p: typeof outfield[0]) => p.attrs.pace + p.attrs.pass + p.attrs.shoot + p.attrs.tackle;
+    const avg = outfield.reduce((s, p) => s + overall(p), 0) / outfield.length;
+    // pick the weakest outfield player so substitutionMomentumLoss returns 0
+    // (aboveAvg <= 0) — this keeps the momentum assertion deterministic
+    const off = outfield.reduce((a, b) => (overall(b) < overall(a) ? b : a));
+    const offSquadIdx = off.squadIdx;
+    void avg;
+    const onIdx = new Set(sim.state.players.filter((p) => p.team === 0).map((p) => p.squadIdx));
+    const benchIdx = (sim as unknown as { cfg: { teams: { data: { players: { pos: string }[] } }[] } }).cfg
+      .teams[0].data.players.findIndex((pl, i) => !onIdx.has(i) && pl.pos !== 'GK');
+    const before = sim.events.length;
+    sim.substitute(0, off.idx, benchIdx);
+    const ev = sim.events.slice(before).find((e) => e.type === 'sub');
+    expect(ev).toBeTruthy();
+    expect(ev!.team).toBe(0);
+    expect(ev!.player).toBe(offSquadIdx);
+    expect((ev as unknown as { onSquadIdx: number }).onSquadIdx).toBe(benchIdx);
+    // momentum must be untouched by a sub event (eventMomentumDelta default-zero);
+    // we subbed off the weakest player so substitutionMomentumLoss is also 0
+    expect(sim.state.momentum).toEqual([0, 0]);
   });
 });

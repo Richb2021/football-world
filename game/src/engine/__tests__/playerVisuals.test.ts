@@ -165,3 +165,192 @@ describe('player visual facing', () => {
     expect(paletteForNumber!('#111111', '#ffffff')).toEqual({ fill: '#111111', stroke: '#ffffff' });
   });
 });
+
+// The renderer's PlayerFactory.update reads only (v, p, dt) — it never touches `this` — so we
+// can drive the fall/get-up state machine in a pure unit by building a real three.js
+// AnimationMixer over a bare object with synthetic clips, calling update.call({}, ...), and
+// inspecting which AnimationAction is the active, full-weight, looping one. AnimationMixer is
+// pure math (no WebGL), so this runs headless.
+describe('post-foul get-up cross-fade hands off to locomotion', () => {
+  const update = (playerVisuals.PlayerFactory.prototype as unknown as {
+    update: (v: unknown, p: unknown, dt: number) => void;
+  }).update;
+
+  // a 1s clip with a single dummy track on a target node, named so the rig binds it
+  function clip(name: string, dur: number, target: THREE.Object3D): THREE.AnimationClip {
+    const track = new THREE.NumberKeyframeTrack(`${target.uuid}.scale[x]`, [0, dur], [1, 1]);
+    return new THREE.AnimationClip(name, dur, [track]);
+  }
+
+  function harness() {
+    const root = new THREE.Object3D();
+    root.name = 'root';
+    const mixer = new THREE.AnimationMixer(root);
+    const mk = (name: string, dur: number) => mixer.clipAction(clip(name, dur, root));
+    // mirror the real durations: getup library clip is long (8.3s), paced into the GETUP window
+    const getup = mk('getup', 8.3);
+    const fall = mk('fall', 2.5);
+    const idle = mk('idle', 1);
+    const run = mk('run', 1);
+    const actions = { getup, fall, idle, run };
+    const v = {
+      group: new THREE.Group(),
+      ring: { visible: false } as { visible: boolean },
+      mixer,
+      actions,
+      current: 'idle',
+      baseRotY: Math.PI / 2,
+      visualRotY: Math.PI / 2,
+      special: null as THREE.AnimationAction | null,
+      fallStage: undefined as 'down' | 'up' | undefined,
+      fallDone: undefined as boolean | undefined,
+    };
+    return { v, actions };
+  }
+
+  function simPlayer(over: Record<string, unknown>) {
+    return {
+      idx: 0, isGK: false, anim: 'fall', facing: 0, sentOff: false,
+      control: false, stamina: 1,
+      pos: { x: 0, y: 0 }, vel: { x: 0, y: 0 },
+      downTimer: 0.8, fallForward: false,
+      ...over,
+    };
+  }
+
+  // run the fall state forward until the get-up clamps at its end, fire the completion frame
+  // at down≈0, then let the ~0.18s cross-fade settle so the loco clip is at full weight and
+  // the faded get-up is back to weight 0 (so we observe the settled handoff, not the in-flight
+  // transition frame where both clips still carry partial weight)
+  function runToHandoff(v: unknown, p: { downTimer: number }, vel: { x: number; y: number }) {
+    const dt = 1 / 60;
+    // ~0.8s of being down: drain downTimer through the GETUP window so the get-up plays + clamps
+    for (let t = 0.8; t > 0.02; t -= dt) {
+      (p as Record<string, unknown>).downTimer = Math.max(0, t);
+      (p as Record<string, unknown>).vel = vel;
+      update(v, p, dt);
+    }
+    (p as Record<string, unknown>).downTimer = 0;
+    (p as Record<string, unknown>).vel = vel;
+    update(v, p, dt); // the completion frame: kicks off the cross-fade
+    for (let i = 0; i < 15; i++) update(v, p, dt); // settle the 0.18s cross-fade
+  }
+
+  // the looping locomotion clips that are actually driving the skeleton at full weight
+  function activeLoop(actions: { idle: THREE.AnimationAction; run: THREE.AnimationAction; getup: THREE.AnimationAction }) {
+    const winners: string[] = [];
+    for (const [name, act] of Object.entries(actions)) {
+      if (act.isRunning() && act.getEffectiveWeight() > 0.5 && act.loop === THREE.LoopRepeat) {
+        winners.push(name);
+      }
+    }
+    return winners;
+  }
+
+  it('a stationary fouled victim lands on the LOOPING idle, not the clamped one-shot get-up', () => {
+    const { v, actions } = harness();
+    const p = simPlayer({ vel: { x: 0, y: 0 } });
+    runToHandoff(v, p, { x: 0, y: 0 });
+
+    // the one-shot get-up is no longer the active special clamped at full weight
+    expect((v as { special: unknown }).special).toBeNull();
+    expect((v as { fallDone?: boolean }).fallDone).toBe(true);
+    // a looping locomotion clip now drives the skeleton; idle wins because he's ~stationary
+    expect(activeLoop(actions)).toContain('idle');
+    // the get-up is NOT a full-weight looping action (it's faded out, one-shot)
+    expect(actions.getup.loop).toBe(THREE.LoopOnce);
+  });
+
+  it('a moving open-play riser lands on the LOOPING run', () => {
+    const { v, actions } = harness();
+    const p = simPlayer({ vel: { x: 4, y: 0 } });
+    runToHandoff(v, p, { x: 4, y: 0 });
+
+    expect((v as { special: unknown }).special).toBeNull();
+    expect((v as { fallDone?: boolean }).fallDone).toBe(true);
+    expect(activeLoop(actions)).toContain('run');
+  });
+
+  it('does not re-grab the clamped get-up while p.anim stays "fall" after the handoff', () => {
+    const { v } = harness();
+    const p = simPlayer({ vel: { x: 0, y: 0 } });
+    runToHandoff(v, p, { x: 0, y: 0 });
+    expect((v as { fallDone?: boolean }).fallDone).toBe(true);
+
+    // several more frames with anim still 'fall' and downTimer drained: the handoff latch
+    // must hold so the get-up is never re-selected as the active special
+    for (let i = 0; i < 10; i++) update(v, p, 1 / 60);
+    expect((v as { special: unknown }).special).toBeNull();
+    expect((v as { fallDone?: boolean }).fallDone).toBe(true);
+
+    // once the sim leaves the fall state the latch clears so the next fall works again
+    (p as Record<string, unknown>).anim = 'idle';
+    update(v, p, 1 / 60);
+    expect((v as { fallDone?: boolean }).fallDone).toBe(false);
+  });
+});
+
+// The persistent over-head injury marker is toggled inside PlayerFactory.update purely
+// off p.injuredOff. update() reads only (v, p, dt), so we can drive it headless with a
+// bare visual carrying a real THREE.Sprite as injuryMark and a synthetic SimPlayer.
+describe('persistent injury marker tracks injuredOff', () => {
+  const update = (playerVisuals.PlayerFactory.prototype as unknown as {
+    update: (v: unknown, p: unknown, dt: number) => void;
+  }).update;
+
+  function harness() {
+    const injuryMark = new THREE.Sprite();
+    injuryMark.position.set(0, 2.4, 0);
+    injuryMark.visible = false;
+    const v = {
+      group: new THREE.Group(),
+      ring: { visible: false } as { visible: boolean },
+      mixer: null,
+      actions: {},
+      injuryMark,
+      current: 'idle',
+      baseRotY: Math.PI / 2,
+      visualRotY: Math.PI / 2,
+      special: null,
+    };
+    return { v, injuryMark };
+  }
+
+  function simPlayer(over: Record<string, unknown>) {
+    return {
+      idx: 0, isGK: false, anim: 'idle', facing: 0, sentOff: false,
+      control: false, stamina: 1, injuredOff: false,
+      pos: { x: 0, y: 0 }, vel: { x: 0, y: 0 },
+      downTimer: 0,
+      ...over,
+    };
+  }
+
+  it('hidden for a healthy player, shown once injuredOff, hidden again when cleared', () => {
+    const { v, injuryMark } = harness();
+    const p = simPlayer({ injuredOff: false });
+
+    // healthy → no marker
+    update(v, p, 1 / 60);
+    expect(injuryMark.visible).toBe(false);
+
+    // forced off → marker appears the same frame
+    p.injuredOff = true;
+    update(v, p, 1 / 60);
+    expect(injuryMark.visible).toBe(true);
+
+    // subbed / resolved (injuredOff cleared) → marker hides
+    p.injuredOff = false;
+    update(v, p, 1 / 60);
+    expect(injuryMark.visible).toBe(false);
+  });
+
+  it('hides the marker when the player is sent off / man-down (group hidden)', () => {
+    const { v, injuryMark } = harness();
+    const p = simPlayer({ injuredOff: true, sentOff: true });
+    update(v, p, 1 / 60);
+    // sentOff hides the whole group (the marker rides it); injuryMark.visible is left
+    // untouched from its last state but the group it parents is invisible
+    expect(v.group.visible).toBe(false);
+  });
+});

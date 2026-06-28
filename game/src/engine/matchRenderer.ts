@@ -60,6 +60,12 @@ export class MatchRenderer {
   private _renderBallX = 0;
   private _renderBallZ = 0;
   private _renderBallInit = false;
+  /** Which held-ball anchor branch was active last frame (0=none/loose, 1=runOut, 2=recovering, 3=lateral, 4=standing).
+   * When it changes we lerp for a few frames to avoid a pop. */
+  private _heldBallBranch = 0;
+  private _heldBranchLerpT = 1; // 0=start of lerp, 1=complete
+  private _heldBranchFromX = 0;
+  private _heldBranchFromZ = 0;
   private _ballHandA = new THREE.Vector3();
   private _ballHandB = new THREE.Vector3();
   private camTarget = new THREE.Vector3();
@@ -552,16 +558,57 @@ export class MatchRenderer {
         }
       }
     }
-    // Render-side smoothing: the sim snaps the ball onto the keeper in a single tick when
-    // he claims a save/smother/gather. Ease the RENDERED ball to that spot over a few frames
-    // so it slides into his hands instead of teleporting. The cap tracks the ball's own
-    // velocity (so genuine fast motion is never held back) plus a fixed catch-up so a snap
-    // closes in ~3-5 frames. Restarts / non-play phases place it instantly.
+    // Held-ball: determine which anchor branch we're in so we can detect handoffs
+    // (belly→chest→hands as keeper rises) and apply a short local ease to prevent pops.
+    // Branch IDs: 0=loose/none, 1=runOut(smother face-down), 2=recovering, 3=lateral(dive), 4=standing.
+    const heldBranch = !b.held ? 0
+      : (b.ownerIdx >= 0 && (() => {
+        const gk = state.players[b.ownerIdx];
+        const gv = this.playerVisuals[b.ownerIdx];
+        const sprawled = !!gk && (gk.diving || gk.anim === 'dive' || gk.anim === 'smother' || (!!gv && (gv.recoverTime ?? 0) > 0));
+        const runOut = !!gv && !!gv.diveRunOut;
+        const recovering = !!gv && gv.current === 'recover';
+        if (sprawled && runOut) return 1;
+        if (sprawled && recovering) return 2;
+        if (sprawled) return 3;
+        return 4;
+      })()) || 0;
+
+    // Render-side smoothing:
+    // • Loose ball: ease the rendered ball toward target (catches ball velocity snap from kicks).
+    // • Held ball: render directly at the hand-transform target — bypass the velocity smoother
+    //   so the ball doesn't curve toward the keeper's MOVING hand over many frames (the pursuit
+    //   curve bug). Only apply a short local ease when the anchor BRANCH switches (belly→chest→
+    //   hands during recovery) to prevent a pop.
     if (!this._renderBallInit || state.phase !== 'play') {
       this._renderBallX = ballX;
       this._renderBallZ = ballZ;
       this._renderBallInit = true;
+      this._heldBallBranch = heldBranch;
+      this._heldBranchLerpT = 1;
+    } else if (b.held) {
+      // Branch switch: start a short local lerp to soften the bone-anchor jump.
+      if (heldBranch !== this._heldBallBranch && this._heldBallBranch !== 0) {
+        this._heldBranchFromX = this._renderBallX;
+        this._heldBranchFromZ = this._renderBallZ;
+        this._heldBranchLerpT = 0;
+      }
+      this._heldBallBranch = heldBranch;
+      this._heldBranchLerpT = Math.min(1, this._heldBranchLerpT + dt / 0.12);
+      const lerpT = this._heldBranchLerpT;
+      if (lerpT < 1) {
+        // Ease between old anchor and new anchor over ~0.12 s
+        this._renderBallX = this._heldBranchFromX + (ballX - this._heldBranchFromX) * lerpT;
+        this._renderBallZ = this._heldBranchFromZ + (ballZ - this._heldBranchFromZ) * lerpT;
+      } else {
+        // Fully arrived — track the hand directly with no smoother lag.
+        this._renderBallX = ballX;
+        this._renderBallZ = ballZ;
+      }
     } else {
+      // Loose ball: ease with velocity-aware cap to absorb kick-snaps.
+      this._heldBallBranch = 0;
+      this._heldBranchLerpT = 1;
       const bdx = ballX - this._renderBallX;
       const bdz = ballZ - this._renderBallZ;
       const bgap = Math.hypot(bdx, bdz);

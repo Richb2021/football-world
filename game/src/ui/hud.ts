@@ -6,7 +6,8 @@ type SubGraphicEntry = { offName: string; onName: string };
 
 export function formatHudPlayerLabel(player: SimPlayer, hasBall: boolean, teamNames: [string, string]): string {
   const card = player.yellowCards > 0 ? ' · YC' : '';
-  return `${hasBall ? 'ON BALL' : 'SELECTED'} · ${teamNames[player.team]}: ${player.attrs.name}${card}`;
+  const injured = player.injuredOff ? ' · INJ' : '';
+  return `${hasBall ? 'ON BALL' : 'SELECTED'} · ${teamNames[player.team]}: ${player.attrs.name}${card}${injured}`;
 }
 
 function escapeHudHtml(s: string): string {
@@ -42,6 +43,8 @@ export class Hud {
   private nameB = 'AWAY';
   private colorA = '#2f7bff';
   private colorB = '#ff5a3c';
+  /** which side the local user controls — drives the defending-keeper DIVE prompt */
+  private localTeam: 0 | 1 = 0;
   private bannerTimeout: number | null = null;
   private scoreGraphicTimeout: number | null = null;
   /** a goal graphic stays up (no auto-hide timer) until the kick-off is taken */
@@ -86,7 +89,7 @@ export class Hud {
       <div class="banner" id="h-banner"></div>
       <div class="pen-board" id="h-pens">
         <div id="h-pentitle">PENALTY SHOOT-OUT</div>
-        <div class="pen-aim" id="h-penaim"><div class="pen-aim__goal"><div class="pen-aim__marker" id="h-penmarker"></div></div></div>
+        <div class="pen-aim" id="h-penaim"><div class="pen-aim__goal"><div class="pen-aim__marker" id="h-penmarker"></div><div class="pen-aim__dive" id="h-pendive"><span>DIVE</span></div></div></div>
         <div class="dots" id="h-pendots"></div>
       </div>
       <img class="hud-logo" id="h-logo" src="./assets/ui/grayson_sports.webp" alt="Grayson Sports" aria-hidden="true" />`;
@@ -94,11 +97,12 @@ export class Hud {
     this.radarCtx = radar.getContext('2d');
   }
 
-  setTeams(nameA: string, nameB: string, colorA: string, colorB: string) {
+  setTeams(nameA: string, nameB: string, colorA: string, colorB: string, localTeam: 0 | 1 = 0) {
     this.nameA = nameA;
     this.nameB = nameB;
     this.colorA = colorA;
     this.colorB = colorB;
+    this.localTeam = localTeam;
     (document.getElementById('h-nameA')!).textContent = nameA;
     (document.getElementById('h-nameB')!).textContent = nameB;
     (document.getElementById('h-chipA')!).style.background = colorA;
@@ -157,6 +161,7 @@ export class Hud {
     const pens = document.getElementById('h-pens')!;
     const penAim = document.getElementById('h-penaim')!;
     const penMarker = document.getElementById('h-penmarker')!;
+    const penDive = document.getElementById('h-pendive')!;
     const showPenaltyAim = state.phase === 'penaltyKick' || (state.phase === 'penalties' && !!state.penalties);
     penAim.classList.toggle('show', showPenaltyAim);
     const aim = state.phase === 'penalties' && state.penalties ? state.penalties.aim : state.penaltyAim;
@@ -166,6 +171,18 @@ export class Hud {
     // too — otherwise it points the opposite way at one end of the pitch.
     const penDir = state.phase === 'penaltyKick' ? (state.attackDir[state.restartTeam] || 1) : 1;
     penMarker.style.left = `${50 + Math.max(-1, Math.min(1, aim)) * penDir * 43}%`;
+    // DIVE marker: shown only to the DEFENDING local user, so he can see where his
+    // keeper will throw himself (left/stay/right). In-match the defender is the team
+    // NOT taking the kick; in the shoot-out it's the team NOT shooting this round.
+    const defendingTeam = state.phase === 'penalties' && state.penalties
+      ? ((1 - state.penalties.shooterTeam) as 0 | 1)
+      : state.phase === 'penaltyKick' ? ((1 - state.restartTeam) as 0 | 1) : -1;
+    const showDive = showPenaltyAim && defendingTeam === this.localTeam;
+    penDive.classList.toggle('show', showDive);
+    if (showDive) {
+      const dive = state.phase === 'penalties' && state.penalties ? state.penalties.dive : (state.penaltyDive ?? 0);
+      penDive.style.left = `${50 + Math.max(-1, Math.min(1, dive)) * penDir * 43}%`;
+    }
     if (state.phase === 'penalties' && state.penalties) {
       pens.classList.add('show');
       (document.getElementById('h-pentitle')!).textContent = 'PENALTY SHOOT-OUT';
@@ -266,11 +283,19 @@ export class Hud {
       const cx = px(p.pos.x);
       const cy = py(p.pos.y);
       const active = p.idx === displayA?.idx || p.idx === displayB?.idx;
+      const injured = p.injuredOff;
       ctx.beginPath();
       ctx.arc(cx, cy, active ? 3.6 : 2.6, 0, Math.PI * 2);
-      ctx.fillStyle = p.team === 0 ? this.colorA : this.colorB;
+      // a forced-off (injured) player's dot turns medical-red so the radar explains
+      // the upcoming forced sub at a glance, mirroring the over-head cross marker
+      ctx.fillStyle = injured ? '#e23b3b' : (p.team === 0 ? this.colorA : this.colorB);
       ctx.fill();
-      if (active) {
+      if (injured) {
+        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+        ctx.stroke();
+        ctx.lineWidth = 1;
+      } else if (active) {
         ctx.lineWidth = 1.4;
         ctx.strokeStyle = 'rgba(255,255,255,0.95)';
         ctx.stroke();
